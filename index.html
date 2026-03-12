@@ -2396,3 +2396,177 @@ function quickStart(mode) {
 // 添加到首頁標題下方
 document.querySelector('h1').insertAdjacentHTML('afterend', '<button onclick="showQuickPlay()" style="background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:25px;padding:10px 25px;color:white;font-size:1rem;cursor:pointer;margin-bottom:15px;">⚡ 快速開始</button>');
 </script>
+
+<script>
+// ========== 收藏歌曲 ==========
+
+const allSongs = [
+    { name: '小星星', notes: ['Do','Do','Sol','Sol','La','La','Sol'], difficulty: 1, category: '童謠' },
+    { name: '兩隻老虎', notes: ['Do','Re','Mi','Do','Do','Re','Mi','Do','Mi','Fa','Sol','Mi','Fa','Sol','La'], difficulty: 1, category: '童謠' },
+    { name: '生日快樂', notes: ['Do','Do','Re','Do','Fa','Mi','Do','Do','Re','Do','Sol','Fa'], difficulty: 2, category: '童謠' },
+    { name: '聖誕歌', notes: ['Mi','Do','Mi','Fa','Do','Re','Do','Fa','Mi','Re','Sol','Sol'], difficulty: 2, category: '童謠' },
+    { name: '卡農', notes: ['Mi','Sol','La','Mi','Fa','Re','Do','Fa','Mi','Sol','La','Mi'], difficulty: 3, category: '經典' },
+    { name: '結婚進行曲', notes: ['Sol','Sol','La','Sol','Do','La','Sol','Fa','Mi','Mi'], difficulty: 3, category: '經典' },
+    { name: '康定情歌', notes: ['Sol','La','Do','Do','La','Sol','Sol','La','Do','La'], difficulty: 2, category: '經典' }
+];
+
+function showFavorites() {
+    const favs = JSON.parse(localStorage.getItem('favoriteSongs') || '[]');
+    
+    const html = `
+        <div id="favPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3600;overflow-y:auto;">
+            <div style="padding:20px;max-width:450px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">❤️ 收藏歌曲</h2>
+                    <button onclick="document.getElementById('favPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                ${favs.length === 0 ? '<div style="text-align:center;color:#888;padding:30px;">還沒有收藏的歌曲</div>' : ''}
+                
+                ${favs.map((s, i) => `
+                    <div style="background:rgba(255,255,255,0.1);padding:15px;border-radius:15px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;">
+                        <div>
+                            <div style="font-weight:bold;">${s.name}</div>
+                            <div style="font-size:0.8rem;color:#888;">${s.category} · ${'⭐'.repeat(s.difficulty)}</div>
+                        </div>
+                        <div style="display:flex;gap:10px;">
+                            <button onclick="playSongByName('${s.name}')" style="padding:8px 15px;background:#4caf50;border:none;border-radius:8px;color:white;cursor:pointer;">▶️</button>
+                            <button onclick="removeFavorite(${i})" style="padding:8px 15px;background:#f44336;border:none;border-radius:8px;color:white;cursor:pointer;">❤️</button>
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <button onclick="document.getElementById('favPanel').remove();showSongLibrary();" style="width:100%;padding:15px;background:linear-gradient(135deg,#9c27b0,#e040fb);border:none;border-radius:10px;color:white;font-size:1rem;cursor:pointer;margin-top:15px;">🎵 歌曲庫</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function playSongByName(name) {
+    const song = allSongs.find(s => s.name === name);
+    if (song) {
+        document.getElementById('favPanel').remove();
+        playSong(allSongs.indexOf(song));
+    }
+}
+
+function addToFavorites(songIndex) {
+    const song = allSongs[songIndex];
+    const favs = JSON.parse(localStorage.getItem('favoriteSongs') || '[]');
+    
+    if (!favs.find(s => s.name === song.name)) {
+        favs.push(song);
+        localStorage.setItem('favoriteSongs', JSON.stringify(favs));
+        showFeedback('❤️ 已收藏！', '#e91e63');
+    }
+}
+
+function removeFavorite(index) {
+    const favs = JSON.parse(localStorage.getItem('favoriteSongs') || '[]');
+    favs.splice(index, 1);
+    localStorage.setItem('favoriteSongs', JSON.stringify(favs));
+    document.getElementById('favPanel').remove();
+    showFavorites();
+}
+
+// 修改歌曲庫加入收藏功能
+const oldShowSongLibrary = showSongLibrary;
+showSongLibrary = function() {
+    oldShowSongLibrary();
+    setTimeout(() => {
+        const div = document.querySelector('#songLibrary > div');
+        if (div) {
+            // 將歌曲改為可收藏
+            const songItems = div.querySelectorAll('div[onclick^="playSong"]');
+            songItems.forEach((item, i) => {
+                item.style.cursor = 'pointer';
+                item.setAttribute('onclick', `addToFavorites(${i});showSongLibrary();`);
+            });
+        }
+    }, 100);
+};
+</script>
+
+<script>
+// ========== 詳細統計 ==========
+
+function showDetailedStats() {
+    const today = new Date().toISOString().split('T')[0];
+    const weekAgo = new Date();
+    weekAgo.setDate(weekAgo.getDate() - 7);
+    
+    const stats = {
+        today: JSON.parse(localStorage.getItem('stats_' + today) || '{"questions":0,"correct":0,"time":0}'),
+        week: getWeekStats(),
+        total: {
+            questions: playerData.totalPlayed,
+            coins: playerData.coins,
+            xp: playerData.xp,
+            level: playerData.level
+        }
+    };
+    
+    const html = `
+        <div id="statsPanel2" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4600;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📊 詳細統計</h2>
+                    <button onclick="document.getElementById('statsPanel2').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,#e94560,#ff6b6b);padding:20px;border-radius:15px;margin-bottom:15px;">
+                    <div style="font-size:1.2rem;margin-bottom:5px;">📅 今日</div>
+                    <div style="display:flex;justify-content:space-around;text-align:center;">
+                        <div><div style="font-size:1.5rem;font-weight:bold;">${stats.today.questions}</div><div style="font-size:0.8rem;opacity:0.8;">答題</div></div>
+                        <div><div style="font-size:1.5rem;font-weight:bold;">${stats.today.correct}</div><div style="font-size:0.8rem;opacity:0.8;">正確</div></div>
+                    </div>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,#2196f3,#03a9f4);padding:20px;border-radius:15px;margin-bottom:15px;">
+                    <div style="font-size:1.2rem;margin-bottom:5px;">📆 本週</div>
+                    <div style="display:flex;justify-content:space-around;text-align:center;">
+                        <div><div style="font-size:1.5rem;font-weight:bold;">${stats.week.questions}</div><div style="font-size:0.8rem;opacity:0.8;">答題</div></div>
+                        <div><div style="font-size:1.5rem;font-weight:bold;">${stats.week.correct}</div><div style="font-size:0.8rem;opacity:0.8;">正確</div></div>
+                    </div>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,#4caf50,#8bc34a);padding:20px;border-radius:15px;margin-bottom:15px;">
+                    <div style="font-size:1.2rem;margin-bottom:5px;">🎯 總計</div>
+                    <div style="display:flex;justify-content:space-around;text-align:center;">
+                        <div><div style="font-size:1.5rem;font-weight:bold;">${stats.total.questions}</div><div style="font-size:0.8rem;opacity:0.8;">答題</div></div>
+                        <div><div style="font-size:1.5rem;font-weight:bold;">${playerData.coins}</div><div style="font-size:0.8rem;opacity:0.8;">金幣</div></div>
+                        <div><div style="font-size:1.5rem;font-weight:bold;">${playerData.level}</div><div style="font-size:0.8rem;opacity:0.8;">等級</div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function getWeekStats() {
+    let questions = 0, correct = 0;
+    for (let i = 0; i < 7; i++) {
+        const d = new Date();
+        d.setDate(d.getDate() - i);
+        const dateStr = d.toISOString().split('T')[0];
+        const s = JSON.parse(localStorage.getItem('stats_' + dateStr) || '{"questions":0,"correct":0}');
+        questions += s.questions;
+        correct += s.correct;
+    }
+    return { questions, correct };
+}
+
+// 記錄答題統計
+const oldCheckAnswer3 = checkAnswer;
+checkAnswer = function(answer, correct) {
+    oldCheckAnswer3(answer, correct);
+    
+    const today = new Date().toISOString().split('T')[0];
+    const s = JSON.parse(localStorage.getItem('stats_' + today) || '{"questions":0,"correct":0}');
+    s.questions++;
+    if (String(answer) === String(correct)) s.correct++;
+    localStorage.setItem('stats_' + today, JSON.stringify(s));
+};
+</script>
