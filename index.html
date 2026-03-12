@@ -3492,3 +3492,64 @@ setTimeout(() => {
 // 添加按鈕
 document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showRecommendation()">💡</button>');
 </script>
+
+<script>
+// ========== 練習日曆 ==========
+
+function showPracticeCalendar() {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = today.getMonth();
+    
+    const firstDay = new Date(year, month, 1).getDay();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
+    
+    let calendarHTML = `
+        <div id="calendarPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4800;overflow-y:auto;">
+            <div style="padding:20px;max-width:380px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📆 練習日曆</h2>
+                    <button onclick="document.getElementById('calendarPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="text-align:center;font-size:1.2rem;margin-bottom:15px;">${year}年 ${month + 1}月</div>
+                
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center;margin-bottom:10px;">
+                    <div style="color:#888;">日</div><div style="color:#888;">一</div><div style="color:#888;">二</div><div style="color:#888;">三</div><div style="color:#888;">四</div><div style="color:#888;">五</div><div style="color:#888;">六</div>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(7,1fr);gap:5px;text-align:center;">
+    `;
+    
+    // 填充空白
+    for (let i = 0; i < firstDay; i++) {
+        calendarHTML += '<div></div>';
+    }
+    
+    // 日期
+    for (let day = 1; day <= daysInMonth; day++) {
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const practiced = localStorage.getItem('practiced_' + dateStr);
+        const isToday = day === today.getDate();
+        
+        calendarHTML += `
+            <div style="padding:10px;border-radius:10px;${isToday ? 'border:2px solid #ffd700;' : ''}${practiced ? 'background:linear-gradient(135deg,#4caf50,#8bc34a);' : 'background:rgba(255,255,255,0.1);'}">
+                ${day}
+                ${practiced ? '✅' : ''}
+            </div>
+        `;
+    }
+    
+    calendarHTML += '</div></div></div>';
+    document.body.insertAdjacentHTML('beforeend', calendarHTML);
+}
+
+// 記錄練習日期
+function markPracticed() {
+    const today = new Date().toISOString().split('T')[0];
+    localStorage.setItem('practiced_' + today, 'true');
+}
+
+// 添加按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showPracticeCalendar()">📆</button>');
+</script>
