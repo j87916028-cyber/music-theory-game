@@ -3976,3 +3976,74 @@ rhythmTraining = function() {
         ).join('') + '</div>';
 };
 </script>
+
+<script>
+// ========== 練習歷史 ==========
+
+function showPracticeHistory() {
+    const history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+    
+    let html = `
+        <div id="historyPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4500;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📜 練習歷史</h2>
+                    <button onclick="document.getElementById('historyPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                ${history.length === 0 ? '<div style="text-align:center;color:#888;padding:30px;">尚無練習記錄</div>' : ''}
+    `;
+    
+    // 顯示最近20筆記錄
+    history.slice(-20).reverse().forEach(h => {
+        const isCorrect = h.correct ? '✅' : '❌';
+        const date = new Date(h.time).toLocaleTimeString();
+        html += `
+            <div style="background:rgba(255,255,255,0.1);padding:15px;border-radius:10px;margin:10px 0;display:flex;justify-content:space-between;align-items:center;">
+                <div>
+                    <div style="font-weight:bold;">${h.question}</div>
+                    <div style="font-size:0.8rem;color:#888;">${date}</div>
+                </div>
+                <div style="font-size:1.5rem;">${isCorrect}</div>
+            </div>
+        `;
+    });
+    
+    html += `
+                <button onclick="clearHistory()" style="width:100%;padding:12px;background:#f44336;border:none;border-radius:10px;color:white;cursor:pointer;margin-top:15px;">清除記錄</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function addHistory(question, correct, userAnswer) {
+    const history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+    history.push({
+        question: question,
+        correct: correct,
+        userAnswer: userAnswer,
+        time: Date.now()
+    });
+    // 只保留最近100筆記錄
+    if (history.length > 100) history.shift();
+    localStorage.setItem("practiceHistory", JSON.stringify(history));
+}
+
+function clearHistory() {
+    if (confirm('確定清除所有練習記錄？')) {
+        localStorage.removeItem('practiceHistory');
+        showPracticeHistory();
+    }
+}
+
+// 修改答題函式記錄歷史
+const oldCheckAnswer4 = checkAnswer;
+checkAnswer = function(answer, correct) {
+    oldCheckAnswer4(answer, correct);
+    addHistory(currentQuestion, String(answer) === String(correct), answer);
+};
+
+// 添加按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showPracticeHistory()">📜</button>');
+</script>
