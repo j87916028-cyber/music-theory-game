@@ -3864,3 +3864,30 @@ rhythmTraining = function() {
         ).join('') + '</div>';
 };
 </script>
+
+<script>
+// ========== 音符改為文字顯示 ==========
+
+const rhythmSymbols = {
+    4: '<span style="font-size:3rem;padding:20px;border:4px dashed white;border-radius:15px;">全音符</span>',
+    2: '<span style="font-size:3rem;padding:20px;border-left:4px solid white;border-radius:5px;">二分音符</span>',
+    1: '<span style="font-size:3rem;padding:20px;">四分音符</span>',
+    0.5: '<span style="font-size:3rem;padding:20px;text-decoration:underline;">八分音符</span>'
+};
+
+const oldRT5 = rhythmTraining;
+rhythmTraining = function() {
+    document.getElementById('gameHint').textContent = t('beats');
+    
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
+    currentQuestion = rhythm.name;
+    
+    document.getElementById('gameContent').innerHTML = 
+        '<div style="text-align:center;padding:30px;">' + rhythmSymbols[rhythm.beats] + '</div>' +
+        '<div style="text-align:center;margin:15px 0;font-size:1.5rem;color:#ffd700;">' + rhythm.name + '</div>' +
+        '<div class="options-grid">' + 
+        [0.5,1,2,4].map(n => 
+            '<button class="option-btn" onclick="checkAnswer(' + n + ',' + rhythm.beats + ')">' + n + ' ' + t('beatUnit') + '</button>'
+        ).join('') + '</div>';
+};
+</script>
