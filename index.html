@@ -2199,3 +2199,200 @@ if (!localStorage.getItem('tutorialDone')) {
     setTimeout(showTutorial, 1500);
 }
 </script>
+
+<script>
+// ========== 夜間模式 ==========
+
+function checkNightMode() {
+    const hour = new Date().getHours();
+    const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    
+    // 自動夜間模式：晚間 9 點到早上 6 點
+    if (hour >= 21 || hour < 6) {
+        enableNightMode();
+    }
+}
+
+function enableNightMode() {
+    document.body.classList.add('night-mode');
+    document.body.style.background = 'linear-gradient(180deg, #0a0a15 0%, #1a1a2e 50%, #0f0f1a 100%)';
+    
+    // 降低亮度
+    document.body.style.filter = 'brightness(0.85)';
+}
+
+function disableNightMode() {
+    document.body.classList.remove('night-mode');
+    document.body.style.filter = '';
+    applyTheme(currentTheme);
+}
+
+// 添加夜間模式切換
+const originalShowSettings2 = showSettings;
+showSettings = function() {
+    originalShowSettings2();
+    setTimeout(() => {
+        const panel = document.querySelector('#settingsPanel > div');
+        if (panel && !document.getElementById('nightModeBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'nightModeBtn';
+            btn.textContent = '🌙 夜間模式';
+            btn.onclick = function() {
+                if (document.body.classList.contains('night-mode')) {
+                    disableNightMode();
+                    btn.textContent = '🌙 夜間模式';
+                } else {
+                    enableNightMode();
+                    btn.textContent = '☀️ 日間模式';
+                }
+            };
+            btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,#3f51b5,#7986cb);border:none;border-radius:10px;color:white;cursor:pointer;margin-top:15px;';
+            panel.appendChild(btn);
+        }
+    }, 100);
+};
+
+// 初始化
+checkNightMode();
+</script>
+
+<script>
+// ========== 音效系統增強 ==========
+
+// 更豐富的音效
+function playEnhancedSound(type) {
+    if (!soundOn) return;
+    
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    switch(type) {
+        case 'correct':
+            osc.frequency.setValueAtTime(523.25, audioCtx.currentTime); // C5
+            osc.frequency.setValueAtTime(659.25, audioCtx.currentTime + 0.1); // E5
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.2);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.2);
+            break;
+            
+        case 'wrong':
+            osc.frequency.setValueAtTime(200, audioCtx.currentTime);
+            osc.frequency.exponentialRampToValueAtTime(100, audioCtx.currentTime + 0.3);
+            osc.type = 'sawtooth';
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.3);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.3);
+            break;
+            
+        case 'coin':
+            osc.frequency.setValueAtTime(1200, audioCtx.currentTime);
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.1, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.08);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.08);
+            break;
+            
+        case 'levelup':
+            const notes = [523.25, 659.25, 783.99, 1046.50];
+            notes.forEach((freq, i) => {
+                const o = audioCtx.createOscillator();
+                const g = audioCtx.createGain();
+                o.connect(g);
+                g.connect(audioCtx.destination);
+                o.frequency.value = freq;
+                o.type = 'square';
+                g.gain.setValueAtTime(0.1, audioCtx.currentTime + i * 0.1);
+                g.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + i * 0.1 + 0.15);
+                o.start(audioCtx.currentTime + i * 0.1);
+                o.stop(audioCtx.currentTime + i * 0.1 + 0.15);
+            });
+            return;
+            
+        case 'click':
+            osc.frequency.value = 800;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.05, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.05);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.05);
+            break;
+    }
+    
+    vibrate(type === 'correct' ? 30 : type === 'wrong' ? 80 : 20);
+}
+
+// 覆蓋原有函數
+const oldPlaySound = playSound;
+playSound = function(type) {
+    if (soundOn) {
+        playEnhancedSound(type);
+    }
+};
+
+// 按鈕點擊音效
+document.addEventListener('click', function(e) {
+    if (e.target.tagName === 'BUTTON') {
+        playEnhancedSound('click');
+    }
+}, { passive: true });
+</script>
+
+<script>
+// ========== 快速開始 ==========
+
+function showQuickPlay() {
+    const modes = [
+        { id: 'ear', name: '👂 听力訓練', icon: '👂' },
+        { id: 'note', name: '🎵 音符練習', icon: '🎵' },
+        { id: 'rhythm', name: '🥁 節奏訓練', icon: '🥁' },
+        { id: 'chord', name: '🎹 和弦練習', icon: '🎹' },
+        { id: 'piano', name: '🎹 自由彈奏', icon: '🎹' },
+        { id: 'quiz', name: '📚 知識問答', icon: '📚' },
+        { id: 'memory', name: '🧠 記憶訓練', icon: '🧠' }
+    ];
+    
+    const html = `
+        <div id="quickPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:3500;display:flex;align-items:center;justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:25px;border-radius:20px;max-width:350px;width:90%;">
+                <h2 style="color:#ffd700;text-align:center;margin-bottom:20px;">⚡ 快速開始</h2>
+                
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+                    ${modes.map(m => `
+                        <button onclick="quickStart('${m.id}')" style="padding:20px;background:rgba(255,255,255,0.1);border:none;border-radius:15px;color:white;font-size:1.1rem;cursor:pointer;transition:all 0.2s;">
+                            ${m.name}
+                        </button>
+                    `).join('')}
+                </div>
+                
+                <button onclick="document.getElementById('quickPanel').remove()" style="width:100%;padding:15px;background:rgba(255,255,255,0.2);border:none;border-radius:10px;color:#888;cursor:pointer;margin-top:15px;">取消</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function quickStart(mode) {
+    document.getElementById('quickPanel').remove();
+    
+    if (mode === 'piano') {
+        showAdvancedPiano();
+    } else if (mode === 'quiz') {
+        showMusicQuiz();
+    } else if (mode === 'memory') {
+        showMemoryGame();
+    } else if (mode === 'rhythm' && typeof showRhythmGame === 'function') {
+        showRhythmGame();
+    } else {
+        startGame(mode);
+    }
+}
+
+// 添加到首頁標題下方
+document.querySelector('h1').insertAdjacentHTML('afterend', '<button onclick="showQuickPlay()" style="background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:25px;padding:10px 25px;color:white;font-size:1rem;cursor:pointer;margin-bottom:15px;">⚡ 快速開始</button>');
+</script>
