@@ -449,21 +449,7 @@ function showPiano() {
 // 在首頁添加鋼琴按鈕
 document.querySelector('.mode-grid').insertAdjacentHTML('beforeend', '<div class="mode-card" onclick="showPiano()"><div class="icon">🎹</div><div class="name">自由彈奏</div><div class="desc">隨意彈鋼琴</div></div>');
 
-// 升級特效
-function showLevelUp(newLevel) {
-    const el = document.createElement('div');
-    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-size:4rem;font-weight:bold;color:#ffd700;text-shadow:0 0 30px #ff8c00;z-index:3000;animation:levelUpPop 2s forwards;';
-    el.textContent = '🎉 升級！' + newLevel + '級！';
-    document.body.appendChild(el);
-    
-    // 煙火
-    for (let i = 0; i < 30; i++) {
-        setTimeout(() => createConfetti(), i * 50);
-    }
-    
-    setTimeout(() => el.remove(), 2000);
-    playSound('levelup');
-}
+// 升級特效（使用增強版）
 
 function createConfetti() {
     const colors = ['#ff6b6b', '#ffd700', '#4caf50', '#00bfff', '#9b59b6'];
