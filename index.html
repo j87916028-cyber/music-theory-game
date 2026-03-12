@@ -1658,7 +1658,7 @@ const dailyChallenges = [
 
 function loadDailyChallenges() {
     const today = new Date().toISOString().split('T')[0];
-    const saved = JSON.parse(localStorage.getItem('dailyChallenges_' + today) || 'null');
+    const saved = JSON.parse(localStorage.getItem('dailyChallenges_' + today) || null);
     
     if (!saved || saved.date !== today) {
         // 隨機選擇 3 個挑戰
