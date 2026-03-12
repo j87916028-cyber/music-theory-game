@@ -3682,3 +3682,75 @@ document.head.appendChild(msCSS);
 // 初始化檢查
 setTimeout(checkMilestones, 2000);
 </script>
+
+<script>
+// ========== 練習計時器 ==========
+
+function showPracticeTimer() {
+    const timerHTML = `
+        <div id="timerPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:5200;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <h2 style="color:#ffd700;margin-bottom:20px;">⏱️ 練習計時</h2>
+            
+            <div id="timerDisplay" style="font-size:4rem;font-weight:bold;color:#ffd700;margin:30px 0;">00:00</div>
+            
+            <div style="display:flex;gap:15px;">
+                <button onclick="startTimer()" id="startBtn" style="padding:15px 30px;background:#4caf50;border:none;border-radius:10px;color:white;font-size:1.2rem;cursor:pointer;">▶️ 開始</button>
+                <button onclick="pauseTimer()" id="pauseBtn" style="padding:15px 30px;background:#ff9800;border:none;border-radius:10px;color:white;font-size:1.2rem;cursor:pointer;display:none;">⏸️ 暫停</button>
+                <button onclick="resetTimer()" style="padding:15px 30px;background:#f44336;border:none;border-radius:10px;color:white;font-size:1.2rem;cursor:pointer;">🔄 重置</button>
+            </div>
+            
+            <div style="margin-top:30px;color:#888;">
+                選擇時長：
+                <button onclick="setTimer(5)" style="margin:5px;padding:8px 15px;background:rgba(255,255,255,0.2);border:none;border-radius:5px;color:white;cursor:pointer;">5分</button>
+                <button onclick="setTimer(10)" style="margin:5px;padding:8px 15px;background:rgba(255,255,255,0.2);border:none;border-radius:5px;color:white;cursor:pointer;">10分</button>
+                <button onclick="setTimer(15)" style="margin:5px;padding:8px 15px;background:rgba(255,255,255,0.2);border:none;border-radius:5px;color:white;cursor:pointer;">15分</button>
+                <button onclick="setTimer(30)" style="margin:5px;padding:8px 15px;background:rgba(255,255,255,0.2);border:none;border-radius:5px;color:white;cursor:pointer;">30分</button>
+            </div>
+            
+            <button onclick="document.getElementById('timerPanel').remove()" style="margin-top:30px;background:none;border:none;color:#888;cursor:pointer;">關閉</button>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', timerHTML);
+}
+
+let timerSeconds = 0;
+let timerInterval = null;
+let timerRunning = false;
+
+function setTimer(minutes) {
+    timerSeconds = minutes * 60;
+    updateTimerDisplay();
+}
+
+function startTimer() {
+    if (timerRunning) return;
+    timerRunning = true;
+    document.getElementById('startBtn').style.display = 'none';
+    document.getElementById('pauseBtn').style.display = 'inline-block';
+    
+    timerInterval = setInterval(() => {
+        timerSeconds++;
+        updateTimerDisplay();
+    }, 1000);
+}
+
+function pauseTimer() {
+    timerRunning = false;
+    clearInterval(timerInterval);
+    document.getElementById('startBtn').style.display = 'inline-block';
+    document.getElementById('pauseBtn').style.display = 'none';
+}
+
+function resetTimer() {
+    pauseTimer();
+    timerSeconds = 0;
+    updateTimerDisplay();
+}
+
+function updateTimerDisplay() {
+    const mins = Math.floor(timerSeconds / 60);
+    const secs = timerSeconds % 60;
+    document.getElementById('timerDisplay').textContent = 
+        String(mins).padStart(2, '0') + ':' + String(secs).padStart(2, '0');
+}
+</script>
