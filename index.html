@@ -1645,3 +1645,213 @@ showSettings = function() {
     }, 100);
 };
 </script>
+
+<script>
+// ========== 每日挑戰系統 ==========
+
+const dailyChallenges = [
+    { id: 'ear_10', name: '听力訓練', desc: '完成 10 題听力', target: 10, mode: 'ear', reward: 30 },
+    { id: 'note_10', name: '音符練習', desc: '完成 10 題音符', target: 10, mode: 'note', reward: 30 },
+    { id: 'rhythm_10', name: '節奏練習', desc: '完成 10 題節奏', target: 10, mode: 'rhythm', reward: 30 },
+    { id: 'chord_10', name: '和弦練習', desc: '完成 10 題和弦', target: 10, mode: 'chord', reward: 30 },
+    { id: 'piano_5', name: '鋼琴彈奏', desc: '彈奏 5 次鋼琴', target: 5, mode: 'piano', reward: 20 },
+    { id: 'score_500', name: '高分挑戰', desc: '單次遊戲獲得 500 分', target: 500, mode: 'score', reward: 50 }
+];
+
+function loadDailyChallenges() {
+    const today = new Date().toISOString().split('T')[0];
+    const saved = JSON.parse(localStorage.getItem('dailyChallenges_' + today) || 'null');
+    
+    if (!saved || saved.date !== today) {
+        // 隨機選擇 3 個挑戰
+        const shuffled = [...dailyChallenges].sort(() => 0.5 - Math.random());
+        const selected = shuffled.slice(0, 3);
+        
+        const newData = {
+            date: today,
+            challenges: selected.map(c => ({ ...c, progress: 0, completed: false }))
+        };
+        
+        localStorage.setItem('dailyChallenges_' + today, JSON.stringify(newData));
+        return newData;
+    }
+    
+    return saved;
+}
+
+function showDailyChallenges() {
+    const data = loadDailyChallenges();
+    
+    const html = `
+        <div id="dailyPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4000;overflow-y:auto;">
+            <div style="padding:20px;max-width:450px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📅 每日挑戰</h2>
+                    <button onclick="document.getElementById('dailyPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,#e94560,#ff6b6b);padding:15px;border-radius:15px;margin-bottom:20px;text-align:center;">
+                    <div style="font-size:1.2rem;">🎁 今日任務</div>
+                    <div style="font-size:0.9rem;opacity:0.8;">完成全部獲得額外 100 金幣！</div>
+                </div>
+                
+                ${data.challenges.map((c, i) => `
+                    <div style="background:rgba(255,255,255,0.1);padding:15px;border-radius:15px;margin:10px 0;${c.completed ? 'opacity:0.6;' : ''}">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <div>
+                                <div style="font-weight:bold;">${c.name}</div>
+                                <div style="font-size:0.8rem;opacity:0.7;">${c.desc}</div>
+                            </div>
+                            <div style="text-align:right;">
+                                <div style="color:${c.completed ? '#4caf50' : '#ffd700'};font-weight:bold;">${c.completed ? '✅' : c.progress + '/' + c.target}</div>
+                                <div style="font-size:0.8rem;color:#ffd700;">+${c.reward}💰</div>
+                            </div>
+                        </div>
+                        <div style="height:8px;background:rgba(255,255,255,0.2);border-radius:4px;margin-top:10px;overflow:hidden;">
+                            <div style="height:100%;width:${(c.progress/c.target)*100}%;background:${c.completed ? '#4caf50' : 'linear-gradient(90deg,#ffd700,#ff8c00)'};transition:width 0.3s;"></div>
+                        </div>
+                    </div>
+                `).join('')}
+                
+                <button onclick="document.getElementById('dailyPanel').remove();startGame('ear');" style="width:100%;padding:15px;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:10px;color:white;font-size:1.1rem;cursor:pointer;margin-top:15px;">🎮 開始練習</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function updateDailyChallengeProgress(mode, amount) {
+    const today = new Date().toISOString().split('T')[0];
+    const data = loadDailyChallenges();
+    
+    let allComplete = true;
+    let totalReward = 0;
+    
+    data.challenges.forEach(c => {
+        if (!c.completed) {
+            if ((c.mode === mode || c.mode === 'score') && c.progress < c.target) {
+                c.progress += amount;
+                if (c.progress >= c.target) {
+                    c.completed = true;
+                    totalReward += c.reward;
+                }
+            }
+            if (!c.completed) allComplete = false;
+        }
+    });
+    
+    // 全部完成額外獎勵
+    if (allComplete && !data.allComplete) {
+        totalReward += 100;
+        data.allComplete = true;
+    }
+    
+    if (totalReward > 0) {
+        playerData.coins += totalReward;
+        saveData();
+        showFeedback('+' + totalReward + '💰 每日挑戰！', '#ffd700');
+    }
+    
+    localStorage.setItem('dailyChallenges_' + today, JSON.stringify(data));
+}
+
+// 監控答題進度
+const oldCheckAnswer = checkAnswer;
+checkAnswer = function(answer, correct) {
+    oldCheckAnswer(answer, correct);
+    
+    if (correct && (currentMode === 'ear' || currentMode === 'note' || currentMode === 'rhythm' || currentMode === 'chord')) {
+        updateDailyChallengeProgress(currentMode, 1);
+    }
+    
+    if (gameScore >= 500) {
+        updateDailyChallengeProgress('score', gameScore);
+    }
+};
+
+// 監控鋼琴
+const oldPlayPianoNote = playPianoNote;
+playPianoNote = function(note) {
+    oldPlayPianoNote(note);
+    updateDailyChallengeProgress('piano', 1);
+};
+
+// 添加按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showDailyChallenges()">📅</button>');
+</script>
+
+<script>
+// ========== 練習連勝系統 ==========
+
+function updatePracticeStreak() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastPractice = localStorage.getItem('lastPracticeDate');
+    const streak = parseInt(localStorage.getItem('practiceStreak') || '0');
+    
+    if (lastPractice !== today) {
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toISOString().split('T')[0];
+        
+        let newStreak;
+        if (lastPractice === yesterdayStr) {
+            newStreak = streak + 1;
+        } else {
+            newStreak = 1;
+        }
+        
+        localStorage.setItem('practiceStreak', newStreak);
+        localStorage.setItem('lastPracticeDate', today);
+        
+        // 顯示連勝獎勵
+        if (newStreak > 1) {
+            const streakBonus = newStreak * 10;
+            playerData.coins += streakBonus;
+            playerData.xp += newStreak * 5;
+            saveData();
+            
+            setTimeout(() => {
+                showStreakPopup(newStreak, streakBonus);
+            }, 1000);
+        }
+    }
+}
+
+function showStreakPopup(streak, bonus) {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:30%;left:50%;transform:translateX(-50%);background:linear-gradient(135deg,#ff6b6b,#ffd700);color:#000;padding:20px 40px;border-radius:20px;font-size:1.5rem;font-weight:bold;z-index:6000;animation:streakPop 2s forwards;text-align:center;';
+    el.innerHTML = `🔥 ${streak} 天連勝！<br><span style="font-size:1rem;">+${bonus}💰</span>`;
+    document.body.appendChild(el);
+    
+    // 煙火
+    for (let i = 0; i < 20; i++) {
+        setTimeout(() => createConfetti(), i * 50);
+    }
+    
+    setTimeout(() => el.remove(), 2000);
+}
+
+// 添加連勝顯示
+function showStreakBadge() {
+    const streak = parseInt(localStorage.getItem('practiceStreak') || '0');
+    if (streak > 0) {
+        const badge = document.createElement('div');
+        badge.id = 'streakBadge';
+        badge.style.cssText = 'position:fixed;top:70px;right:20px;background:linear-gradient(135deg,#ff6b6b,#ffd700);color:#000;padding:8px 15px;border-radius:20px;font-weight:bold;font-size:0.9rem;z-index:1000;';
+        badge.textContent = '🔥 ' + streak;
+        document.body.appendChild(badge);
+    }
+}
+
+// 初始化
+setTimeout(showStreakBadge, 500);
+
+// 在答對題時更新連勝
+const oldCheckAnswer2 = checkAnswer;
+checkAnswer = function(answer, correct) {
+    oldCheckAnswer2(answer, correct);
+    if (correct) {
+        updatePracticeStreak();
+    }
+};
+</script>
