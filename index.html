@@ -2694,3 +2694,57 @@ function showShortcuts() {
 // 添加快捷鍵說明按鈕
 document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showShortcuts()">⌨️</button>');
 </script>
+
+<script>
+// ========== 搜尋功能 ==========
+
+function showSearch() {
+    const searchHTML = `
+        <div id="searchPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4000;display:flex;align-items:flex-start;justify-content:center;padding-top:50px;">
+            <div style="width:90%;max-width:400px;">
+                <input type="text" id="searchInput" placeholder="搜尋功能..." oninput="searchFeatures(this.value)" style="width:100%;padding:15px;font-size:1.1rem;border:none;border-radius:10px;background:rgba(255,255,255,0.2);color:white;outline:none;">
+                <div id="searchResults" style="margin-top:20px;"></div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', searchHTML);
+    document.getElementById('searchInput').focus();
+}
+
+function searchFeatures(query) {
+    if (!query) {
+        document.getElementById('searchResults').innerHTML = '';
+        return;
+    }
+    
+    const features = [
+        { name: '听力大師', desc: '聽聲音猜音符', action: "startGame('ear')" },
+        { name: '音符認識', desc: '認識音名與唱名', action: "startGame('note')" },
+        { name: '節奏訓練', desc: '學習各種音符時值', action: "startGame('rhythm')" },
+        { name: '和弦教室', desc: '認識和弦組成', action: "startGame('chord')" },
+        { name: '音階練習', desc: '大小調音階', action: "startGame('scale')" },
+        { name: '鋼琴', desc: '自由彈奏鋼琴', action: 'showAdvancedPiano()' },
+        { name: '歌曲庫', desc: '經典歌曲練習', action: 'showSongLibrary()' },
+        { name: '節奏遊戲', desc: '敲擊節拍', action: 'showRhythmGame()' },
+        { name: '音樂知識', desc: '音樂素養問答', action: 'showMusicQuiz()' },
+        { name: '記憶訓練', desc: '翻牌配對遊戲', action: 'showMemoryGame()' },
+        { name: '設置', desc: '設定音效、亮度', action: 'showSettings()' },
+        { name: '主題', desc: '更換外觀主題', action: 'showThemeSelector()' }
+    ];
+    
+    const results = features.filter(f => 
+        f.name.toLowerCase().includes(query.toLowerCase()) || 
+        f.desc.toLowerCase().includes(query.toLowerCase())
+    );
+    
+    document.getElementById('searchResults').innerHTML = results.map(f => `
+        <div onclick="${f.action};document.getElementById('searchPanel').remove();" style="background:rgba(255,255,255,0.1);padding:15px;border-radius:10px;margin:10px 0;cursor:pointer;">
+            <div style="font-weight:bold;">${f.name}</div>
+            <div style="font-size:0.8rem;opacity:0.7;">${f.desc}</div>
+        </div>
+    `).join('') || '<div style="color:#888;text-align:center;">沒有找到結果</div>';
+}
+
+// 添加搜尋按鈕
+document.querySelector('h1').insertAdjacentHTML('afterend', '<button onclick="showSearch()" style="position:fixed;top:15px;right:80px;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;">🔍</button>');
+</script>
