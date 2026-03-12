@@ -3891,3 +3891,30 @@ rhythmTraining = function() {
         ).join('') + '</div>';
 };
 </script>
+
+<script>
+// ========== 音符改為圖示 ==========
+
+const rhythmSymbols = {
+    4: '<span style="font-size:3rem;">⬜</span>',  // 全音符 - 空心方塊
+    2: '<span style="font-size:3rem;">🟧</span>',  // 二分音符 - 矩形
+    1: '<span style="font-size:3rem;">🟢</span>',  // 四分音符 - 實心圓
+    0.5: '<span style="font-size:3rem;">🔴</span>'   // 八分音符 - 紅色圓
+};
+
+const oldRT6 = rhythmTraining;
+rhythmTraining = function() {
+    document.getElementById('gameHint').textContent = t('beats');
+    
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
+    currentQuestion = rhythm.name;
+    
+    document.getElementById('gameContent').innerHTML = 
+        '<div style="text-align:center;padding:40px;font-size:5rem;">' + rhythmSymbols[rhythm.beats] + '</div>' +
+        '<div style="text-align:center;margin:10px 0;font-size:1.2rem;color:#888;">' + rhythm.name + '</div>' +
+        '<div class="options-grid">' + 
+        [0.5,1,2,4].map(n => 
+            '<button class="option-btn" onclick="checkAnswer(' + n + ',' + rhythm.beats + ')">' + n + ' ' + t('beatUnit') + '</button>'
+        ).join('') + '</div>';
+};
+</script>
