@@ -3553,3 +3553,75 @@ function markPracticed() {
 // 添加按鈕
 document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showPracticeCalendar()">📆</button>');
 </script>
+
+<script>
+// ========== 成就徽章牆 ==========
+
+function showBadgeWall() {
+    const badges2 = [
+        { id: 'first', name: '初學者', icon: '🎯', color: '#4caf50' },
+        { id: 'ten', name: '小試身手', icon: '⭐', color: '#ffd700' },
+        { id: 'hundred', name: '勤學不倦', icon: '📚', color: '#2196f3' },
+        { id: 'streak3', name: '連擊初體驗', icon: '🔥', color: '#ff9800' },
+        { id: 'streak10', name: '連擊達人', icon: '💥', color: '#e91e63' },
+        { id: 'rich100', name: '小有積蓄', icon: '💰', color: '#ffc107' },
+        { id: 'rich500', name: '小富翁', icon: '🤑', color: '#9c27b0' },
+        { id: 'level5', name: '初露頭角', icon: '🌟', color: '#00bcd4' },
+        { id: 'level10', name: '音樂新星', icon: '🌠', color: '#3f51b5' },
+        { id: 'daily3', name: '持之以恆', icon: '📅', color: '#795548' },
+        { id: 'daily7', name: '一週之約', icon: '🏆', color: '#ff5722' },
+        { id: 'piano', name: '鋼琴家', icon: '🎹', color: '#607d8b' }
+    ];
+    
+    const unlocked = JSON.parse(localStorage.getItem('musicBadges') || '[]');
+    
+    let html = `
+        <div id="badgeWallPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a1a2e,#0d0d1a);z-index:4900;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">🎖️ 成就牆</h2>
+                    <button onclick="document.getElementById('badgeWallPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:15px;">
+    `;
+    
+    badges2.forEach(badge => {
+        const isUnlocked = unlocked.includes(badge.id) || badgeCondition(badge.id);
+        html += `
+            <div style="background:${isUnlocked ? badge.color : 'rgba(255,255,255,0.1)'};padding:15px;border-radius:15px;text-align:center;${isUnlocked ? 'box-shadow:0 0 20px ' + badge.color + ';' : 'opacity:0.5;'}">
+                <div style="font-size:2.5rem;">${badge.icon}</div>
+                <div style="font-size:0.8rem;margin-top:5px;">${badge.name}</div>
+            </div>
+        `;
+    });
+    
+    html += `
+                </div>
+                <div style="text-align:center;margin-top:20px;color:#888;">
+                    ${badges2.filter(b => unlocked.includes(b.id) || badgeCondition(b.id)).length} / ${badges2.length} 成就
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function badgeCondition(id) {
+    const conditions = {
+        'first': () => playerData.totalPlayed >= 1,
+        'ten': () => playerData.totalPlayed >= 10,
+        'hundred': () => playerData.totalPlayed >= 100,
+        'streak3': () => parseInt(localStorage.getItem('musicMaxCombo') || '0') >= 3,
+        'streak10': () => parseInt(localStorage.getItem('musicMaxCombo') || '0') >= 10,
+        'rich100': () => playerData.coins >= 100,
+        'rich500': () => playerData.coins >= 500,
+        'level5': () => playerData.level >= 5,
+        'level10': () => playerData.level >= 10,
+        'daily3': () => playerData.dayStreak >= 3,
+        'daily7': () => playerData.dayStreak >= 7,
+        'piano': () => parseInt(localStorage.getItem('pianoPlays') || '0') >= 10
+    };
+    return conditions[id] ? conditions[id]() : false;
+}
+</script>
