@@ -3047,3 +3047,129 @@ function showHowToPlay() {
 // 在首頁添加問號按鈕
 document.querySelector('h1').insertAdjacentHTML('afterend', '<button onclick="showHowToPlay()" style="position:fixed;top:15px;right:15px;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;">❓</button>');
 </script>
+
+<script>
+// ========== 技能進度環 ==========
+
+function showSkillProgress() {
+    const skills = [
+        { id: 'ear', name: '听力', icon: '👂', color: '#4caf50' },
+        { id: 'note', name: '音符', icon: '🎵', color: '#2196f3' },
+        { id: 'rhythm', name: '節奏', icon: '🥁', color: '#ff9800' },
+        { id: 'chord', name: '和弦', icon: '🎹', color: '#9c27b0' },
+        { id: 'scale', name: '音階', icon: '🎼', color: '#e91e63' }
+    ];
+    
+    const progress = JSON.parse(localStorage.getItem('musicProgress') || '{}');
+    
+    const html = `
+        <div id="skillPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4700;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">🎯 技能進度</h2>
+                    <button onclick="document.getElementById('skillPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:15px;">
+                    ${skills.map(s => {
+                        const p = progress[s.id] || 0;
+                        const percent = Math.min(100, p * 2);
+                        return `
+                            <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;text-align:center;">
+                                <div style="position:relative;width:80px;height:80px;margin:0 auto 10px;">
+                                    <svg width="80" height="80" style="transform:rotate(-90deg);">
+                                        <circle cx="40" cy="40" r="35" fill="none" stroke="rgba(255,255,255,0.2)" stroke-width="8"/>
+                                        <circle cx="40" cy="40" r="35" fill="none" stroke="${s.color}" stroke-width="8" stroke-dasharray="220" stroke-dashoffset="${220 - (220 * percent / 100)}" style="transition:stroke-dashoffset 0.5s;"/>
+                                    </svg>
+                                    <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:1.5rem;">${s.icon}</div>
+                                </div>
+                                <div style="font-weight:bold;">${s.name}</div>
+                                <div style="font-size:0.8rem;opacity:0.7;">${p} 題</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// 添加按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showSkillProgress()">🎯</button>');
+</script>
+
+<script>
+// ========== 社交分享 ==========
+
+function showShareOptions() {
+    const shareData = {
+        title: '🎹 音樂達人',
+        text: `我在音樂達人已經是 ${playerData.level} 級了！一起來學音樂吧！`,
+        url: 'https://j87916028-cyber.github.io/music-theory-game/'
+    };
+    
+    const html = `
+        <div id="sharePanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:4800;display:flex;align-items:center;justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:350px;text-align:center;">
+                <h2 style="color:#ffd700;margin-bottom:20px;">📤 分享遊戲</h2>
+                
+                <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;margin-bottom:20px;">
+                    <button onclick="shareTo('line')" style="padding:15px;background:#00c300;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;">LINE</button>
+                    <button onclick="shareTo('fb')" style="padding:15px;background:#1877f2;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;">Facebook</button>
+                    <button onclick="shareTo('twitter')" style="padding:15px;background:#1da1f2;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;">Twitter</button>
+                    <button onclick="shareTo('copy')" style="padding:15px;background:#666;border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;">複製連結</button>
+                </div>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:15px;border-radius:10px;margin-bottom:15px;">
+                    <div style="font-size:0.8rem;opacity:0.7;">你的成就</div>
+                    <div style="font-size:1.5rem;color:#ffd700;">Lv.${playerData.level} · ${playerData.coins} 💰</div>
+                </div>
+                
+                <button onclick="document.getElementById('sharePanel').remove()" style="padding:10px 20px;background:rgba(255,255,255,0.2);border:none;border-radius:10px;color:#888;cursor:pointer;">關閉</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function shareTo(platform) {
+    const url = 'https://j87916028-cyber.github.io/music-theory-game/';
+    const text = `我在音樂達人已經是 ${playerData.level} 級了！一起來學音樂吧！`;
+    
+    switch(platform) {
+        case 'line':
+            window.open('https://line.me/R/msg/text/?' + encodeURIComponent(text + ' ' + url));
+            break;
+        case 'fb':
+            window.open('https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent(url));
+            break;
+        case 'twitter':
+            window.open('https://twitter.com/intent/tweet?text=' + encodeURIComponent(text) + '&url=' + encodeURIComponent(url));
+            break;
+        case 'copy':
+            navigator.clipboard.writeText(url).then(() => {
+                showFeedback('連結已複製！', '#4caf50');
+            });
+            break;
+    }
+    document.getElementById('sharePanel').remove();
+}
+
+// 添加到設置
+const originalShowSettings5 = showSettings;
+showSettings = function() {
+    originalShowSettings5();
+    setTimeout(() => {
+        const panel = document.querySelector('#settingsPanel > div');
+        if (panel && !document.getElementById('shareBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'shareBtn';
+            btn.textContent = '📤 分享遊戲';
+            btn.onclick = showShareOptions;
+            btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,#e91e63,#ff4081);border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;margin-top:15px;';
+            panel.appendChild(btn);
+        }
+    }, 100);
+};
+</script>
