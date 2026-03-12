@@ -2917,3 +2917,133 @@ function showLearningPath() {
 // 添加按鈕
 document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showLearningPath()">🗺️</button>');
 </script>
+
+<script>
+// ========== 音樂課程 ==========
+
+const lessons = [
+    { id: 'note_names', title: '認識音符', icon: '🎵', content: '音符是音樂的基本單位。常見的七個音符是：Do、Re、Mi、Fa、Sol、La、Si。' },
+    { id: 'note_values', title: '音符時值', icon: '⏱️', content: '全音符 = 4拍，二分音符 = 2拍，四分音符 = 1拍，八分音符 = 半拍。' },
+    { id: 'scales', title: '音階', icon: '🎼', content: '音階是按順序排列的音符。大調音階音色明亮，小調音階音色悲傷。' },
+    { id: 'chords', title: '和弦', icon: '🎹', content: '和弦是三個或更多音符同時發聲。C大和弦由 C、E、G 三個音組成。' },
+    { id: 'rhythm', title: '節奏', icon: '🥁', content: '節奏是音樂的心臟均勻的節奏讓音樂更好聽。' }
+];
+
+function showLessons() {
+    const lessonsHTML = `
+        <div id="lessonsPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a1a2e,#0d0d1a);z-index:3800;overflow-y:auto;">
+            <div style="padding:20px;max-width:450px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📖 音樂課程</h2>
+                    <button onclick="document.getElementById('lessonsPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                ${lessons.map(l => `
+                    <div onclick="showLesson('${l.id}')" style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:10px 0;cursor:pointer;transition:all 0.2s;">
+                        <div style="display:flex;align-items:center;gap:15px;">
+                            <div style="font-size:2rem;">${l.icon}</div>
+                            <div>
+                                <div style="font-weight:bold;font-size:1.1rem;">${l.title}</div>
+                                <div style="font-size:0.8rem;opacity:0.7;">點擊學習</div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', lessonsHTML);
+}
+
+function showLesson(id) {
+    const lesson = lessons.find(l => l.id === id);
+    if (!lesson) return;
+    
+    const content = document.getElementById('lessonsPanel');
+    content.innerHTML = `
+        <div style="padding:20px;max-width:450px;margin:0 auto;">
+            <button onclick="showLessons()" style="background:none;border:none;color:#ffd700;font-size:1rem;cursor:pointer;margin-bottom:20px;">← 返回課程列表</button>
+            
+            <div style="background:rgba(255,255,255,0.1);padding:30px;border-radius:20px;">
+                <div style="font-size:3rem;text-align:center;margin-bottom:20px;">${lesson.icon}</div>
+                <h2 style="color:#ffd700;text-align:center;margin-bottom:20px;">${lesson.title}</h2>
+                <p style="line-height:1.8;font-size:1.1rem;color:#ccc;">${lesson.content}</p>
+            </div>
+            
+            <button onclick="playLessonSound()" style="width:100%;padding:15px;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:10px;color:white;font-size:1.1rem;cursor:pointer;margin-top:20px;">🔊 聆聽示範</button>
+        </div>
+    `;
+}
+
+function playLessonSound() {
+    const notes2 = ['Do','Re','Mi','Fa','Sol','La','Si'];
+    notes2.forEach((n, i) => {
+        setTimeout(() => playNote(n), i * 500);
+    });
+}
+
+// 添加到設置
+const originalShowSettings4 = showSettings;
+showSettings = function() {
+    originalShowSettings4();
+    setTimeout(() => {
+        const panel = document.querySelector('#settingsPanel > div');
+        if (panel && !document.getElementById('lessonsBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'lessonsBtn';
+            btn.textContent = '📖 音樂課程';
+            btn.onclick = function() {
+                document.getElementById('settingsPanel').remove();
+                showLessons();
+            };
+            btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,#2196f3,#03a9f4);border:none;border-radius:10px;color:white;cursor:pointer;margin-top:15px;';
+            panel.appendChild(btn);
+        }
+    }, 100);
+};
+</script>
+
+<script>
+// ========== 如何使用說明 ==========
+
+function showHowToPlay() {
+    const howToHTML = `
+        <div id="howToPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:5000;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">❓ 如何遊玩</h2>
+                    <button onclick="document.getElementById('howToPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:15px 0;">
+                    <div style="font-size:1.5rem;margin-bottom:10px;">1️⃣ 選擇模式</div>
+                    <div style="opacity:0.7;">點擊「遊戲」分頁，選擇想練習的項目</div>
+                </div>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:15px 0;">
+                    <div style="font-size:1.5rem;margin-bottom:10px;">2️⃣ 答題或互動</div>
+                    <div style="opacity:0.7;">根據指示聽音符、選答案或彈鋼琴</div>
+                </div>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:15px 0;">
+                    <div style="font-size:1.5rem;margin-bottom:10px;">3️⃣ 賺取獎勵</div>
+                    <div style="opacity:0.7;">答對獲得金幣和經驗值，升級解鎖更多功能！</div>
+                </div>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:15px 0;">
+                    <div style="font-size:1.5rem;margin-bottom:10px;">💡 小技巧</div>
+                    <div style="opacity:0.7;">
+                        • 連擊越高分數加成越多<br>
+                        • 每天回來領取登入獎勵<br>
+                        • 完成每日任務獲得額外金幣
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', howToHTML);
+}
+
+// 在首頁添加問號按鈕
+document.querySelector('h1').insertAdjacentHTML('afterend', '<button onclick="showHowToPlay()" style="position:fixed;top:15px;right:15px;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:40px;height:40px;font-size:1.2rem;cursor:pointer;">❓</button>');
+</script>
