@@ -2053,3 +2053,149 @@ function flipCard(el, note, index) {
 // 添加按鈕
 document.querySelector('.mode-grid').innerHTML += '<div class="mode-card" onclick="showMemoryGame()"><div class="icon">🧠</div><div class="name">記憶訓練</div><div class="desc">翻牌配對練習</div></div>';
 </script>
+
+<script>
+// ========== 徽章成就系統 ==========
+
+const badges = [
+    { id: 'first', name: '初學者', desc: '回答第一題', icon: '🎯', condition: () => playerData.totalPlayed >= 1 },
+    { id: 'ten', name: '小試身手', desc: '回答 10 題', icon: '⭐', condition: () => playerData.totalPlayed >= 10 },
+    { id: 'hundred', name: '勤學不倦', desc: '回答 100 題', icon: '📚', condition: () => playerData.totalPlayed >= 100 },
+    { id: 'streak3', name: '連擊初體驗', desc: '達成 3 連擊', icon: '🔥', condition: () => parseInt(localStorage.getItem('musicMaxCombo') || '0') >= 3 },
+    { id: 'streak10', name: '連擊達人', desc: '達成 10 連擊', icon: '💥', condition: () => parseInt(localStorage.getItem('musicMaxCombo') || '0') >= 10 },
+    { id: 'rich100', name: '小有積蓄', desc: '擁有 100 金幣', icon: '💰', condition: () => playerData.coins >= 100 },
+    { id: 'rich500', name: '小富翁', desc: '擁有 500 金幣', icon: '🤑', condition: () => playerData.coins >= 500 },
+    { id: 'level5', name: '初露頭角', desc: '達到 5 級', icon: '🌟', condition: () => playerData.level >= 5 },
+    { id: 'level10', name: '音樂新星', desc: '達到 10 級', icon: '🌠', condition: () => playerData.level >= 10 },
+    { id: 'daily3', name: '持之以恆', desc: '連續登入 3 天', icon: '📅', condition: () => playerData.dayStreak >= 3 },
+    { id: 'daily7', name: '一週之約', desc: '連續登入 7 天', icon: '🏆', condition: () => playerData.dayStreak >= 7 },
+    { id: 'piano', name: '鋼琴家', desc: '彈奏鋼琴 10 次', icon: '🎹', condition: () => parseInt(localStorage.getItem('pianoPlays') || '0') >= 10 }
+];
+
+function showBadges() {
+    const unlocked = JSON.parse(localStorage.getItem('musicBadges') || '[]');
+    
+    // 檢查新徽章
+    badges.forEach(b => {
+        if (b.condition() && !unlocked.includes(b.id)) {
+            unlocked.push(b.id);
+            localStorage.setItem('musicBadges', JSON.stringify(unlocked));
+            
+            // 顯示解鎖動畫
+            setTimeout(() => {
+                showBadgeUnlock(b);
+            }, 500);
+        }
+    });
+    
+    const html = `
+        <div id="badgePanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4500;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">🎖️ 徽章</h2>
+                    <button onclick="document.getElementById('badgePanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                    ${badges.map(b => {
+                        const isUnlocked = unlocked.includes(b.id) || b.condition();
+                        return `
+                            <div style="background:${isUnlocked ? 'rgba(255,215,0,0.2)' : 'rgba(255,255,255,0.1)'};padding:15px;border-radius:15px;text-align:center;border:2px solid ${isUnlocked ? '#ffd700' : 'transparent'};opacity:${isUnlocked ? 1 : 0.5};">
+                                <div style="font-size:2rem;">${b.icon}</div>
+                                <div style="font-size:0.8rem;font-weight:bold;margin-top:5px;">${b.name}</div>
+                                <div style="font-size:0.6rem;opacity:0.7;">${b.desc}</div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div style="text-align:center;margin-top:20px;color:#888;">
+                    ${unlocked.length + badges.filter(b => b.condition()).length - unlocked.filter(u => badges.some(b => b.id === u && b.condition())).length} / ${badges.length} 徽章
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function showBadgeUnlock(badge) {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;padding:30px 50px;border-radius:20px;font-size:1.5rem;font-weight:bold;z-index:6000;animation:badgeUnlock 3s forwards;text-align:center;';
+    el.innerHTML = `🎖️ 獲得徽章！<br><span style="font-size:2rem;">${badge.icon}</span><br>${badge.name}`;
+    document.body.appendChild(el);
+    
+    for (let i = 0; i < 30; i++) setTimeout(() => createConfetti(), i * 50);
+    
+    setTimeout(() => el.remove(), 3000);
+}
+
+// 添加 CSS
+const badgeCSS = document.createElement('style');
+badgeCSS.textContent = '@keyframes badgeUnlock { 0% { transform:translate(-50%,-50%) scale(0); } 20% { transform:translate(-50%,-50%) scale(1.2); } 80% { transform:translate(-50%,-50%) scale(1); } 100% { transform:translate(-50%,-50%) scale(1); opacity:0; } }';
+document.head.appendChild(badgeCSS);
+
+// 初始化檢查
+setTimeout(showBadges, 2000);
+</script>
+
+<script>
+// ========== 新手教學 ==========
+
+function showTutorial() {
+    const tutorialSteps = [
+        { title: '歡迎來到音樂達人！', content: '這是一個幫助你學習音樂的遊戲', icon: '🎹' },
+        { title: '選擇遊戲模式', content: '點擊不同的模式來練習', icon: '🎮' },
+        { title: '答題賺金幣', content: '答對問題可以獲得金幣和經驗值', icon: '💰' },
+        { title: '升級變強', content: '累積經驗值可以升級，解鎖更多功能', icon: '⭐' },
+        { title: '每日挑戰', content: '記得每天回來完成挑戰！', icon: '📅' }
+    ];
+    
+    let currentStep = 0;
+    
+    const html = `
+        <div id="tutorialPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:7000;display:flex;align-items:center;justify-content:center;">
+            <div id="tutorialContent" style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:40px;border-radius:25px;max-width:350px;text-align:center;"></div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('afterbegin', html);
+    
+    showTutorialStep();
+    
+    function showTutorialStep() {
+        if (currentStep >= tutorialSteps.length) {
+            localStorage.setItem('tutorialDone', 'true');
+            document.getElementById('tutorialPanel').remove();
+            return;
+        }
+        
+        const step = tutorialSteps[currentStep];
+        const content = document.getElementById('tutorialContent');
+        
+        content.innerHTML = `
+            <div style="font-size:4rem;margin-bottom:20px;">${step.icon}</div>
+            <h2 style="color:#ffd700;margin-bottom:15px;">${step.title}</h2>
+            <p style="color:#ccc;margin-bottom:30px;">${step.content}</p>
+            <div style="display:flex;gap:10px;justify-content:center;">
+                <button onclick="skipTutorial()" style="padding:10px 20px;background:rgba(255,255,255,0.2);border:none;border-radius:10px;color:#888;cursor:pointer;">跳過</button>
+                <button onclick="nextTutorialStep()" style="padding:10px 30px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:10px;color:#000;font-weight:bold;cursor:pointer;">${currentStep === tutorialSteps.length - 1 ? '開始！' : '下一步'}</button>
+            </div>
+            <div style="margin-top:20px;color:#666;font-size:0.8rem;">${currentStep + 1} / ${tutorialSteps.length}</div>
+        `;
+    }
+    
+    window.nextTutorialStep = function() {
+        currentStep++;
+        showTutorialStep();
+    };
+    
+    window.skipTutorial = function() {
+        localStorage.setItem('tutorialDone', 'true');
+        document.getElementById('tutorialPanel').remove();
+    };
+}
+
+// 檢查是否需要顯示教學
+if (!localStorage.getItem('tutorialDone')) {
+    setTimeout(showTutorial, 1500);
+}
+</script>
