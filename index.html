@@ -717,7 +717,10 @@ function shareGame() {
     } else {
         // 複製連結
         navigator.clipboard.writeText(shareData.url).then(() => {
-            alert('連結已複製到剪貼簿！');
+            const m = document.createElement('div');
+        m.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+        m.innerHTML = '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;text-align:center;"><p style="color:#4caf50;font-size:1.2rem;">連結已複製到剪貼簿！📋</p><button onclick="this.parentElement.parentElement.remove()" style="margin-top:15px;padding:8px 20px;background:#2196f3;border:none;border-radius:8px;color:white;cursor:pointer;">關閉</button></div>';
+        document.body.appendChild(m);
         });
     }
 }
