@@ -1855,3 +1855,201 @@ checkAnswer = function(answer, correct) {
     }
 };
 </script>
+
+<script>
+// ========== 音樂知識問答 ==========
+
+const musicFacts = [
+    { q: '鋼琴有幾個黑白鍵？', a: '88', options: ['66', '88', '100', '76'] },
+    { q: 'Do Re Mi 是什麼？', a: '唱名', options: ['音名', '唱名', '節奏', '和弦'] },
+    { q: '鋼琴屬於哪類樂器？', a: '鍵盤樂器', options: ['弦樂器', '管樂器', '鍵盤樂器', '打擊樂器'] },
+    { q: '一個八度有幾個音符？', a: '7', options: ['6', '7', '8', '12'] },
+    { q: 'G大調有幾個升號？', a: '1', options: ['0', '1', '2', '3'] },
+    { q: '四分音符等於幾拍？', a: '1', options: ['0.5', '1', '2', '4'] },
+    { q: '鋼琴的英文是？', a: 'Piano', options: ['Piano', 'Guitar', 'Violin', 'Drum'] },
+    { q: '音階中最高的音是？', a: 'Si', options: ['Do', 'Re', 'La', 'Si'] },
+    { q: 'C和弦由哪些音組成？', a: 'C E G', options: ['C E G', 'C F A', 'D F A', 'G B D'] },
+    { q: ' Half note 等於幾拍？', a: '2', options: ['1', '2', '4', '0.5'] }
+];
+
+function showMusicQuiz() {
+    const quizHTML = `
+        <div id="quizPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a1a2e,#0d0d1a);z-index:3500;overflow-y:auto;">
+            <div style="padding:20px;max-width:500px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📚 音樂知識</h2>
+                    <button onclick="document.getElementById('quizPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div id="quizContent"></div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', quizHTML);
+    startQuiz();
+}
+
+let quizScore = 0;
+let quizAnswered = 0;
+
+function startQuiz() {
+    quizScore = 0;
+    quizAnswered = 0;
+    nextQuizQuestion();
+}
+
+function nextQuizQuestion() {
+    const fact = musicFacts[Math.floor(Math.random() * musicFacts.length)];
+    const content = document.getElementById('quizContent');
+    
+    content.innerHTML = `
+        <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin-bottom:20px;">
+            <div style="font-size:1.2rem;margin-bottom:20px;">${fact.q}</div>
+            <div style="display:grid;grid-template-columns:repeat(2,1fr);gap:10px;">
+                ${fact.options.map(opt => `
+                    <button onclick="checkQuizAnswer('${opt}','${fact.a}',this)" style="padding:15px;background:rgba(255,255,255,0.1);border:2px solid rgba(255,255,255,0.2);border-radius:10px;color:white;font-size:1rem;cursor:pointer;">${opt}</button>
+                `).join('')}
+            </div>
+        </div>
+        <div style="text-align:center;color:#888;">分數: <span style="color:#ffd700;">${quizScore}</span></div>
+    `;
+}
+
+function checkQuizAnswer(selected, correct, btn) {
+    quizAnswered++;
+    
+    if (selected === correct) {
+        btn.style.background = '#4caf50';
+        btn.style.borderColor = '#4caf50';
+        quizScore += 10;
+        playerData.coins += 5;
+        playerData.xp += 3;
+        saveData();
+    } else {
+        btn.style.background = '#f44336';
+        btn.style.borderColor = '#f44336';
+    }
+    
+    setTimeout(() => {
+        if (quizAnswered < 5) {
+            nextQuizQuestion();
+        } else {
+            showQuizResult();
+        }
+    }, 500);
+}
+
+function showQuizResult() {
+    const content = document.getElementById('quizContent');
+    content.innerHTML = `
+        <div style="text-align:center;padding:30px;">
+            <div style="font-size:3rem;margin-bottom:20px;">${quizScore >= 30 ? '🎉' : '📚'}</div>
+            <div style="font-size:1.5rem;margin-bottom:10px;">完成！</div>
+            <div style="font-size:2rem;color:#ffd700;margin-bottom:20px;">${quizScore} 分</div>
+            <div style="color:#888;margin-bottom:20px;">+${quizScore/2} 金幣</div>
+            <button onclick="startQuiz()" style="padding:15px 30px;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:10px;color:white;font-size:1rem;cursor:pointer;">再玩一次</button>
+            <button onclick="document.getElementById('quizPanel').remove()" style="padding:15px 30px;background:rgba(255,255,255,0.2);border:none;border-radius:10px;color:white;font-size:1rem;cursor:pointer;margin-left:10px;">關閉</button>
+        </div>
+    `;
+}
+
+// 添加按鈕
+document.querySelector('.mode-grid').innerHTML += '<div class="mode-card" onclick="showMusicQuiz()"><div class="icon">📚</div><div class="name">音樂知識</div><div class="desc">測試你的音樂素養</div></div>';
+</script>
+
+<script>
+// ========== 記憶力訓練 ==========
+
+function showMemoryGame() {
+    const notes4 = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La'];
+    const cards = [...notes4, ...notes4].sort(() => Math.random() - 0.5);
+    
+    const memoryHTML = `
+        <div id="memoryPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a1a2e,#0d0d1a);z-index:3500;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">🧠 記憶力訓練</h2>
+                    <button onclick="document.getElementById('memoryPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="text-align:center;margin-bottom:15px;">
+                    <span style="color:#ffd700;font-size:1.2rem;">${0}</span> 回合
+                </div>
+                
+                <div id="memoryGrid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;">
+                    ${cards.map((note, i) => `
+                        <div class="memory-card" onclick="flipCard(this,'${note}',${i})" style="height:80px;background:linear-gradient(135deg,#e94560,#ff6b6b);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:2rem;cursor:pointer;transform:scale(1);transition:transform 0.3s;">
+                            ❓
+                        </div>
+                    `).join('')}
+                </div>
+                
+                <div style="text-align:center;margin-top:20px;color:#888;">
+                    翻出相同的音符！
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', memoryHTML);
+}
+
+let flippedCards = [];
+let matchedPairs = 0;
+let moves = 0;
+
+function flipCard(el, note, index) {
+    if (el.classList.contains('flipped') || flippedCards.length >= 2) return;
+    
+    el.classList.add('flipped');
+    el.style.background = 'linear-gradient(135deg,#4caf50,#8bc34a)';
+    el.textContent = note;
+    el.dataset.note = note;
+    
+    flippedCards.push({ el, note, index });
+    
+    if (flippedCards.length === 2) {
+        moves++;
+        document.querySelector('#memoryPanel span').textContent = moves;
+        
+        const [card1, card2] = flippedCards;
+        
+        if (card1.note === card2.note) {
+            // 配對成功
+            matchedPairs++;
+            card1.el.style.opacity = '0.5';
+            card2.el.style.opacity = '0.5';
+            card1.el.style.cursor = 'default';
+            card2.el.style.cursor = 'default';
+            flippedCards = [];
+            
+            playSound('correct');
+            
+            if (matchedPairs === 6) {
+                setTimeout(() => {
+                    const reward = 50 - moves * 2;
+                    playerData.coins += Math.max(10, reward);
+                    playerData.xp += 20;
+                    saveData();
+                    
+                    showFeedback(`🎉 完成！+${Math.max(10, reward)}💰`, '#ffd700');
+                }, 500);
+            }
+        } else {
+            // 配對失敗
+            setTimeout(() => {
+                card1.el.classList.remove('flipped');
+                card2.el.classList.remove('flipped');
+                card1.el.style.background = 'linear-gradient(135deg,#e94560,#ff6b6b)';
+                card2.el.style.background = 'linear-gradient(135deg,#e94560,#ff6b6b)';
+                card1.el.textContent = '❓';
+                card2.el.textContent = '❓';
+                flippedCards = [];
+            }, 800);
+            playSound('wrong');
+        }
+    }
+}
+
+// 添加按鈕
+document.querySelector('.mode-grid').innerHTML += '<div class="mode-card" onclick="showMemoryGame()"><div class="icon">🧠</div><div class="name">記憶訓練</div><div class="desc">翻牌配對練習</div></div>';
+</script>
