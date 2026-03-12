@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎹 音樂達人 - 爆肝也要玩！</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            background: linear-gradient(135deg, #0d0d1a 0%, #1a1a2e 50%, #16213e 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            padding: 15px;
+        }
+        @keyframes levelUp { 0% { transform: scale(1); } 50% { transform: scale(1.3); } 100% { transform: scale(1); } }
+        @keyframes rainbow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+        
+        .xp-bar { width: 100%; max-width: 500px; height: 20px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin: 10px 0; }
+        .xp-fill { height: 100%; background: linear-gradient(90deg, #ff6b6b, #ffd700, #4caf50, #00bfff); background-size: 200% 200%; animation: rainbow 2s ease infinite; transition: width 0.5s; }
+        .level-badge { font-size: 1.5rem; font-weight: bold; padding: 5px 20px; background: linear-gradient(135deg, #ffd700, #ff8c00); border-radius: 20px; color: #000; animation: pulse 2s infinite; }
+        h1 { font-size: 2rem; margin-bottom: 5px; background: linear-gradient(90deg, #ff6b6b, #ffd700, #4caf50, #00bfff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; animation: rainbow 3s linear infinite; }
+        .stats-row { display: flex; gap: 15px; flex-wrap: wrap; justify-content: center; margin: 10px 0; }
+        .stat-box { background: rgba(255,255,255,0.1); padding: 10px 20px; border-radius: 15px; text-align: center; min-width: 100px; }
+        .stat-value { font-size: 1.5rem; font-weight: bold; }
+        .stat-label { font-size: 0.8rem; opacity: 0.7; }
+        .streak-fire { color: #ff6b6b; font-size: 2rem; animation: float 0.5s infinite; }
+        
+        .main-container { width: 100%; max-width: 600px; background: rgba(255,255,255,0.05); border-radius: 25px; padding: 20px; margin: 15px 0; }
+        .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
+        .mode-card { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 2px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .mode-card:hover { transform: translateY(-5px); border-color: #ffd700; box-shadow: 0 10px 30px rgba(255,215,0,0.3); }
+        .mode-card.locked { opacity: 0.5; filter: grayscale(1); }
+        .mode-card .icon { font-size: 3rem; margin-bottom: 10px; }
+        .mode-card .name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .mode-card .desc { font-size: 0.8rem; opacity: 0.7; }
+        
+        .daily-reward { background: linear-gradient(135deg, #ffd700, #ff8c00); border-radius: 20px; padding: 20px; text-align: center; margin: 15px 0; }
+        
+        .tab-buttons { display: flex; gap: 10px; margin-bottom: 20px; }
+        .tab-btn { flex: 1; padding: 12px; background: rgba(255,255,255,0.1); border: none; border-radius: 10px; color: white; cursor: pointer; font-size: 1rem; }
+        .tab-btn.active { background: linear-gradient(135deg, #e94560, #ff6b6b); }
+        
+        .game-area { display: none; text-align: center; }
+        .game-area.active { display: block; }
+        .note-display { font-size: 6rem; margin: 20px 0; animation: float 1s ease infinite; cursor: pointer; }
+        .options-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
+        .option-btn { padding: 20px; font-size: 1.3rem; background: rgba(255,255,255,0.1); border: 2px solid rgba(255,255,255,0.2); border-radius: 15px; color: white; cursor: pointer; transition: all 0.2s; }
+        .option-btn:hover { background: rgba(255,255,255,0.2); transform: scale(1.02); }
+        .option-btn.correct { background: #4caf50 !important; border-color: #4caf50 !important; animation: levelUp 0.3s; }
+        .option-btn.wrong { background: #f44336 !important; border-color: #f44336 !important; opacity: 0.5; }
+        
+        .feedback-popup { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); font-size: 4rem; font-weight: bold; z-index: 1000; animation: levelUp 0.5s forwards; text-shadow: 0 0 30px currentColor; }
+        .back-btn { position: fixed; top: 20px; left: 20px; font-size: 1.5rem; background: rgba(255,255,255,0.2); border: none; border-radius: 50%; width: 50px; height: 50px; cursor: pointer; color: white; }
+        
+        .quest-card { background: linear-gradient(135deg, #2d2d44, #1a1a2e); border-radius: 15px; padding: 15px; margin: 10px 0; display: flex; align-items: center; gap: 15px; }
+        .quest-icon { font-size: 2rem; }
+        .quest-info { flex: 1; }
+        .quest-title { font-weight: bold; }
+        .quest-progress { font-size: 0.8rem; opacity: 0.7; }
+        .quest-reward { background: linear-gradient(135deg, #ffd700, #ff8c00); padding: 5px 15px; border-radius: 10px; font-weight: bold; color: #000; }
+        
+        .achievement-card { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; margin: 10px 0; display: flex; align-items: center; gap: 15px; border: 2px solid transparent; }
+        .achievement-card.unlocked { border-color: #ffd700; background: rgba(255,215,0,0.1); }
+        .achievement-icon { font-size: 2.5rem; }
+        .achievement-info { flex: 1; }
+        .achievement-title { font-weight: bold; }
+        .achievement-desc { font-size: 0.8rem; opacity: 0.7; }
+        
+        .collection-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin: 20px 0; }
+        .collection-item { background: rgba(255,255,255,0.1); border-radius: 15px; padding: 15px; text-align: center; font-size: 2rem; cursor: pointer; transition: all 0.2s; }
+        .collection-item:hover { transform: scale(1.1); }
+        .collection-item.owned { background: rgba(255,215,0,0.2); border: 2px solid #ffd700; }
+        .collection-item.equipped { border-color: #4caf50; box-shadow: 0 0 20px #4caf50; }
+    </style>
+</head>
+<body>
+    <button class="back-btn" onclick="showHome()" style="display:none" id="backBtn">⬅️</button>
+    <div id="homePage">
+        <h1>🎹 音樂達人</h1>
+        <div class="stats-row">
+            <div class="stat-box"><div class="stat-value" id="playerLevel">1</div><div class="stat-label">等級</div></div>
+            <div class="stat-box"><div class="stat-value" id="playerXP">0</div><div class="stat-label">經驗值</div></div>
+            <div class="stat-box"><div class="stat-value" id="totalCoins">0</div><div class="stat-label">金幣 💰</div></div>
+            <div class="stat-box"><span class="streak-fire" id="streakEmoji">🔥</span><div class="stat-value" id="dayStreak">0</div><div class="stat-label">天數</div></div>
+        </div>
+        <div class="xp-bar"><div class="xp-fill" id="xpFill" style="width: 0%"></div></div>
+        <div class="daily-reward" id="dailyReward" onclick="claimDailyReward()">
+            <div style="font-size: 1.2rem;">📅 每日登入獎勵</div>
+            <div style="font-size: 2rem; margin: 10px 0;">🎁</div>
+            <div id="dailyText">點擊領取！</div>
+        </div>
+        <div class="main-container">
+            <div class="tab-buttons">
+                <button class="tab-btn active" onclick="switchTab('play')">🎮 遊戲</button>
+                <button class="tab-btn" onclick="switchTab('quest')">📋 任務</button>
+                <button class="tab-btn" onclick="switchTab('collection')">🎨 收藏</button>
+                <button class="tab-btn" onclick="switchTab('achievement')">🏆 成就</button>
+            </div>
+            <div id="tabPlay" class="tab-content">
+                <div class="mode-grid">
+                    <div class="mode-card" onclick="startGame('ear')"><div class="icon">👂</div><div class="name">听力大師</div><div class="desc">聽聲音猜音符</div></div>
+                    <div class="mode-card" onclick="startGame('note')"><div class="icon">🎵</div><div class="name">音符認識</div><div class="desc">認識音名與唱名</div></div>
+                    <div class="mode-card" onclick="startGame('rhythm')"><div class="icon">🥁</div><div class="name">節奏訓練</div><div class="desc">學習各種音符時值</div></div>
+                    <div class="mode-card" onclick="startGame('chord')"><div class="icon">🎹</div><div class="name">和弦教室</div><div class="desc">認識和弦組成</div></div>
+                    <div class="mode-card" onclick="startGame('scale')"><div class="icon">🎼</div><div class="name">音階練習</div><div class="desc">大小調音階</div></div>
+                    <div class="mode-card" id="bossCard" onclick="startGame('boss')"><div class="icon">👑</div><div class="name">BOSS戰</div><div class="desc">挑戰音樂BOSS</div><div class="lock" id="bossLock">🔒 Lv.5</div></div>
+                </div>
+            </div>
+            <div id="tabQuest" class="tab-content" style="display:none"><div id="dailyQuests"></div></div>
+            <div id="tabCollection" class="tab-content" style="display:none"><h3 style="margin-bottom:15px;">🎹 樂器主題</h3><div class="collection-grid" id="instrumentCollection"></div></div>
+            <div id="tabAchievement" class="tab-content" style="display:none"><div id="achievementsList"></div></div>
+        </div>
+    </div>
+    <div id="gameArea" class="game-area">
+        <div class="stats-row">
+            <div class="stat-box"><div class="stat-value" id="gameScore">0</div><div class="stat-label">分數</div></div>
+            <div class="stat-box"><div class="stat-value" id="gameCombo">0</div><div class="stat-label">COMBO</div></div>
+        </div>
+        <div class="hint-text" id="gameHint"></div>
+        <div id="gameContent"></div>
+    </div>
+    
+    <script>
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+        const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
+        const rhythms = [{ name: '全音符', beats: 4, symbol: '𝅝' }, { name: '二分音符', beats: 2, symbol: '𝅗𝅥' }, { name: '四分音符', beats: 1, symbol: '♩' }, { name: '八分音符', beats: 0.5, symbol: '♪' }];
+        const chords = [{ name: 'C', notes: ['Do','Mi','Sol'] }, { name: 'G', notes: ['Sol','Si','Re'] }, { name: 'F', notes: ['Fa','La','Do'] }, { name: 'Am', notes: ['La','Do','Mi'] }, { name: 'Dm', notes: ['Re','Fa','La'] }, { name: 'Em', notes: ['Mi','Sol','Si'] }];
+        const scales = [{ name: 'C大調', notes: ['Do','Re','Mi','Fa','Sol','La','Si'] }, { name: 'A小調', notes: ['La','Si','Do','Re','Mi','Fa','Sol'] }, { name: 'G大調', notes: ['Sol','La','Si','Do','Re','Mi','Fa#'] }];
+        const instruments = [{ id: 'piano', emoji: '🎹', name: '鋼琴', unlockXP: 0 }, { id: 'guitar', emoji: '🎸', name: '吉他', unlockXP: 100 }, { id: 'violin', emoji: '🎻', name: '小提琴', unlockXP: 500 }, { id: 'drum', emoji: '🥁', name: '鼓', unlockXP: 1000 }, { id: 'sax', emoji: '🎷', name: '薩克斯', unlockXP: 2500 }, { id: 'trumpet', emoji: '🎺', name: '小號', unlockXP: 5000 }];
+        const achievements = [{ id: 'first', name: '初試身手', desc: '完成第一題', icon: '🎯', req: 1 }, { id: 'streak5', name: '熱身完畢', desc: '達成 5 連擊', icon: '🔥', req: 5 }, { id: 'streak10', name: '火力全開', desc: '達成 10 連擊', icon: '💥', req: 10 }, { id: 'coins100', name: '小有積蓄', desc: '獲得 100 金幣', icon: '💰', req: 100 }, { id: 'coins500', name: '小富翁', desc: '獲得 500 金幣', icon: '🤑', req: 500 }, { id: 'level5', name: '初露頭角', desc: '達到 5 級', icon: '⭐', req: 5 }, { id: 'level10', name: '音樂新星', desc: '達到 10 級', icon: '🌟', req: 10 }, { id: 'daily7', name: '持之以恆', desc: '連續登入 7 天', icon: '📅', req: 7 }];
+        
+        let playerData = { xp: parseInt(localStorage.getItem('musicXP') || '0'), coins: parseInt(localStorage.getItem('musicCoins') || '0'), level: 1, dayStreak: parseInt(localStorage.getItem('musicStreak') || '0'), lastLogin: localStorage.getItem('musicLastLogin') || '', totalPlayed: parseInt(localStorage.getItem('musicPlayed') || '0'), achievements: JSON.parse(localStorage.getItem('musicAchievements') || '[]'), instruments: JSON.parse(localStorage.getItem('musicInstruments') || '["piano"]'), equippedInstrument: localStorage.getItem('musicEquipped') || 'piano', dailyQuests: JSON.parse(localStorage.getItem('musicDailyQuests') || '{}') };
+        
+        let gameScore = 0, gameCombo = 0, currentMode = '', currentQuestion = null, questionsAnswered = 0, correctThisRound = 0;
+        
+        function calcLevel(xp) { let level = 1, needXP = 50; while (xp >= needXP) { xp -= needXP; level++; needXP = Math.floor(needXP * 1.5); } return { level, currentXP: xp, needXP }; }
+        function saveData() { localStorage.setItem('musicXP', playerData.xp); localStorage.setItem('musicCoins', playerData.coins); localStorage.setItem('musicStreak', playerData.dayStreak); localStorage.setItem('musicLastLogin', playerData.lastLogin); localStorage.setItem('musicPlayed', playerData.totalPlayed); localStorage.setItem('musicAchievements', JSON.stringify(playerData.achievements)); localStorage.setItem('musicInstruments', JSON.stringify(playerData.instruments)); localStorage.setItem('musicEquipped', playerData.equippedInstrument); localStorage.setItem('musicDailyQuests', JSON.stringify(playerData.dailyQuests)); }
+        
+        function updateUI() {
+            const { level, currentXP, needXP } = calcLevel(playerData.xp);
+            playerData.level = level;
+            document.getElementById('playerLevel').textContent = level;
+            document.getElementById('playerXP').textContent = currentXP + '/' + needXP;
+            document.getElementById('xpFill').style.width = (currentXP / needXP * 100) + '%';
+            document.getElementById('totalCoins').textContent = playerData.coins;
+            document.getElementById('dayStreak').textContent = playerData.dayStreak;
+            checkDailyLogin(); updateCollection(); updateAchievements(); updateQuests();
+            const bossCard = document.getElementById('bossCard'); const bossLock = document.getElementById('bossLock');
+            if (level >= 5) { bossCard.classList.remove('locked'); if (bossLock) bossLock.style.display = 'none'; }
+        }
+        
+        function checkDailyLogin() {
+            const today = new Date().toISOString().split('T')[0];
+            if (playerData.lastLogin !== today) {
+                if (playerData.lastLogin) { const diff = (new Date(today) - new Date(playerData.lastLogin)) / (1000 * 60 * 60 * 24); if (diff > 1) playerData.dayStreak = 0; }
+                document.getElementById('dailyText').textContent = '點擊領取今日獎勵！';
+            } else { document.getElementById('dailyText').textContent = '已連續登入 ' + playerData.dayStreak + ' 天 ✅'; document.getElementById('dailyReward').style.opacity = '0.7'; }
+        }
+        
+        function claimDailyReward() {
+            const today = new Date().toISOString().split('T')[0];
+            if (playerData.lastLogin === today) return;
+            playerData.lastLogin = today; playerData.dayStreak++;
+            const reward = 10 + playerData.dayStreak * 5; playerData.coins += reward; playerData.xp += 20;
+            saveData(); showFeedback('+' + reward + '💰', '#ffd700'); updateUI();
+        }
+        
+        function updateCollection() {
+            const grid = document.getElementById('instrumentCollection');
+            grid.innerHTML = instruments.map(inst => {
+                const owned = playerData.instruments.includes(inst.id); const equipped = playerData.equippedInstrument === inst.id; const unlocked = playerData.xp >= inst.unlockXP;
+                return '<div class="collection-item ' + (owned ? 'owned' : '') + ' ' + (equipped ? 'equipped' : '') + '" onclick="' + (owned ? 'equipInstrument(\'' + inst.id + '\')' : (unlocked ? 'unlockInstrument(\'' + inst.id + '\')' : '')) + '">' + inst.emoji + '<div style="font-size:0.7rem">' + inst.name + '</div>' + (!owned && !unlocked ? '<div style="font-size:0.6rem">🔒</div>' : '') + '</div>';
+            }).join('');
+        }
+        
+        function unlockInstrument(id) {
+            const inst = instruments.find(i => i.id === id);
+            if (playerData.xp >= inst.unlockXP) { playerData.instruments.push(id); playerData.equippedInstrument = id; saveData(); updateUI(); showFeedback('解鎖 ' + inst.name + '！', '#4caf50'); }
+        }
+        function equipInstrument(id) { if (playerData.instruments.includes(id)) { playerData.equippedInstrument = id; saveData(); updateUI(); } }
+        
+        function updateAchievements() {
+            const list = document.getElementById('achievementsList');
+            list.innerHTML = achievements.map(ach => {
+                const unlocked = playerData.achievements.includes(ach.id);
+                return '<div class="achievement-card ' + (unlocked ? 'unlocked' : '') + '"><div class="achievement-icon">' + ach.icon + '</div><div class="achievement-info"><div class="achievement-title">' + ach.name + '</div><div class="achievement-desc">' + ach.desc + '</div></div>' + (unlocked ? '<div style="font-size:1.5rem">✅</div>' : '') + '</div>';
+            }).join('');
+        }
+        
+        function updateQuests() {
+            const today = new Date().toISOString().split('T')[0];
+            if (playerData.dailyQuests.date !== today) {
+                playerData.dailyQuests = { date: today, quests: [{ id: 'play10', desc: '回答 10 題', progress: 0, target: 10, reward: 20 }, { id: 'perfect3', desc: '3 題全對', progress: 0, target: 3, reward: 30 }, { id: 'earn50', desc: '獲得 50 金幣', progress: 0, target: 50, reward: 40 }] };
+                localStorage.setItem('musicDailyQuests', JSON.stringify(playerData.dailyQuests));
+            }
+            const container = document.getElementById('dailyQuests');
+            container.innerHTML = '<h3 style="margin-bottom:15px;">📋 今日任務</h3>';
+            playerData.dailyQuests.quests.forEach(q => {
+                container.innerHTML += '<div class="quest-card"><div class="quest-icon">📌</div><div class="quest-info"><div class="quest-title">' + q.desc + '</div><div class="quest-progress">' + q.progress + '/' + q.target + '</div></div><div class="quest-reward">+' + q.reward + '💰</div></div>';
+            });
+        }
+        
+        function checkQuests() {
+            playerData.dailyQuests.quests.forEach(q => {
+                if (q.id === 'play10' && q.progress < q.target) { q.progress++; if (q.progress >= q.target) { playerData.coins += q.reward; showFeedback('+' + q.reward + '💰 任務完成！', '#ffd700'); } }
+                if (q.id === 'perfect3' && correctThisRound >= 3 && q.progress < q.target) { q.progress++; if (q.progress >= q.target) { playerData.coins += q.reward; showFeedback('+' + q.reward + '💰 任務完成！', '#ffd700'); } }
+            });
+            saveData(); updateQuests();
+        }
+        
+        function playNote(note) { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = noteFreqs[note]; osc.type = 'sine'; gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+        
+        function switchTab(tab) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
+        
+        function showHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('gameArea').classList.remove('active'); document.getElementById('backBtn').style.display = 'none'; updateUI(); }
+        
+        function startGame(mode) { currentMode = mode; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; document.getElementById('homePage').style.display = 'none'; document.getElementById('gameArea').classList.add('active'); document.getElementById('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
+        
+        function updateGameUI() { document.getElementById('gameScore').textContent = gameScore; document.getElementById('gameCombo').textContent = gameCombo; }
+        
+        function nextQuestion() { document.getElementById('gameContent').innerHTML = ''; switch(currentMode) { case 'ear': earTraining(); break; case 'note': noteRecognition(); break; case 'rhythm': rhythmTraining(); break; case 'chord': chordTraining(); break; case 'scale': scaleTraining(); break; case 'boss': bossBattle(); break; } }
+        
+        function earTraining() {
+            const correct = notes[Math.floor(Math.random() * notes.length)];
+            currentQuestion = correct;
+            document.getElementById('gameHint').textContent = '🎧 聽聲音，選音符';
+            document.getElementById('gameContent').innerHTML = '<div class="note-display" onclick="playNote(\'' + correct + '\')">🔊</div><div class="options-grid">' + notes.map(n => '<button class="option-btn" onclick="checkAnswer(\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+            setTimeout(() => playNote(correct), 300);
+        }
+        
+        function noteRecognition() {
+            const note = notes[Math.floor(Math.random() * notes.length)];
+            const mode = Math.random() > 0.5;
+            currentQuestion = note;
+            const correct = mode ? noteNames[note] : note;
+            setTimeout(() => playNote(note), 100);
+            document.getElementById('gameHint').textContent = mode ? '這個音符的音名是？' : '這個音符的唱名是？';
+            let opts = [correct]; const all = mode ? ['C','D','E','F','G','A','B'] : notes;
+            while (opts.length < 4) { const o = all[Math.floor(Math.random() * all.length)]; if (!opts.includes(o)) opts.push(o); }
+            opts.sort(() => Math.random() - 0.5);
+            document.getElementById('gameContent').innerHTML = '<div class="note-display">' + note + '</div><button onclick="playNote(\'' + note + '\')" style="font-size:1.5rem;background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:10px 20px;cursor:pointer;margin:10px;">🔊 再聽</button><div class="options-grid">' + opts.map(n => '<button class="option-btn" onclick="checkAnswer(\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+        }
+        
+        function rhythmTraining() {
+            const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
+            currentQuestion = rhythm.name;
+            document.getElementById('gameHint').textContent = '這個音符有幾拍？';
+            document.getElementById('gameContent').innerHTML = '<div class="note-display">' + rhythm.symbol + '</div><div class="options-grid">' + [0.5,1,2,4].map(n => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + rhythm.beats + ')">' + n + ' 拍</button>').join('') + '</div>';
+        }
+        
+        function chordTraining() {
+            const chord = chords[Math.floor(Math.random() * chords.length)];
+            currentQuestion = chord.name;
+            document.getElementById('gameHint').textContent = '🎧 聽和弦，選名稱';
+            document.getElementById('gameContent').innerHTML = '<button onclick="playChord(\'' + chord.notes.join(',') + '\')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button><div class="options-grid">' + chords.map(c => '<button class="option-btn" onclick="checkAnswer(\'' + c.name + '\',\'' + chord.name + '\')">' + c.name + '</button>').join('') + '</div>';
+            setTimeout(() => playChord(chord.notes), 300);
+        }
+        
+        function playChord(notesStr) { notesStr.split(',').forEach((n, i) => { setTimeout(() => playNote(n), i * 100); }); }
+        
+        function scaleTraining() {
+            const scale = scales[Math.floor(Math.random() * scales.length)];
+            currentQuestion = scale.name;
+            document.getElementById('gameHint').textContent = '🎧 聽音階，選名稱';
+            document.getElementById('gameContent').innerHTML = '<button onclick="playScale(\'' + scale.notes.join(',') + '\')" style="font-size:3rem;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button><div class="options-grid">' + scales.map(s => '<button class="option-btn" onclick="checkAnswer(\'' + s.name + '\',\'' + scale.name + '\')">' + s.name + '</button>').join('') + '</div>';
+            setTimeout(() => playScale(scale.notes), 300);
+        }
+        
+        function playScale(notesStr) { notesStr.split(',').forEach((n, i) => { setTimeout(() => playNote(n), i * 300); }); }
+        
+        function bossBattle() {
+            const bosses = [{ name: '節奏怪獸', q: () => { const r = rhythms[Math.floor(Math.random() * rhythms.length)]; currentQuestion = r.name; document.getElementById('gameHint').textContent = '👑 BOSS挑戰！這是什麼音符？'; return { display: '<div class="note-display">' + r.symbol + '</div>', options: [0.5,1,2,4].map(n => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + r.beats + ')">' + n + ' 拍</button>').join('') }; } }];
+            const boss = bosses[0]; const q = boss.q();
+            document.getElementById('gameContent').innerHTML = q.display + '<div class="options-grid">' + q.options + '</div>';
+        }
+        
+        function checkAnswer(answer, correct) {
+            questionsAnswered++; playerData.totalPlayed++;
+            const isCorrect = String(answer) === String(correct);
+            if (isCorrect) { gameScore += 10 + gameCombo * 2; gameCombo++; correctThisRound++; playerData.coins += 5; playerData.xp += 3; showFeedback('✅', '#4caf50'); if (gameCombo >= 5) showFeedback('🔥 ' + gameCombo + ' COMBO!', '#ffd700'); }
+            else { gameCombo = 0; correctThisRound = 0; showFeedback('❌', '#f44336'); }
+            updateGameUI(); checkQuests(); saveData();
+            setTimeout(nextQuestion, 800);
+        }
+        
+        function showFeedback(text, color) { const el = document.createElement('div'); el.className = 'feedback-popup'; el.textContent = text; el.style.color = color; document.body.appendChild(el); setTimeout(() => el.remove(), 600); }
+        
+        updateUI();
+    </script>
+</body>
+</html>
