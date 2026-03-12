@@ -629,3 +629,195 @@ startGame = function(mode) {
     }
 };
 </script>
+
+<script>
+// ========== 更多優化 ==========
+
+// 設置面板
+function showSettings() {
+    const settingsHTML = `
+        <div id="settingsPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:5000;display:flex;align-items:center;justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:400px;width:90%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">⚙️ 設置</h2>
+                    <button onclick="document.getElementById('settingsPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="margin:20px 0;">
+                    <label style="display:flex;align-items:center;gap:15px;cursor:pointer;">
+                        <input type="checkbox" id="soundEnabled" checked onchange="toggleSound(this.checked)">
+                        <span>🔊 音效</span>
+                    </label>
+                </div>
+                
+                <div style="margin:20px 0;">
+                    <label style="display:flex;align-items:center;gap:15px;cursor:pointer;">
+                        <input type="checkbox" id="bgmEnabled" onchange="toggleBGM(this.checked)">
+                        <span>🎵 背景音樂</span>
+                    </label>
+                </div>
+                
+                <div style="margin:20px 0;">
+                    <label style="display:flex;align-items:center;gap:15px;cursor:pointer;">
+                        <input type="checkbox" id="vibrateEnabled" checked onchange="toggleVibrate(this.checked)">
+                        <span>📳 震動反饋</span>
+                    </label>
+                </div>
+                
+                <div style="margin:20px 0;">
+                    <div>🔆 亮度</div>
+                    <input type="range" min="50" max="150" value="100" onchange="adjustBrightness(this.value)" style="width:100%;margin-top:10px;">
+                </div>
+                
+                <button onclick="resetProgress()" style="width:100%;padding:15px;background:linear-gradient(135deg,#f44336,#d32f2f);border:none;border-radius:10px;color:white;cursor:pointer;margin-top:20px;">🗑️ 重置進度</button>
+                
+                <div style="text-align:center;margin-top:20px;color:#888;font-size:0.8rem;">
+                    版本 1.0.0
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', settingsHTML);
+}
+
+let soundOn = true, bgmOn = false, vibrateOn = true;
+
+function toggleSound(val) { soundOn = val; localStorage.setItem('soundOn', val); }
+function toggleBGM(val) { bgmOn = val; localStorage.setItem('bgmOn', val); }
+function toggleVibrate(val) { vibrateOn = val; localStorage.setItem('vibrateOn', val); }
+function adjustBrightness(val) { document.body.style.filter = 'brightness(' + (val/100) + ')'; }
+
+function resetProgress() {
+    if (confirm('確定要重置所有進度嗎？這無法復原！')) {
+        localStorage.clear();
+        location.reload();
+    }
+}
+
+// 載入設置
+function loadSettings() {
+    soundOn = localStorage.getItem('soundOn') !== 'false';
+    bgmOn = localStorage.getItem('bgmOn') === 'true';
+    vibrateOn = localStorage.getItem('vibrateOn') !== 'false';
+}
+
+// 添加設置按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showSettings()">⚙️</button>');
+
+// 震動反饋
+function vibrate(pattern) {
+    if (vibrateOn && navigator.vibrate) {
+        navigator.vibrate(pattern);
+    }
+}
+
+// 增強音效
+const originalPlaySound = playSound;
+playSound = function(type) {
+    if (!soundOn) return;
+    originalPlaySound(type);
+    vibrate(type === 'correct' ? 50 : type === 'wrong' ? 100 : 30);
+};
+
+// 分享功能
+function shareGame() {
+    const shareData = {
+        title: '🎹 音樂達人',
+        text: '我在音樂達人已經達到 ' + playerData.level + ' 級！來挑戰吧！',
+        url: 'https://j87916028-cyber.github.io/music-theory-game/'
+    };
+    
+    if (navigator.share) {
+        navigator.share(shareData);
+    } else {
+        // 複製連結
+        navigator.clipboard.writeText(shareData.url).then(() => {
+            alert('連結已複製到剪貼簿！');
+        });
+    }
+}
+
+// 添加分享按鈕到設置
+const originalShowSettings = showSettings;
+showSettings = function() {
+    originalShowSettings();
+    setTimeout(() => {
+        document.querySelector('#settingsPanel > div').insertAdjacentHTML('beforeend', '<button onclick="shareGame()" style="width:100%;padding:15px;background:linear-gradient(135deg,#4caf50,#388e3c);border:none;border-radius:10px;color:white;cursor:pointer;margin-top:15px;">📤 分享遊戲</button>');
+    }, 100);
+};
+
+// 載入
+loadSettings();
+</script>
+
+<script>
+// ========== Bug Fixes ==========
+
+// 修復練習模式回調
+function practiceAnswer(btn, answer, correct) {
+    const isCorrect = String(answer) === String(correct);
+    btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    if (isCorrect) {
+        playSound('correct');
+        setTimeout(() => {
+            const hint = document.getElementById('gameHint').textContent;
+            if (hint.includes('听力') || hint.includes('聽')) practiceEar();
+            else if (hint.includes('音名') || hint.includes('唱名')) practiceNote();
+            else if (hint.includes('幾拍')) practiceRhythm();
+            else if (hint.includes('和弦')) practiceChord();
+        }, 600);
+    } else {
+        playSound('wrong');
+    }
+}
+
+// 修復顯示音符
+function updateGameTexts() {
+    const hint = document.getElementById('gameHint');
+    if (!hint) return;
+    const text = hint.textContent;
+    if (text.includes('聽聲音')) hint.textContent = t('listen');
+    else if (text.includes('音名')) hint.textContent = t('noteName');
+    else if (text.includes('唱名')) hint.textContent = t('solfege');
+    else if (text.includes('幾拍')) hint.textContent = t('beats');
+    else if (text.includes('聽和弦')) hint.textContent = t('chordName');
+    else if (text.includes('聽音階')) hint.textContent = t('scaleName');
+    else if (text.includes('BOSS')) hint.textContent = t('bossTitle');
+    
+    const statLabels = document.querySelectorAll('#gameArea .stat-box .stat-label');
+    if (statLabels[0]) statLabels[0].textContent = t('score');
+    if (statLabels[1]) statLabels[1].textContent = t('combo');
+}
+
+// 確保每日登入檢查正確
+function checkDailyLogin() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastLogin = playerData.lastLogin;
+    const dailyText = document.getElementById('dailyText');
+    
+    if (!dailyText) return;
+    
+    if (lastLogin !== today) {
+        if (lastLogin) {
+            try {
+                const diff = (new Date(today) - new Date(lastLogin)) / (1000 * 60 * 60 * 24);
+                if (diff > 1) playerData.dayStreak = 0;
+            } catch(e) {}
+        }
+        dailyText.textContent = t('claim');
+    } else {
+        dailyText.textContent = t('claimed') + ' ✅';
+        document.getElementById('dailyReward').style.opacity = '0.7';
+    }
+}
+
+// 添加 head 的 CSS
+const headStyle = document.createElement('style');
+headStyle.textContent = `
+    .piano-key:active { background: #ddd !important; transform: scale(0.98); }
+    input[type="range"] { -webkit-appearance: none; height: 8px; background: rgba(255,255,255,0.3); border-radius: 5px; }
+    input[type="range"]::-webkit-slider-thumb { -webkit-appearance: none; width: 20px; height: 20px; background: #ffd700; border-radius: 50%; cursor: pointer; }
+    input[type="checkbox"] { width: 20px; height: 20px; accent-color: #ffd700; }
+`;
+document.head.appendChild(headStyle);
+</script>
