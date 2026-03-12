@@ -4390,3 +4390,15 @@ setTimeout(adjustLayout, 100);
     .mode-grid { grid-template-columns: repeat(4, 1fr); }
 }
 </style>
+
+<script>
+// ========== 浮動幫助按鈕 ==========
+function showHelp() {
+    const html = '<div id="helpPanel" style="position:fixed;bottom:20px;left:20px;width:50px;height:50px;background:linear-gradient(135deg,#2196f3,#03a9f4);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;cursor:pointer;z-index:1000;box-shadow:0 4px 15px rgba(0,0,0,0.3);" onclick="showHelpDialog()">❓</div>';
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+function showHelpDialog() {
+    alert('🎵 音樂達人\n\n遇到問題？試試這些：\n• 點擊 ⚡ 快速開始\n• 點擊 📋 查看任務\n• 點擊 ⚙️ 設定功能');
+}
+setTimeout(showHelp, 2000);
+</script>
