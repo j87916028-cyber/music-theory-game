@@ -4256,3 +4256,139 @@ function checkMistake(answer, correct) {
     }
 }
 </script>
+
+<script>
+// ========== 響應式設計 ==========
+
+function adjustLayout() {
+    const width = window.innerWidth;
+    const height = window.innerHeight;
+    
+    // 調整字體大小
+    let baseFontSize = 16;
+    let titleSize = '2rem';
+    let cardPadding = '20px';
+    let buttonPadding = '15px';
+    
+    if (width < 400) {
+        // 小手機
+        baseFontSize = 14;
+        titleSize = '1.5rem';
+        cardPadding = '12px';
+        buttonPadding = '10px';
+    } else if (width < 600) {
+        // 一般手機
+        baseFontSize = 15;
+        titleSize = '1.8rem';
+        cardPadding = '15px';
+        buttonPadding = '12px';
+    } else if (width > 1000) {
+        // 平板/電腦
+        baseFontSize = 18;
+        titleSize = '2.5rem';
+        cardPadding = '25px';
+        buttonPadding = '18px';
+    }
+    
+    // 動態調整根元素字體
+    document.documentElement.style.fontSize = baseFontSize + 'px';
+    
+    // 調整標題
+    const h1 = document.querySelector('h1');
+    if (h1) h1.style.fontSize = titleSize;
+    
+    // 調整遊戲卡片
+    const cards = document.querySelectorAll('.mode-card');
+    cards.forEach(card => {
+        card.style.padding = cardPadding;
+    });
+    
+    // 調整按鈕
+    const buttons = document.querySelectorAll('.option-btn');
+    buttons.forEach(btn => {
+        btn.style.padding = buttonPadding;
+    });
+    
+    // 調整網格
+    const grids = document.querySelectorAll('.mode-grid, .options-grid');
+    grids.forEach(grid => {
+        if (width < 400) {
+            grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            grid.style.gap = '8px';
+        } else if (width < 600) {
+            grid.style.gridTemplateColumns = 'repeat(2, 1fr)';
+            grid.style.gap = '12px';
+        } else {
+            grid.style.gridTemplateColumns = 'repeat(3, 1fr)';
+            grid.style.gap = '15px';
+        }
+    });
+    
+    // 調整統計列
+    const statsRow = document.querySelector('.stats-row');
+    if (statsRow) {
+        if (width < 400) {
+            statsRow.style.gap = '8px';
+        } else {
+            statsRow.style.gap = '15px';
+        }
+    }
+    
+    // 調整音符顯示
+    const noteDisplay = document.querySelector('.note-display');
+    if (noteDisplay) {
+        if (width < 400) {
+            noteDisplay.style.fontSize = '4rem';
+        } else if (width < 600) {
+            noteDisplay.style.fontSize = '5rem';
+        } else {
+            noteDisplay.style.fontSize = '7rem';
+        }
+    }
+}
+
+// 監聽視窗大小變化
+window.addEventListener('resize', adjustLayout);
+window.addEventListener('load', adjustLayout);
+
+// 初始化
+setTimeout(adjustLayout, 100);
+</script>
+
+<style>
+/* 響應式設計 */
+@media (max-width: 380px) {
+    body { font-size: 14px; }
+    h1 { font-size: 1.5rem; }
+    .stat-box { min-width: 60px; padding: 8px; }
+    .stat-value { font-size: 1.2rem; }
+    .mode-card { padding: 12px; }
+    .mode-card .icon { font-size: 2rem; }
+    .mode-card .name { font-size: 0.9rem; }
+    .mode-card .desc { font-size: 0.7rem; }
+    .option-btn { padding: 12px; font-size: 1rem; }
+    .tab-btn { padding: 8px; font-size: 0.8rem; }
+    .note-display { font-size: 4rem; }
+    .daily-reward { padding: 15px; }
+}
+
+@media (min-width: 600px) {
+    body { font-size: 18px; }
+    h1 { font-size: 2.5rem; }
+    .stat-box { min-width: 100px; padding: 15px; }
+    .stat-value { font-size: 1.8rem; }
+    .mode-card { padding: 25px; }
+    .mode-card .icon { font-size: 3.5rem; }
+    .mode-card .name { font-size: 1.3rem; }
+    .option-btn { padding: 20px; font-size: 1.3rem; }
+    .tab-btn { padding: 15px; font-size: 1.1rem; }
+    .note-display { font-size: 7rem; }
+    .main-container { padding: 30px; }
+}
+
+@media (min-width: 1000px) {
+    body { font-size: 20px; }
+    .main-container { max-width: 800px; }
+    .mode-grid { grid-template-columns: repeat(4, 1fr); }
+}
+</style>
