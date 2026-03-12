@@ -4401,3 +4401,14 @@ function showHelpDialog() {
     document.body.appendChild(d);
 }
 </script>
+
+<script>
+// 分頁可見性監控
+document.addEventListener('visibilitychange', function() {
+    if(document.hidden) {
+        console.log('🔔 遊戲暫停（分頁隱藏）');
+    } else {
+        console.log('🔔 遊戲繼續');
+    }
+});
+</script>
