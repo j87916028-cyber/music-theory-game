@@ -821,3 +821,194 @@ headStyle.textContent = `
 `;
 document.head.appendChild(headStyle);
 </script>
+
+<script>
+// ========== 更多功能 ==========
+
+// 學習進度追蹤
+const progressData = JSON.parse(localStorage.getItem('musicProgress') || '{"ear":0,"note":0,"rhythm":0,"chord":0,"scale":0}');
+
+function updateProgress(mode, correct) {
+    if (!progressData[mode]) progressData[mode] = 0;
+    if (correct) progressData[mode]++;
+    localStorage.setItem('musicProgress', JSON.stringify(progressData));
+}
+
+// 顯示學習統計
+function showStats() {
+    const statsHTML = `
+        <div id="statsPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:5000;display:flex;align-items:center;justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:450px;width:90%;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📊 學習統計</h2>
+                    <button onclick="document.getElementById('statsPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="margin:15px 0;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                        <span>👂 听力</span>
+                        <span>${progressData.ear || 0} 題</span>
+                    </div>
+                    <div style="height:10px;background:rgba(255,255,255,0.2);border-radius:5px;">
+                        <div style="height:100%;width:${Math.min(100, (progressData.ear||0)/5)}%;background:linear-gradient(90deg,#4caf50,#8bc34a);border-radius:5px;"></div>
+                    </div>
+                </div>
+                
+                <div style="margin:15px 0;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                        <span>🎵 音符</span>
+                        <span>${progressData.note || 0} 題</span>
+                    </div>
+                    <div style="height:10px;background:rgba(255,255,255,0.2);border-radius:5px;">
+                        <div style="height:100%;width:${Math.min(100, (progressData.note||0)/5)}%;background:linear-gradient(90deg,#2196f3,#03a9f4);border-radius:5px;"></div>
+                    </div>
+                </div>
+                
+                <div style="margin:15px 0;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                        <span>🥁 節奏</span>
+                        <span>${progressData.rhythm || 0} 題</span>
+                    </div>
+                    <div style="height:10px;background:rgba(255,255,255,0.2);border-radius:5px;">
+                        <div style="height:100%;width:${Math.min(100, (progressData.rhythm||0)/5)}%;background:linear-gradient(90deg,#ff9800,#ffc107);border-radius:5px;"></div>
+                    </div>
+                </div>
+                
+                <div style="margin:15px 0;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:5px;">
+                        <span>🎹 和弦</span>
+                        <span>${progressData.chord || 0} 題</span>
+                    </div>
+                    <div style="height:10px;background:rgba(255,255,255,0.2);border-radius:5px;">
+                        <div style="height:100%;width:${Math.min(100, (progressData.chord||0)/5)}%;background:linear-gradient(90deg,#9c27b0,#e040fb);border-radius:5px;"></div>
+                    </div>
+                </div>
+                
+                <div style="margin-top:20px;padding:15px;background:rgba(255,255,255,0.1);border-radius:10px;">
+                    <div style="display:flex;justify-content:space-between;">
+                        <span>總答題數</span>
+                        <span style="color:#ffd700;font-weight:bold;">${playerData.totalPlayed} 題</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+                        <span>獲得金幣</span>
+                        <span style="color:#ffd700;font-weight:bold;">${playerData.coins}</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;margin-top:10px;">
+                        <span>最高連擊</span>
+                        <span style="color:#ff6b6b;font-weight:bold;">${localStorage.getItem('musicMaxCombo') || 0}</span>
+                    </div>
+                </div>
+                
+                <button onclick="document.getElementById('statsPanel').remove()" style="width:100%;padding:15px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:10px;color:#000;font-weight:bold;cursor:pointer;margin-top:20px;">關閉</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', statsHTML);
+}
+
+// 在首頁添加統計按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showStats()">📊</button>');
+
+// 記錄最高連擊
+const originalCheckAnswer = checkAnswer;
+checkAnswer = function(answer, correct) {
+    const isCorrect = String(answer) === String(correct);
+    originalCheckAnswer(answer, correct);
+    
+    // 記錄進度
+    if (currentMode === 'ear') updateProgress('ear', isCorrect);
+    else if (currentMode === 'note') updateProgress('note', isCorrect);
+    else if (currentMode === 'rhythm') updateProgress('rhythm', isCorrect);
+    else if (currentMode === 'chord') updateProgress('chord', isCorrect);
+    else if (currentMode === 'scale') updateProgress('scale', isCorrect);
+    
+    // 最高連擊
+    const maxCombo = parseInt(localStorage.getItem('musicMaxCombo') || '0');
+    if (gameCombo > maxCombo) {
+        localStorage.setItem('musicMaxCombo', gameCombo);
+    }
+};
+
+// 添加 hint 樣式
+const hintStyle = document.createElement('style');
+hintStyle.textContent = '.hint-text { font-size: 1.1rem; color: #ffd700; margin: 15px 0; text-align: center; }';
+document.head.appendChild(hintStyle);
+
+// 離線提示
+if (!navigator.onLine) {
+    document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed;top:0;left:0;right:0;background:#f44336;color:white;padding:10px;text-align:center;z-index:10000;">⚠️ 您已離線，部分功能可能無法使用</div>');
+}
+</script>
+
+<script>
+// ========== 提示系統 ==========
+
+const tips = {
+    'zh-TW': [
+        '💡 多聽音樂可以培養音感！',
+        '🎹 每天練習 10 分鐘，進步最快！',
+        '🔥 連擊越高，分數加成越多！',
+        '📅 每日登入可以獲得額外獎勵！',
+        '🎯 成就解鎖有驚喜等著你！',
+        '👂 听力訓練是音樂的基礎',
+        '🎵 認識音符是第一步',
+        '🥁 節奏是音樂的心跳',
+        '🎹 和弦讓音樂更豐富'
+    ],
+    'en': [
+        '💡 Listen to music daily to improve your ear!',
+        '🎹 Practice 10 minutes every day!',
+        '🔥 Higher combo = more bonus points!',
+        '📅 Daily login rewards!',
+        '🎯 Achievements unlock surprises!',
+        '👂 Ear training is the foundation',
+        '🎵 Learning notes is the first step',
+        '🥁 Rhythm is the heartbeat of music'
+    ]
+};
+
+function showRandomTip() {
+    const lang = currentLang || 'zh-TW';
+    const tipList = tips[lang] || tips['zh-TW'];
+    const tip = tipList[Math.floor(Math.random() * tipList.length)];
+    
+    const tipEl = document.createElement('div');
+    tipEl.id = 'dailyTip';
+    tipEl.style.cssText = 'text-align:center;padding:10px;background:rgba(255,215,0,0.1);border-radius:10px;margin:10px 0;color:#ffd700;font-size:0.9rem;';
+    tipEl.textContent = tip;
+    
+    const daily = document.getElementById('dailyReward');
+    if (daily) daily.insertAdjacentElement('afterend', tipEl);
+}
+
+// 顯示歡迎訊息
+function showWelcome() {
+    const lastVisit = localStorage.getItem('lastVisit');
+    const now = new Date().toISOString();
+    
+    if (!lastVisit || (new Date(now) - new Date(lastVisit)) > 86400000) {
+        // 新的一天
+        setTimeout(() => {
+            const welcome = document.createElement('div');
+            welcome.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;padding:20px 40px;border-radius:20px;font-size:1.5rem;font-weight:bold;z-index:6000;animation:welcomePop 2s forwards;';
+            welcome.textContent = '🎉 歡迎回來！';
+            document.body.appendChild(welcome);
+            
+            setTimeout(() => welcome.remove(), 2000);
+        }, 500);
+    }
+    
+    localStorage.setItem('lastVisit', now);
+}
+
+// 添加動畫
+const animStyle = document.createElement('style');
+animStyle.textContent = '@keyframes welcomePop { 0% { transform:translate(-50%,-50%) scale(0); } 50% { transform:translate(-50%,-50%) scale(1.2); } 100% { transform:translate(-50%,-50%) scale(1); opacity:0; } }';
+document.head.appendChild(animStyle);
+
+// 初始化
+setTimeout(() => {
+    showRandomTip();
+    showWelcome();
+}, 1000);
+</script>
