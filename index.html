@@ -3625,3 +3625,60 @@ function badgeCondition(id) {
     return conditions[id] ? conditions[id]() : false;
 }
 </script>
+
+<script>
+// ========== 里程碑系統 ==========
+
+function checkMilestones() {
+    const milestones = [
+        { id: 'play_10', name: '初試身手', desc: '完成 10 題', target: 10, icon: '🎯', type: 'play' },
+        { id: 'play_50', name: '小有成就', desc: '完成 50 題', target: 50, icon: '⭐', type: 'play' },
+        { id: 'play_100', name: '勤學不倦', desc: '完成 100 題', target: 100, icon: '📚', type: 'play' },
+        { id: 'play_500', name: '音樂學者', desc: '完成 500 題', target: 500, icon: '🎓', type: 'play' },
+        { id: 'coins_100', name: '小有積蓄', desc: '擁有 100 金幣', target: 100, icon: '💰', type: 'coins' },
+        { id: 'coins_500', name: '小富翁', desc: '擁有 500 金幣', target: 500, icon: '🤑', type: 'coins' },
+        { id: 'coins_1000', name: '大富翁', desc: '擁有 1000 金幣', target: 1000, icon: '💎', type: 'coins' },
+        { id: 'level_5', name: '初露頭角', desc: '達到 5 級', target: 5, icon: '🌟', type: 'level' },
+        { id: 'level_10', name: '音樂新星', desc: '達到 10 級', target: 10, icon: '🌠', type: 'level' }
+    ];
+    
+    const achieved = JSON.parse(localStorage.getItem('milestones') || '[]');
+    
+    milestones.forEach(m => {
+        if (achieved.includes(m.id)) return;
+        
+        let reached = false;
+        if (m.type === 'play' && playerData.totalPlayed >= m.target) reached = true;
+        if (m.type === 'coins' && playerData.coins >= m.target) reached = true;
+        if (m.type === 'level' && playerData.level >= m.target) reached = true;
+        
+        if (reached) {
+            achieved.push(m.id);
+            localStorage.setItem('milestones', JSON.stringify(achieved));
+            
+            // 顯示里程碑動畫
+            setTimeout(() => {
+                showMilestoneUnlock(m);
+            }, 1000);
+        }
+    });
+}
+
+function showMilestoneUnlock(m) {
+    const el = document.createElement('div');
+    el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#ffd700,#ff8c00);color:#000;padding:30px 50px;border-radius:20px;font-size:1.5rem;font-weight:bold;z-index:6000;animation:milestonePop 3s forwards;text-align:center;';
+    el.innerHTML = `🏆 達成里程碑！<br><span style="font-size:2rem;">${m.icon}</span><br>${m.name}`;
+    document.body.appendChild(el);
+    
+    for (let i = 0; i < 30; i++) setTimeout(() => createConfetti(), i * 50);
+    
+    setTimeout(() => el.remove(), 3000);
+}
+
+const msCSS = document.createElement('style');
+msCSS.textContent = '@keyframes milestonePop { 0% { transform:translate(-50%,-50%) scale(0); } 20% { transform:translate(-50%,-50%) scale(1.2); } 80% { transform:translate(-50%,-50%) scale(1); } 100% { transform:translate(-50%,-50%) scale(1); opacity:0; } }';
+document.head.appendChild(msCSS);
+
+// 初始化檢查
+setTimeout(checkMilestones, 2000);
+</script>
