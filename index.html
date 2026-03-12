@@ -4398,7 +4398,10 @@ function showHelp() {
     document.body.insertAdjacentHTML('beforeend', html);
 }
 function showHelpDialog() {
-    alert('🎵 音樂達人\n\n遇到問題？試試這些：\n• 點擊 ⚡ 快速開始\n• 點擊 📋 查看任務\n• 點擊 ⚙️ 設定功能');
+    const d = document.createElement('div');
+    d.id = 'helpModal';
+    d.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
+    d.innerHTML = '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:350px;text-align:center;"><h2 style="color:#ffd700;margin-bottom:15px;">🎵 音樂達人</h2><p style="color:#ccc;margin:10px 0;">⚡ 快速開始</p><p style="color:#ccc;margin:10px 0;">📋 查看任務</p><p style="color:#ccc;margin:10px 0;">⚙️ 設定功能</p><button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px;padding:10px 30px;background:#2196f3;border:none;border-radius:10px;color:white;cursor:pointer;font-size:1rem;">關閉</button></div>';
+    document.body.appendChild(d);
 }
-setTimeout(showHelp, 2000);
 </script>
