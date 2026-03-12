@@ -2570,3 +2570,127 @@ checkAnswer = function(answer, correct) {
     localStorage.setItem('stats_' + today, JSON.stringify(s));
 };
 </script>
+
+<script>
+// ========== 提醒系統 ==========
+
+function requestNotification() {
+    if ('Notification' in window && Notification.permission === 'default') {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                showFeedback('🔔 已開啟提醒！', '#4caf50');
+            }
+        });
+    }
+}
+
+function scheduleReminder() {
+    if (!('Notification' in window) || Notification.permission !== 'granted') return;
+    
+    // 檢查是否需要提醒
+    const lastReminder = localStorage.getItem('lastReminder');
+    const now = new Date();
+    const today = now.toISOString().split('T')[0];
+    
+    if (lastReminder !== today) {
+        // 顯示通知
+        new Notification('🎹 音樂達人', {
+            body: '該練習了！每日挑戰等你來完成！',
+            icon: '🎹'
+        });
+        
+        localStorage.setItem('lastReminder', today);
+    }
+}
+
+// 請求通知權限按鈕
+const originalShowSettings3 = showSettings;
+showSettings = function() {
+    originalShowSettings3();
+    setTimeout(() => {
+        const panel = document.querySelector('#settingsPanel > div');
+        if (panel && !document.getElementById('notifyBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'notifyBtn';
+            btn.textContent = '🔔 開啟練習提醒';
+            btn.onclick = requestNotification;
+            btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,#ff9800,#ffc107);border:none;border-radius:10px;color:#000;font-weight:bold;cursor:pointer;margin-top:15px;';
+            panel.appendChild(btn);
+        }
+    }, 100);
+};
+</script>
+
+<script>
+// ========== 鍵盤快捷鍵 ==========
+
+document.addEventListener('keydown', function(e) {
+    // 避免在輸入框中觸發
+    if (e.target.tagName === 'INPUT') return;
+    
+    switch(e.key) {
+        case '1':
+            startGame('ear');
+            break;
+        case '2':
+            startGame('note');
+            break;
+        case '3':
+            startGame('rhythm');
+            break;
+        case '4':
+            startGame('chord');
+            break;
+        case '5':
+            showAdvancedPiano();
+            break;
+        case 'Escape':
+            showHome();
+            break;
+        case ' ':
+            if (document.getElementById('gameArea').classList.contains('active')) {
+                // 下一題
+            }
+            break;
+    }
+});
+
+// 顯示快捷鍵說明
+function showShortcuts() {
+    const html = `
+        <div id="shortcutsPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:5000;display:flex;align-items:center;justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:350px;">
+                <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">⌨️ 快捷鍵</h2>
+                    <button onclick="document.getElementById('shortcutsPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="display:grid;gap:10px;">
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>听力訓練</span><span style="color:#ffd700;">1</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>音符練習</span><span style="color:#ffd700;">2</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>節奏訓練</span><span style="color:#ffd700;">3</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>和弦練習</span><span style="color:#ffd700;">4</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>鋼琴</span><span style="color:#ffd700;">5</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>返回首頁</span><span style="color:#ffd700;">Esc</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// 添加快捷鍵說明按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showShortcuts()">⌨️</button>');
+</script>
