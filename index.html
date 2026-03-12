@@ -2827,3 +2827,93 @@ document.head.appendChild(rewardCSS);
 // 初始化
 showDailyRewardAnimation();
 </script>
+
+<script>
+// ========== 每日小知識 ==========
+
+const musicTips = [
+    { tip: '鋼琴有 88 個鍵', icon: '🎹' },
+    { tip: 'Do Re Mi 是義大利語', icon: '🎵' },
+    { tip: '鋼琴屬於鍵盤樂器', icon: '🎹' },
+    { tip: '一個八度有 7 個音符', icon: '🎼' },
+    { tip: 'C 大調是最常見的調性', icon: '🎼' },
+    { tip: '四分音符等於 1 拍', icon: '🥁' },
+    { tip: 'G7 和弦包含 G、B、D、F', icon: '🎸' },
+    { tip: '小提琴是弦樂器', icon: '🎻' },
+    { tip: '節奏是音樂的心臟', icon: '❤️' },
+    { tip: '音階決定音樂的情緒', icon: '🎭' }
+];
+
+function showDailyTip() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastTip = localStorage.getItem('lastTipDate');
+    
+    if (lastTip !== today) {
+        const tipIndex = Math.floor(Math.random() * musicTips.length);
+        const tip = musicTips[tipIndex];
+        
+        const tipEl = document.createElement('div');
+        tipEl.id = 'dailyTip';
+        tipEl.style.cssText = 'text-align:center;padding:15px;background:linear-gradient(135deg,rgba(255,215,0,0.2),rgba(255,140,0,0.2));border-radius:15px;margin:15px 0;border:2px solid rgba(255,215,0,0.5);';
+        tipEl.innerHTML = `<div style="font-size:1.5rem;">${tip.icon}</div><div style="font-size:0.9rem;">${tip.tip}</div>`;
+        
+        const statsRow = document.querySelector('.stats-row');
+        if (statsRow) {
+            statsRow.insertAdjacentElement('afterend', tipEl);
+        }
+        
+        localStorage.setItem('lastTipDate', today);
+        localStorage.setItem('lastTipIndex', tipIndex);
+    }
+}
+
+// 初始化
+setTimeout(showDailyTip, 1500);
+</script>
+
+<script>
+// ========== 學習路徑 ==========
+
+const learningPath = [
+    { id: 'ear', name: '听力訓練', icon: '👂', xp: 0 },
+    { id: 'note', name: '音符認識', icon: '🎵', xp: 50 },
+    { id: 'rhythm', name: '節奏訓練', icon: '🥁', xp: 150 },
+    { id: 'chord', name: '和弦教室', icon: '🎹', xp: 300 },
+    { id: 'scale', name: '音階練習', icon: '🎼', xp: 500 },
+    { id: 'master', name: '音樂大師', icon: '👑', xp: 1000 }
+];
+
+function showLearningPath() {
+    const pathHTML = `
+        <div id="pathPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4500;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">🗺️ 學習路徑</h2>
+                    <button onclick="document.getElementById('pathPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="position:relative;padding-left:40px;">
+                    ${learningPath.map((step, i) => {
+                        const isUnlocked = playerData.xp >= step.xp;
+                        const isCurrent = i === learningPath.findIndex(s => playerData.xp < s.xp);
+                        return `
+                            <div style="position:relative;margin:20px 0;">
+                                <div style="position:absolute;left:-35px;width:30px;height:30px;border-radius:50%;background:${isUnlocked ? '#4caf50' : '#666'};display:flex;align-items:center;justify-content:center;font-size:1rem;">${isUnlocked ? '✅' : i + 1}</div>
+                                <div style="background:${isUnlocked ? 'rgba(76,175,80,0.3)' : 'rgba(255,255,255,0.1)'};padding:15px;border-radius:15px;${isCurrent ? 'border:2px solid #ffd700;' : ''}">
+                                    <div style="font-size:1.5rem;">${step.icon}</div>
+                                    <div style="font-weight:bold;">${step.name}</div>
+                                    <div style="font-size:0.8rem;opacity:0.7;">需要 ${step.xp} 經驗值</div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', pathHTML);
+}
+
+// 添加按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showLearningPath()">🗺️</button>');
+</script>
