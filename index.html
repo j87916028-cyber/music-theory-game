@@ -4154,3 +4154,105 @@ function showPracticeReport() {
     document.body.insertAdjacentHTML('beforeend', html);
 }
 </script>
+
+<script>
+// ========== 錯題複習 ==========
+
+function showMistakeReview() {
+    const history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+    const mistakes = history.filter(h => !h.correct);
+    
+    if (mistakes.length === 0) {
+        showFeedback('太棒了！沒有錯題！', '#4caf50');
+        return;
+    }
+    
+    const mistake = mistakes[Math.floor(Math.random() * mistakes.length)];
+    
+    // 根據題目類型生成複習
+    let questionHTML = '';
+    let correctAnswer = '';
+    
+    if (mistake.question.includes('拍') || mistake.question.includes('節奏')) {
+        // 節奏題
+        const rhythms2 = [
+            { name: '全音符', beats: 4 },
+            { name: '二分音符', beats: 2 },
+            { name: '四分音符', beats: 1 },
+            { name: '八分音符', beats: 0.5 }
+        ];
+        const r = rhythms2.find(r => mistake.question.includes(r.name)) || rhythms2[Math.floor(Math.random() * 4)];
+        correctAnswer = r.beats;
+        
+        questionHTML = `
+            <div style="background:rgba(255,255,255,0.1);padding:30px;border-radius:15px;text-align:center;">
+                <div style="font-size:1.2rem;margin-bottom:15px;">複習：${r.name}</div>
+                <div class="options-grid">
+                    ${[0.5,1,2,4].map(n => 
+                        '<button class="option-btn" onclick="checkMistake(' + n + ',' + r.beats + ')">' + n + ' 拍</button>'
+                    ).join('')}
+                </div>
+            </div>
+        `;
+    } else if (mistake.question.includes('和弦')) {
+        // 和弦題
+        const chords2 = ['C', 'G', 'F', 'Am', 'Dm', 'Em'];
+        const c = chords2[Math.floor(Math.random() * chords2.length)];
+        correctAnswer = c;
+        
+        questionHTML = `
+            <div style="background:rgba(255,255,255,0.1);padding:30px;border-radius:15px;text-align:center;">
+                <div style="font-size:1.2rem;margin-bottom:15px;">這是什麼和弦？</div>
+                <div class="options-grid">
+                    ${chords2.map(n => 
+                        '<button class="option-btn" onclick="checkMistake(\'' + n + '\',\'' + c + '\')">' + n + '</button>'
+                    ).join('')}
+                </div>
+            </div>
+        `;
+    } else {
+        // 音符題
+        const notes2 = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+        const n = notes2[Math.floor(Math.random() * notes2.length)];
+        correctAnswer = n;
+        
+        questionHTML = `
+            <div style="background:rgba(255,255,255,0.1);padding:30px;border-radius:15px;text-align:center;">
+                <div style="font-size:3rem;margin-bottom:15px;">${n}</div>
+                <div class="options-grid">
+                    ${notes2.map(note => 
+                        '<button class="option-btn" onclick="checkMistake(\'' + note + '\',\'' + n + '\')">' + note + '</button>'
+                    ).join('')}
+                </div>
+            </div>
+        `;
+    }
+    
+    const html = `
+        <div id="mistakePanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a1a2e,#0d0d1a);z-index:4700;display:flex;align-items:center;justify-content:center;">
+            <div style="width:90%;max-width:400px;">
+                <h2 style="color:#ffd700;text-align:center;margin-bottom:20px;">📝 錯題複習</h2>
+                <p style="color:#888;text-align:center;margin-bottom:20px;">你有 ${mistakes.length} 題錯過的題目</p>
+                ${questionHTML}
+                <button onclick="showMistakeReview()" style="width:100%;padding:12px;background:rgba(255,255,255,0.2);border:none;border-radius:10px;color:#888;cursor:pointer;margin-top:15px;">下一題</button>
+                <button onclick="document.getElementById('mistakePanel').remove()" style="width:100%;padding:12px;background:transparent;border:none;color:#666;cursor:pointer;margin-top:10px;">關閉</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+function checkMistake(answer, correct) {
+    const isCorrect = String(answer) === String(correct);
+    
+    if (isCorrect) {
+        showFeedback('答對了！👏', '#4caf50');
+        setTimeout(() => {
+            document.getElementById('mistakePanel').remove();
+            showMistakeReview();
+        }, 1000);
+    } else {
+        showFeedback('再想想！💪', '#ff9800');
+    }
+}
+</script>
