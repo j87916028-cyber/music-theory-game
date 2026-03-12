@@ -3436,3 +3436,59 @@ function updateDailyGoal(type, value) {
 // 添加按鈕
 document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showDailyGoal()">🎯</button>');
 </script>
+
+<script>
+// ========== 個人化練習建議 ==========
+
+function showRecommendation() {
+    const progress = JSON.parse(localStorage.getItem('musicProgress') || '{}');
+    const total = Object.values(progress).reduce((a, b) => a + b, 0);
+    
+    // 找出最弱的項目
+    const weakest = Object.entries(progress).sort((a, b) => a[1] - b[1])[0];
+    
+    const recommendations = {
+        ear: { name: '聽力大師', icon: '👂', desc: '多練習聽音可以培養音感！' },
+        note: { name: '音符認識', icon: '🎵', desc: '記住音名和唱名的對應關係！' },
+        rhythm: { name: '節奏訓練', icon: '🥁', desc: '節奏是音樂的心臟！' },
+        chord: { name: '和弦教室', icon: '🎹', desc: '了解和弦組成讓音樂更豐富！' },
+        scale: { name: '音階練習', icon: '🎼', desc: '大小調音階是音樂的基礎！' }
+    };
+    
+    const rec = recommendations[weakest[0]] || recommendations.ear;
+    
+    const html = `
+        <div id="recPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4600;display:flex;align-items:center;justify-content:center;">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:350px;text-align:center;">
+                <div style="font-size:3rem;margin-bottom:15px;">💡</div>
+                <h2 style="color:#ffd700;margin-bottom:20px;">個人化建議</h2>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin:20px 0;">
+                    <div style="font-size:3rem;margin-bottom:10px;">${rec.icon}</div>
+                    <div style="font-size:1.3rem;font-weight:bold;margin-bottom:10px;">${rec.name}</div>
+                    <div style="color:#ccc;font-size:0.9rem;">${rec.desc}</div>
+                </div>
+                
+                <div style="color:#888;font-size:0.8rem;margin-bottom:20px;">
+                    你目前總共練習了 ${total} 題
+                </div>
+                
+                <button onclick="document.getElementById('recPanel').remove();startGame('${weakest[0] || 'ear'}');" style="width:100%;padding:15px;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:10px;color:white;font-size:1.1rem;font-weight:bold;cursor:pointer;">開始練習</button>
+                
+                <button onclick="document.getElementById('recPanel').remove()" style="width:100%;padding:10px;background:transparent;border:none;color:#888;cursor:pointer;margin-top:10px;">關閉</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// 自動顯示建議
+setTimeout(() => {
+    if (playerData.totalPlayed > 0 && playerData.totalPlayed % 10 === 0) {
+        showRecommendation();
+    }
+}, 3000);
+
+// 添加按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showRecommendation()">💡</button>');
+</script>
