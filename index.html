@@ -3249,3 +3249,109 @@ updateAllTexts = function() {
 // 初始化時調用
 setTimeout(updateAllTexts, 300);
 </script>
+
+<script>
+// ========== 轉盤抽獎系統 ==========
+
+function showLuckyWheel() {
+    const prizes = [
+        { name: '50 金幣', value: 50, color: '#ffd700', icon: '💰' },
+        { name: '100 金幣', value: 100, color: '#ff8c00', icon: '💰' },
+        { name: '20 經驗', value: 20, color: '#4caf50', icon: '⭐' },
+        { name: '謝謝參與', value: 0, color: '#888', icon: '😢' },
+        { name: '50 金幣', value: 50, color: '#ffd700', icon: '💰' },
+        { name: '200 金幣', value: 200, color: '#e94560', icon: '💎' }
+    ];
+    
+    const wheelHTML = `
+        <div id="wheelPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:5500;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+            <h2 style="color:#ffd700;margin-bottom:20px;">🎰 幸運轉盤</h2>
+            
+            <div id="wheel" style="width:280px;height:280px;border-radius:50%;background:conic-gradient(${prizes.map((p,i)=>p.color+' '+(i*60)+'deg '+(i*60+60)+'deg').join(',')});position:relative;border:10px solid #ffd700;box-shadow:0 0 30px rgba(255,215,0,0.5);">
+                <div style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:60px;height:60px;background:#fff;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.5rem;">🎯</div>
+            </div>
+            
+            <button id="spinBtn" onclick="spinWheel()" style="margin-top:30px;padding:15px 50px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:30px;color:#000;font-size:1.2rem;font-weight:bold;cursor:pointer;">開始轉動！</button>
+            
+            <div style="margin-top:20px;color:#888;font-size:0.9rem;">每天可轉 1 次</div>
+            
+            <button onclick="document.getElementById('wheelPanel').remove()" style="margin-top:20px;background:none;border:none;color:#888;cursor:pointer;">關閉</button>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', wheelHTML);
+}
+
+let isSpinning = false;
+
+function spinWheel() {
+    if (isSpinning) return;
+    isSpinning = true;
+    
+    const wheel = document.getElementById('wheel');
+    const btn = document.getElementById('spinBtn');
+    btn.disabled = true;
+    btn.textContent = '轉動中...';
+    
+    // 隨機旋轉角度
+    const prizeIndex = Math.floor(Math.random() * 6);
+    const rotation = 360 * 5 + prizeIndex * 60 + Math.random() * 30;
+    
+    wheel.style.transition = 'transform 4s cubic-bezier(0.17, 0.67, 0.12, 0.99)';
+    wheel.style.transform = `rotate(${rotation}deg)`;
+    
+    setTimeout(() => {
+        const prizes = ['50 金幣', '100 金幣', '20 經驗', '謝謝參與', '50 金幣', '200 金幣'];
+        const prize = prizes[prizeIndex];
+        
+        if (prize.includes('金幣') && !prize.includes('謝謝')) {
+            const value = parseInt(prize);
+            playerData.coins += value;
+            playerData.xp += 10;
+            saveData();
+            showFeedback(`+${value}💰`, '#ffd700');
+        } else if (prize.includes('經驗')) {
+            playerData.xp += 20;
+            saveData();
+            showFeedback('+20⭐', '#4caf50');
+        }
+        
+        // 記錄今天已轉
+        const today = new Date().toISOString().split('T')[0];
+        localStorage.setItem('wheelPlayed', today);
+        
+        btn.textContent = '明天再來！';
+        isSpinning = false;
+    }, 4000);
+}
+
+// 檢查是否可以轉
+function checkWheel() {
+    const today = new Date().toISOString().split('T')[0];
+    const lastPlayed = localStorage.getItem('wheelPlayed');
+    return lastPlayed !== today;
+}
+
+// 添加到設置
+const originalShowSettings6 = showSettings;
+showSettings = function() {
+    originalShowSettings6();
+    setTimeout(() => {
+        const panel = document.querySelector('#settingsPanel > div');
+        if (panel && !document.getElementById('wheelBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'wheelBtn';
+            btn.textContent = checkWheel() ? '🎰 幸運轉盤' : '🎰 已轉過';
+            btn.onclick = function() {
+                if (checkWheel()) {
+                    document.getElementById('settingsPanel').remove();
+                    showLuckyWheel();
+                } else {
+                    showFeedback('明天再來！', '#888');
+                }
+            };
+            btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,#9c27b0,#e040fb);border:none;border-radius:10px;color:white;font-weight:bold;cursor:pointer;margin-top:15px;';
+            panel.appendChild(btn);
+        }
+    }, 100);
+};
+</script>
