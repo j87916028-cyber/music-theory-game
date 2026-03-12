@@ -3197,3 +3197,55 @@ updateAllTexts = function() {
 // 初始化時也更新
 setTimeout(updateGameCards, 500);
 </script>
+
+<script>
+// ========== 完整語言修復 ==========
+
+// 重新定義 updateAllTexts 來更新所有硬編碼文字
+updateAllTexts = function() {
+    if (!document.getElementById('langLabel')) return;
+    
+    document.getElementById('langLabel').textContent = langNames[currentLang];
+    
+    // 標題
+    if(document.querySelector('h1')) document.querySelector('h1').textContent = t('home');
+    
+    // 標籤按鈕
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    if (tabBtns[0]) tabBtns[0].innerHTML = '🎮 ' + t('play');
+    if (tabBtns[1]) tabBtns[1].innerHTML = '📋 ' + t('quest');
+    if (tabBtns[2]) tabBtns[2].innerHTML = '🎨 ' + t('collection');
+    if (tabBtns[3]) tabBtns[3].innerHTML = '🏆 ' + t('achievement');
+    
+    // 統計
+    const statLabels = document.querySelectorAll('.stat-label');
+    if (statLabels[0]) statLabels[0].textContent = t('level');
+    if (statLabels[1]) statLabels[1].textContent = t('xp');
+    if (statLabels[2]) statLabels[2].textContent = t('coins');
+    if (statLabels[3]) statLabels[3].textContent = t('days');
+    
+    // 遊戲卡片
+    const modeCards = document.querySelectorAll('.mode-card');
+    const modeNames = [t('ear'), t('note'), t('rhythm'), t('chord'), t('scale')];
+    modeCards.forEach((card, i) => {
+        if (modeNames[i] && card.querySelector('.name')) {
+            card.querySelector('.name').textContent = modeNames[i];
+        }
+    });
+    
+    // 每日登入
+    const dailyText = document.getElementById('dailyText');
+    if (dailyText) {
+        const lastLogin = playerData.lastLogin;
+        const today = new Date().toISOString().split('T')[0];
+        if (lastLogin === today) {
+            dailyText.textContent = t('claimed');
+        } else {
+            dailyText.textContent = t('claim');
+        }
+    }
+};
+
+// 初始化時調用
+setTimeout(updateAllTexts, 300);
+</script>
