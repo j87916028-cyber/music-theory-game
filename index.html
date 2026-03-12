@@ -1202,3 +1202,223 @@ window.addEventListener('load', function() {
     }, 500);
 });
 </script>
+
+<script>
+// ========== 進階鋼琴系統 ==========
+
+// 多種樂器音色
+const instruments2 = {
+    piano: { name: '鋼琴', wave: 'sine', color: '#fff' },
+    guitar: { name: '吉他', wave: 'triangle', color: '#d4a574' },
+    violin: { name: '小提琴', wave: 'sawtooth', color: '#8b4513' },
+    organ: { name: '風琴', wave: 'square', color: '#2f4f4f' },
+    sax: { name: '薩克斯', wave: 'sawtooth', color: '#daa520' }
+};
+
+let currentInstrument = localStorage.getItem('pianoInstrument') || 'piano';
+
+function showAdvancedPiano() {
+    const inst = instruments2[currentInstrument];
+    const pianoHTML = `
+        <div id="advancedPiano" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(to bottom,#1a1a2e,#0d0d1a);z-index:2000;overflow-y:auto;">
+            <div style="padding:20px;">
+                <div style="display:flex;justify-content:space-between;align-items:center;">
+                    <h2 style="color:#ffd700;">🎹 ${inst.name}</h2>
+                    <button onclick="document.getElementById('advancedPiano').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <!-- 樂器選擇 -->
+                <div style="display:flex;gap:10px;flex-wrap:wrap;margin:15px 0;justify-content:center;">
+                    ${Object.keys(instruments2).map(i => `<button onclick="switchInstrument('${i}')" style="padding:10px 15px;background:${currentInstrument===i?'linear-gradient(135deg,#ffd700,#ff8c00)':'rgba(255,255,255,0.2)'};border:none;border-radius:20px;color:${currentInstrument===i?'#000':'#fff'};cursor:pointer;">${instruments2[i].name}</button>`).join('')}
+                </div>
+                
+                <!-- 錄音功能 -->
+                <div style="background:rgba(255,255,255,0.1);padding:15px;border-radius:15px;margin:15px 0;">
+                    <div style="display:flex;gap:10px;justify-content:center;">
+                        <button onclick="startRecording()" id="recBtn" style="padding:10px 20px;background:#f44336;border:none;border-radius:10px;color:white;cursor:pointer;">🔴 錄音</button>
+                        <button onclick="stopRecording()" id="stopBtn" style="padding:10px 20px;background:#4caf50;border:none;border-radius:10px;color:white;cursor:pointer;display:none;">⏹️ 停止</button>
+                        <button onclick="playRecording()" id="playBtn" style="padding:10px 20px;background:#2196f3;border:none;border-radius:10px;color:white;cursor:pointer;display:none;">▶️ 播放</button>
+                        <button onclick="clearRecording()" style="padding:10px 20px;background:#9e9e9e;border:none;border-radius:10px;color:white;cursor:pointer;">🗑️ 清除</button>
+                    </div>
+                    <div id="recStatus" style="text-align:center;margin-top:10px;color:#888;font-size:0.9rem;"></div>
+                </div>
+                
+                <!-- 鋼琴鍵盤 -->
+                <div style="display:flex;justify-content:center;position:relative;margin:20px 0;overflow-x:auto;">
+                    ${['Do','Re','Mi','Fa','Sol','La','Si'].map((n,i) => `
+                        <div class="piano-key2" onclick="playPianoNote('${n}')" style="width:45px;height:150px;background:linear-gradient(to bottom,${inst.color},#ccc);border-radius:0 0 5px 5px;margin:0 2px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;color:#333;font-weight:bold;user-select:none;box-shadow:0 5px 15px rgba(0,0,0,0.3);transition:transform 0.1s;">${n}</div>
+                    `).join('')}
+                    ${['Do#','Re#','Fa#','Sol#','La#'].map((n,i) => `
+                        <div onclick="playPianoNote('${n.replace('#','')}')" style="width:30px;height:90px;background:linear-gradient(to bottom,#333,#000);border-radius:0 0 3px 3px;margin:0 -17px;z-index:1;cursor:pointer;position:relative;top:-150px;color:#fff;font-size:0.6rem;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;">${n}</div>
+                    `).join('')}
+                </div>
+                
+                <!-- 說明 -->
+                <div style="text-align:center;color:#888;font-size:0.8rem;margin-top:20px;">
+                    點擊音符發聲 🎵<br>
+                    支援錄音和播放功能
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', pianoHTML);
+    
+    // 添加 CSS
+    const pianoStyle = document.createElement('style');
+    pianoStyle.textContent = '.piano-key2:active { transform: scale(0.95); background: #ffd700 !important; }';
+    document.head.appendChild(pianoStyle);
+}
+
+function switchInstrument(inst) {
+    currentInstrument = inst;
+    localStorage.setItem('pianoInstrument', inst);
+    showAdvancedPiano();
+}
+
+function playPianoNote(note) {
+    const inst = instruments2[currentInstrument];
+    const osc = audioCtx.createOscillator();
+    const gain = audioCtx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(audioCtx.destination);
+    
+    // 根據音符計算頻率
+    const baseFreq = noteFreqs[note] || 261.63;
+    osc.frequency.value = baseFreq;
+    osc.type = inst.wave;
+    
+    gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.8);
+    
+    osc.start();
+    osc.stop(audioCtx.currentTime + 0.8);
+    
+    // 錄音中
+    if (isRecording && recordingNotes.length < 100) {
+        recordingNotes.push({ note: note, time: Date.now() });
+    }
+}
+
+// 錄音系統
+let isRecording = false;
+let recordingNotes = [];
+
+function startRecording() {
+    isRecording = true;
+    recordingNotes = [];
+    document.getElementById('recBtn').style.display = 'none';
+    document.getElementById('stopBtn').style.display = 'inline-block';
+    document.getElementById('playBtn').style.display = 'none';
+    document.getElementById('recStatus').textContent = '🔴 錄音中...';
+}
+
+function stopRecording() {
+    isRecording = false;
+    document.getElementById('recBtn').style.display = 'inline-block';
+    document.getElementById('stopBtn').style.display = 'none';
+    document.getElementById('playBtn').style.display = 'inline-block';
+    document.getElementById('recStatus').textContent = `✅ 錄製完成！${recordingNotes.length} 個音符`;
+}
+
+function playRecording() {
+    if (recordingNotes.length === 0) return;
+    
+    const startTime = recordingNotes[0].time;
+    recordingNotes.forEach((n, i) => {
+        setTimeout(() => {
+            playPianoNote(n.note);
+        }, n.time - startTime);
+    });
+}
+
+function clearRecording() {
+    recordingNotes = [];
+    document.getElementById('playBtn').style.display = 'none';
+    document.getElementById('recStatus').textContent = '已清除';
+}
+
+// 覆蓋原來的鋼琴按鈕
+document.querySelector('.mode-grid').innerHTML = document.querySelector('.mode-grid').innerHTML.replace('onclick="showPiano()"', 'onclick="showAdvancedPiano()"');
+</script>
+
+<script>
+// ========== 歌曲庫 ==========
+
+const songs = [
+    { name: '小星星', notes: ['Do','Do','Sol','Sol','La','La','Sol'], difficulty: 1 },
+    { name: '兩隻老虎', notes: ['Do','Re','Mi','Do','Do','Re','Mi','Do','Mi','Fa','Sol','Mi','Fa','Sol','La'], difficulty: 1 },
+    { name: '生日快樂', notes: ['Do','Do','Re','Do','Fa','Mi','Do','Do','Re','Do','Sol','Fa'], difficulty: 2 },
+    { name: '聖誕歌', notes: ['Mi','Do','Mi','Fa','Do','Re','Do','Fa','Mi','Re','Sol','Sol'], difficulty: 2 },
+    { name: '卡農', notes: ['Mi','Sol','La','Mi','Fa','Re','Do','Fa','Mi','Sol','La','Mi'], difficulty: 3 }
+];
+
+function showSongLibrary() {
+    const songsHTML = `
+        <div id="songLibrary" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:3000;overflow-y:auto;">
+            <div style="padding:20px;max-width:500px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">🎵 歌曲庫</h2>
+                    <button onclick="document.getElementById('songLibrary').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <p style="color:#888;margin-bottom:20px;">跟著音符彈奏經典歌曲！</p>
+                
+                ${songs.map((s, i) => `
+                    <div onclick="playSong(${i})" style="background:rgba(255,255,255,0.1);padding:15px;border-radius:15px;margin:10px 0;cursor:pointer;transition:all 0.2s;">
+                        <div style="display:flex;justify-content:space-between;align-items:center;">
+                            <span style="font-size:1.2rem;">${s.name}</span>
+                            <span style="color:#ffd700;">${'⭐'.repeat(s.difficulty)}</span>
+                        </div>
+                        <div style="font-size:0.8rem;color:#888;margin-top:5px;">${s.notes.join(' ')}</div>
+                    </div>
+                `).join('')}
+                
+                <button onclick="showAdvancedPiano()" style="width:100%;padding:15px;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:10px;color:white;font-size:1.1rem;cursor:pointer;margin-top:20px;">🎹 自由彈奏</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', songsHTML);
+}
+
+function playSong(index) {
+    const song = songs[index];
+    let delay = 0;
+    
+    song.notes.forEach((note, i) => {
+        setTimeout(() => {
+            playPianoNote(note);
+            
+            // 高亮顯示
+            const keys = document.querySelectorAll('.piano-key2');
+            keys.forEach(k => {
+                if (k.textContent === note) {
+                    k.style.background = '#ffd700';
+                    setTimeout(() => k.style.background = '', 200);
+                }
+            });
+        }, delay);
+        delay += 400;
+    });
+}
+
+// 添加到鋼琴畫面
+const originalShowAdvancedPiano = showAdvancedPiano;
+showAdvancedPiano = function() {
+    originalShowAdvancedPiano();
+    setTimeout(() => {
+        const div = document.querySelector('#advancedPiano > div');
+        if (div && !document.getElementById('songLibBtn')) {
+            const btn = document.createElement('button');
+            btn.id = 'songLibBtn';
+            btn.textContent = '🎵 歌曲庫';
+            btn.style.cssText = 'width:100%;padding:15px;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:10px;color:white;font-size:1.1rem;cursor:pointer;margin-top:15px;';
+            btn.onclick = function() {
+                document.getElementById('advancedPiano').remove();
+                showSongLibrary();
+            };
+            div.appendChild(btn);
+        }
+    }, 100);
+};
+</script>
