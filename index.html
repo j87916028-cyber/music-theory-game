@@ -3355,3 +3355,84 @@ showSettings = function() {
     }, 100);
 };
 </script>
+
+<script>
+// ========== 每日目標系統 ==========
+
+function showDailyGoal() {
+    const today = new Date().toISOString().split('T')[0];
+    const goal = JSON.parse(localStorage.getItem('dailyGoal_' + today) || '{"questions":0,"coins":0,"time":0}');
+    
+    const targets = {
+        questions: 20,
+        coins: 100,
+        time: 10
+    };
+    
+    const html = `
+        <div id="goalPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4500;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">🎯 每日目標</h2>
+                    <button onclick="document.getElementById('goalPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,#e94560,#ff6b6b);padding:20px;border-radius:15px;margin-bottom:15px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                        <span>📝 答題數量</span>
+                        <span>${goal.questions}/${targets.questions}</span>
+                    </div>
+                    <div style="height:10px;background:rgba(255,255,255,0.3);border-radius:5px;overflow:hidden;">
+                        <div style="height:100%;width:${Math.min(100,goal.questions/targets.questions*100)}%;background:#fff;transition:width 0.5s;"></div>
+                    </div>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,#ffd700,#ff8c00);padding:20px;border-radius:15px;margin-bottom:15px;">
+                    <div style="display:flex;justify-content:space-between;margin-bottom:10px;">
+                        <span>💰 獲得金幣</span>
+                        <span>${goal.coins}/${targets.coins}</span>
+                    </div>
+                    <div style="height:10px;background:rgba(255,255,255,0.3);border-radius:5px;overflow:hidden;">
+                        <div style="height:100%;width:${Math.min(100,goal.coins/targets.coins*100)}%;background:#fff;transition:width 0.5s;"></div>
+                    </div>
+                </div>
+                
+                <div style="text-align:center;margin-top:20px;">
+                    ${goal.questions >= targets.questions && goal.coins >= targets.coins ? 
+                        '<div style="font-size:2rem;">🎉 今日目標完成！</div>' : 
+                        '<div style="color:#888;">完成目標獲得額外獎勵！</div>'}
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+
+// 追蹤目標進度
+function updateDailyGoal(type, value) {
+    const today = new Date().toISOString().split('T')[0];
+    const goal = JSON.parse(localStorage.getItem('dailyGoal_' + today) || '{"questions":0,"coins":0,"time":0}');
+    
+    if (type === 'question') goal.questions += value;
+    if (type === 'coins') goal.coins += value;
+    if (type === 'time') goal.time += value;
+    
+    localStorage.setItem('dailyGoal_' + today, JSON.stringify(goal));
+    
+    // 檢查是否全部完成
+    const targets = { questions: 20, coins: 100 };
+    if (goal.questions >= targets.questions && goal.coins >= targets.coins) {
+        const alreadyRewarded = localStorage.getItem('goalRewarded_' + today);
+        if (!alreadyRewarded) {
+            playerData.coins += 100;
+            playerData.xp += 50;
+            saveData();
+            localStorage.setItem('goalRewarded_' + today, 'true');
+            showFeedback('🎉 目標完成！+100💰', '#ffd700');
+        }
+    }
+}
+
+// 添加按鈕
+document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showDailyGoal()">🎯</button>');
+</script>
