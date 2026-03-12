@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎵 音樂小學堂 - 從零開始學樂理</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Noto Sans TC', 'Comic Sans MS', sans-serif;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+        h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px #e94560;
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+        @keyframes glow {
+            from { text-shadow: 0 0 20px #e94560, 0 0 40px #ff6b6b; }
+            to { text-shadow: 0 0 30px #e94560, 0 0 60px #ff6b6b; }
+        }
+        .level-select {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .level-btn {
+            padding: 15px 25px;
+            font-size: 1.1rem;
+            background: linear-gradient(135deg, #e94560, #0f3460);
+            border: none;
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+        .level-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+        }
+        .level-btn.active {
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+        }
+        #gameArea {
+            width: 100%;
+            max-width: 600px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            text-align: center;
+            min-height: 400px;
+        }
+        .note-display {
+            font-size: 8rem;
+            margin: 20px 0;
+            animation: bounce 0.5s ease infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 30px;
+        }
+        .option-btn {
+            padding: 20px;
+            font-size: 1.5rem;
+            background: rgba(255,255,255,0.2);
+            border: 3px solid rgba(255,255,255,0.3);
+            border-radius: 15px;
+            color: white;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .option-btn:hover {
+            background: rgba(255,255,255,0.3);
+            transform: scale(1.02);
+        }
+        .option-btn.correct {
+            background: #4caf50 !important;
+            border-color: #4caf50 !important;
+        }
+        .option-btn.wrong {
+            background: #f44336 !important;
+            border-color: #f44336 !important;
+            opacity: 0.5;
+        }
+        .score-display {
+            font-size: 1.5rem;
+            margin-bottom: 20px;
+            color: #ffd700;
+        }
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 20px;
+        }
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #e94560, #ffd700);
+            transition: width 0.3s;
+        }
+        .feedback {
+            font-size: 2rem;
+            margin: 20px 0;
+            height: 50px;
+        }
+        .feedback.correct { color: #4caf50; animation: pop 0.3s; }
+        .feedback.wrong { color: #f44336; animation: shake 0.3s; }
+        @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
+        @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        .staff {
+            font-size: 6rem;
+            line-height: 1.2;
+            margin: 20px 0;
+            letter-spacing: 10px;
+        }
+        .piano {
+            display: flex;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .key {
+            width: 40px;
+            height: 120px;
+            background: white;
+            border: 1px solid #333;
+            border-radius: 0 0 5px 5px;
+            cursor: pointer;
+            transition: background 0.1s;
+        }
+        .key:active, .key.playing {
+            background: #ddd;
+        }
+        .key.black {
+            width: 25px;
+            height: 70px;
+            background: #333;
+            margin: 0 -12px;
+            z-index: 1;
+            border-radius: 0 0 3px 3px;
+        }
+        .key.black:active, .key.black.playing {
+            background: #555;
+        }
+        .hint {
+            font-size: 0.9rem;
+            opacity: 0.7;
+            margin: 10px 0;
+        }
+        .streak {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: linear-gradient(135deg, #ffd700, #ff8c00);
+            color: #000;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-weight: bold;
+            display: none;
+        }
+        .streak.show { display: block; animation: pulse 0.5s; }
+        @keyframes pulse { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+    <h1>🎵 音樂小學堂</h1>
+    <p class="hint">從零開始，輕鬆學樂理</p>
+    
+    <div class="level-select">
+        <button class="level-btn active" onclick="setLevel(1)">🌱 認識音符</button>
+        <button class="level-btn" onclick="setLevel(2)">📖 音名與唱名</button>
+        <button class="level-btn" onclick="setLevel(3)">🎼 節奏練習</button>
+        <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識</button>
+    </div>
+    
+    <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥</div>
+    <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+    
+    <div id="gameArea">
+        <div class="feedback" id="feedback"></div>
+        <div id="questionArea"></div>
+    </div>
+    
+    <div class="streak" id="streakPopup">🔥 5連擊！</div>
+    
+    <script>
+        // 音頻上下文
+        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+        const noteNames = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
+        const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
+        
+        let score = 0;
+        let streak = 0;
+        let currentLevel = 1;
+        let currentQuestion = null;
+        let questionsAnswered = 0;
+        let correctAnswers = 0;
+        
+        function playNote(note) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = noteFreqs[note];
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
+        }
+        
+        function setLevel(level) {
+            currentLevel = level;
+            document.querySelectorAll('.level-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', i + 1 === level);
+            });
+            questionsAnswered = 0;
+            correctAnswers = 0;
+            updateProgress();
+            nextQuestion();
+        }
+        
+        function updateProgress() {
+            const progress = questionsAnswered > 0 ? (correctAnswers / questionsAnswered) * 100 : 0;
+            document.getElementById('progress').style.width = progress + '%';
+        }
+        
+        function nextQuestion() {
+            document.getElementById('feedback').textContent = '';
+            document.getElementById('questionArea').innerHTML = '';
+            
+            switch(currentLevel) {
+                case 1: level1Question(); break;
+                case 2: level2Question(); break;
+                case 3: level3Question(); break;
+                case 4: level4Question(); break;
+            }
+        }
+        
+        // 🌱 Level 1: 認識音符 - 聽聲音選音符
+        function level1Question() {
+            const correctNote = notes[Math.floor(Math.random() * notes.length)];
+            currentQuestion = correctNote;
+            
+            const html = `
+                <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？</p>
+                <button onclick="playNote('${correctNote}')" style="font-size:3rem;background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
+                <div class="options">
+                    ${notes.map(n => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${n}</button>`).join('')}
+                </div>
+            `;
+            document.getElementById('questionArea').innerHTML = html;
+        }
+        
+        // 📖 Level 2: 音名與唱名
+        function level2Question() {
+            const note = notes[Math.floor(Math.random() * notes.length)];
+            const mode = Math.random() > 0.5;
+            currentQuestion = note;
+            
+            const question = mode ? `這個音符的音名是？` : `這個音符的唱名是？`;
+            const correctAnswer = mode ? noteNames[note] : note;
+            
+            // 播放聲音
+            setTimeout(() => playNote(note), 100);
+            
+            let options = [correctAnswer];
+            const allOptions = mode ? ['C','D','E','F','G','A','B'] : notes;
+            
+            while (options.length < 4) {
+                const opt = allOptions[Math.floor(Math.random() * allOptions.length)];
+                if (!options.includes(opt)) options.push(opt);
+            }
+            options = options.sort(() => Math.random() - 0.5);
+            
+            const html = `
+                <p class="hint">🎧 ${question}</p>
+                <div class="note-display">${note}</div>
+                <button onclick="playNote('${note}')" style="font-size:2rem;background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:10px 20px;cursor:pointer;">🔊 再聽一次</button>
+                <div class="options">
+                    ${options.map(n => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')">${n}</button>`).join('')}
+                </div>
+            `;
+            document.getElementById('questionArea').innerHTML = html;
+        }
+        
+        // 🎼 Level 3: 節奏練習
+        const rhythms = [
+            { name: '四分音符', beats: 1, symbol: '♩' },
+            { name: '二分音符', beats: 2, symbol: '𝅗𝅥' },
+            { name: '全音符', beats: 4, symbol: '𝅝' },
+            { name: '八分音符', beats: 0.5, symbol: '♪' }
+        ];
+        
+        function level3Question() {
+            const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
+            currentQuestion = rhythm.name;
+            
+            const html = `
+                <p class="hint">這個音符有幾拍？</p>
+                <div class="note-display">${rhythm.symbol}</div>
+                <p style="font-size:1.5rem;margin:20px 0;">${rhythm.name}</p>
+                <div class="options">
+                    ${[0.5,1,2,4].map(n => `<button class="option-btn" onclick="checkAnswer(${n},${rhythm.beats})">${n} 拍</button>`).join('')}
+                </div>
+            `;
+            document.getElementById('questionArea').innerHTML = html;
+        }
+        
+        // 🎹 Level 4: 和弦認識
+        const chords = [
+            { name: 'C大和弦', notes: ['Do','Mi','Sol'], symbol: 'C' },
+            { name: 'G大和弦', notes: ['Sol','Si','Re'], symbol: 'G' },
+            { name: 'F大和弦', notes: ['Fa','La','Do'], symbol: 'F' },
+            { name: 'Dm和弦', notes: ['Re','Fa','La'], symbol: 'Dm' }
+        ];
+        
+        function level4Question() {
+            const chord = chords[Math.floor(Math.random() * chords.length)];
+            currentQuestion = chord.name;
+            
+            const html = `
+                <p class="hint">🎧 聽和弦，選擇正確的名稱</p>
+                <button onclick="playChord('${chord.notes.join(',')}')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
+                <div class="piano">
+                    ${notes.map(n => `<div class="key" onclick="playNote('${n}')" style="${chord.notes.includes(n)?'background:#ffd700':''}">${n[0]}</div>`).join('')}
+                </div>
+                <div class="options">
+                    ${chords.map(c => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${c.name}</button>`).join('')}
+                </div>
+            `;
+            document.getElementById('questionArea').innerHTML = html;
+        }
+        
+        function playChord(notesStr) {
+            const notes = notesStr.split(',');
+            notes.forEach((n, i) => {
+                setTimeout(() => playNote(n), i * 50);
+            });
+        }
+        
+        function checkAnswer(answer, correct) {
+            const isCorrect = String(answer) === String(correct);
+            questionsAnswered++;
+            
+            const feedback = document.getElementById('feedback');
+            feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+            feedback.textContent = isCorrect ? '✅ 答對了！' : '❌ 錯了～';
+            
+            if (isCorrect) {
+                score += 10 + streak * 2;
+                streak++;
+                correctAnswers++;
+                
+                // 顯示連擊
+                if (streak >= 3) {
+                    const popup = document.getElementById('streakPopup');
+                    popup.textContent = `🔥 ${streak}連擊！`;
+                    popup.classList.add('show');
+                    setTimeout(() => popup.classList.remove('show'), 1000);
+                }
+            } else {
+                streak = 0;
+            }
+            
+            document.getElementById('score').textContent = score;
+            document.getElementById('streakCount').textContent = streak;
+            updateProgress();
+            
+            // 答錯顯示正確答案
+            if (!isCorrect) {
+                setTimeout(() => {
+                    feedback.textContent += ` 正確答案是：${correct}`;
+                }, 500);
+            }
+            
+            setTimeout(nextQuestion, 1500);
+        }
+        
+        // 初始化
+        setLevel(1);
+    </script>
+</body>
+</html>
