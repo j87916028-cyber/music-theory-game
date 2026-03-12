@@ -4047,3 +4047,110 @@ checkAnswer = function(answer, correct) {
 // 添加按鈕
 document.querySelector('.tab-buttons').insertAdjacentHTML('beforeend', '<button class="tab-btn" onclick="showPracticeHistory()">📜</button>');
 </script>
+
+<script>
+// ========== 練習報告 ==========
+
+function showPracticeReport() {
+    const history = JSON.parse(localStorage.getItem('practiceHistory') || '[]');
+    
+    if (history.length === 0) {
+        showFeedback('尚無練習記錄！', '#888');
+        return;
+    }
+    
+    // 統計正確率
+    const stats = {
+        ear: { correct: 0, total: 0 },
+        note: { correct: 0, total: 0 },
+        rhythm: { correct: 0, total: 0 },
+        chord: { correct: 0, total: 0 },
+        scale: { correct: 0, total: 0 }
+    };
+    
+    history.forEach(h => {
+        // 根據題目內容判斷類型
+        if (h.question.includes('音符') || h.question.includes('Do') || h.question.includes('Re')) {
+            stats.note.total++;
+            if (h.correct) stats.note.correct++;
+        } else if (h.question.includes('拍') || h.question.includes('節奏')) {
+            stats.rhythm.total++;
+            if (h.correct) stats.rhythm.correct++;
+        } else if (h.question.includes('和弦')) {
+            stats.chord.total++;
+            if (h.correct) stats.chord.correct++;
+        } else if (h.question.includes('音階')) {
+            stats.scale.total++;
+            if (h.correct) stats.scale.correct++;
+        } else {
+            stats.ear.total++;
+            if (h.correct) stats.ear.correct++;
+        }
+    });
+    
+    const total = history.length;
+    const correctCount = history.filter(h => h.correct).length;
+    const accuracy = Math.round((correctCount / total) * 100);
+    
+    // 找出最弱的項目
+    let weakest = 'ear';
+    let weakestRate = 100;
+    Object.entries(stats).forEach(([key, val]) => {
+        if (val.total > 0) {
+            const rate = Math.round((val.correct / val.total) * 100);
+            if (rate < weakestRate) {
+                weakestRate = rate;
+                weakest = key;
+            }
+        }
+    });
+    
+    const names = { ear: '聽力', note: '音符', rhythm: '節奏', chord: '和弦', scale: '音階' };
+    const icons = { ear: '👂', note: '🎵', rhythm: '🥁', chord: '🎹', scale: '🎼' };
+    
+    const html = `
+        <div id="reportPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.95);z-index:4600;overflow-y:auto;">
+            <div style="padding:20px;max-width:400px;margin:0 auto;">
+                <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px;">
+                    <h2 style="color:#ffd700;">📊 練習報告</h2>
+                    <button onclick="document.getElementById('reportPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                </div>
+                
+                <div style="background:linear-gradient(135deg,#ffd700,#ff8c00);padding:25px;border-radius:15px;text-align:center;margin-bottom:20px;">
+                    <div style="font-size:3rem;font-weight:bold;">${accuracy}%</div>
+                    <div style="font-size:1rem;">總正確率</div>
+                    <div style="font-size:0.8rem;margin-top:10px;">${correctCount} / ${total} 題</div>
+                </div>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;margin-bottom:15px;">
+                    <div style="font-weight:bold;margin-bottom:15px;">各類正確率</div>
+                    ${Object.entries(stats).map(([key, val]) => {
+                        const rate = val.total > 0 ? Math.round((val.correct / val.total) * 100) : 0;
+                        const color = rate >= 80 ? '#4caf50' : rate >= 60 ? '#ff9800' : '#f44336';
+                        return `
+                            <div style="display:flex;align-items:center;gap:10px;margin:10px 0;">
+                                <span style="font-size:1.5rem;">${icons[key]}</span>
+                                <span style="flex:1;">${names[key]}</span>
+                                <span style="color:${color};font-weight:bold;">${rate}%</span>
+                            </div>
+                            <div style="height:5px;background:rgba(255,255,255,0.2);border-radius:3px;overflow:hidden;">
+                                <div style="height:100%;width:${rate}%;background:${color};transition:width 0.5s;"></div>
+                            </div>
+                        `;
+                    }).join('')}
+                </div>
+                
+                <div style="background:rgba(255,255,255,0.1);padding:20px;border-radius:15px;">
+                    <div style="font-weight:bold;margin-bottom:10px;">💡 建議</div>
+                    <div style="color:#ccc;">
+                        ${weakestRate < 80 ? `需要多加練習「${names[weakest]}」！` : '太棒了！所有項目都很強！'}
+                    </div>
+                </div>
+                
+                <button onclick="document.getElementById('reportPanel').remove();startGame('${weakest}');" style="width:100%;padding:15px;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:10px;color:white;font-size:1.1rem;font-weight:bold;cursor:pointer;margin-top:20px;">開始練習 💪</button>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', html);
+}
+</script>
