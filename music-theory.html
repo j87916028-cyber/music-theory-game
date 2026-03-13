@@ -136,6 +136,8 @@
             display: flex;
             justify-content: center;
             margin: 20px 0;
+            position: relative;
+            height: 120px;
         }
         .key {
             width: 40px;
@@ -145,20 +147,39 @@
             border-radius: 0 0 5px 5px;
             cursor: pointer;
             transition: background 0.1s;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 8px;
+            color: #333;
+            font-weight: bold;
+            font-size: 0.8rem;
+            position: relative;
+            z-index: 1;
         }
         .key:active, .key.playing {
             background: #ddd;
         }
         .key.black {
-            width: 25px;
-            height: 70px;
-            background: #333;
-            margin: 0 -12px;
-            z-index: 1;
-            border-radius: 0 0 3px 3px;
+            position: absolute;
+            width: 28px;
+            height: 75px;
+            background: #1a1a1a;
+            z-index: 2;
+            border-radius: 0 0 4px 4px;
+            color: white;
+            top: 0;
         }
         .key.black:active, .key.black.playing {
-            background: #555;
+            background: #444;
+        }
+        .key.highlight {
+            background: #ffd700 !important;
+            box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
+        }
+        .key.black.highlight {
+            background: #ffa500 !important;
+            box-shadow: 0 0 15px rgba(255, 165, 0, 0.7);
         }
         .hint {
             font-size: 0.9rem;
@@ -364,22 +385,81 @@
                 playNote(correctNote);
             }
         }
-        
+
+        // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
+        const pianoKeys = [
+            { note: 'Do', isBlack: false },
+            { note: 'Do♯', isBlack: true, offset: 28 },
+            { note: 'Re', isBlack: false },
+            { note: 'Re♯', isBlack: true, offset: 70 },
+            { note: 'Mi', isBlack: false },
+            { note: 'Fa', isBlack: false },
+            { note: 'Fa♯', isBlack: true, offset: 154 },
+            { note: 'Sol', isBlack: false },
+            { note: 'Sol♯', isBlack: true, offset: 196 },
+            { note: 'La', isBlack: false },
+            { note: 'La♯', isBlack: true, offset: 238 },
+            { note: 'Si', isBlack: false }
+        ];
+
         function level4Question() {
             const chord = chords[Math.floor(Math.random() * chords.length)];
             currentQuestion = chord.name;
             
+            // 將唱名轉換為對應的鍵盤音符
+            const chordKeyMap = {
+                'Do': 'Do', 'Re': 'Re', 'Mi': 'Mi', 'Fa': 'Fa', 
+                'Sol': 'Sol', 'La': 'La', 'Si': 'Si'
+            };
+            const activeKeys = chord.notes.map(n => chordKeyMap[n]);
+            
+            const renderPiano = pianoKeys.map(k => {
+                if (k.isBlack) {
+                    return `<div class="key black" style="left:${k.offset}px" onclick="playPianoKey('${k.note}')"></div>`;
+                } else {
+                    const isHighlight = activeKeys.includes(k.note);
+                    return `<div class="key ${isHighlight?'highlight':''}" onclick="playPianoKey('${k.note}')">${k.note}</div>`;
+                }
+            }).join('');
+            
             const html = `
-                <p class="hint">🎧 聽和弦，選擇正確的名稱</p>
+                <p class="hint">🎧 聽和弦，選擇正確的名稱（黃色鍵為和弦組成音）</p>
                 <button onclick="playChord('${chord.notes.join(',')}')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
                 <div class="piano">
-                    ${notes.map(n => `<div class="key" onclick="playNote('${n}')" style="${chord.notes.includes(n)?'background:#ffd700':''}">${n[0]}</div>`).join('')}
+                    ${renderPiano}
                 </div>
                 <div class="options">
                     ${chords.map(c => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${c.name}</button>`).join('')}
                 </div>
             `;
             document.getElementById('questionArea').innerHTML = html;
+        }
+
+        function playPianoKey(note) {
+            // 映射鋼琴音符到頻率
+            const noteFreqMap = {
+                'Do': 261.63, 'Do♯': 277.18,
+                'Re': 293.66, 'Re♯': 311.13,
+                'Mi': 329.63,
+                'Fa': 349.23, 'Fa♯': 369.99,
+                'Sol': 392.00, 'Sol♯': 415.30,
+                'La': 440.00, 'La♯': 466.16,
+                'Si': 493.88
+            };
+            playPianoNote(noteFreqMap[note] || 261.63);
+        }
+
+        function playPianoNote(freq) {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.frequency.value = freq;
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(audioCtx.currentTime + 0.5);
         }
         
         function playChord(notesStr) {
