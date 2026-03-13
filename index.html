@@ -1527,7 +1527,24 @@ showAdvancedPiano = function() {
 <script>
 // ========== 節奏遊戲 ==========
 
+// 節奏遊戲變數（移到全域作用域以修復 bug）
+let rhythmScore = 0;
+let rhythmRunning = false;
+let bpm = 60;
+let beatInterval = null;
+let lastBeatTime = 0;
+let perfectCount = 0;
+
 function showRhythmGame() {
+    // 重置遊戲狀態
+    rhythmRunning = false;
+    rhythmScore = 0;
+    perfectCount = 0;
+    if (beatInterval) {
+        clearInterval(beatInterval);
+        beatInterval = null;
+    }
+    
     const rhythmGameHTML = `
         <div id="rhythmGame" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(180deg,#0d0d1a,#1a1a2e);z-index:3000;">
             <div style="padding:20px;text-align:center;">
@@ -1561,13 +1578,6 @@ function showRhythmGame() {
     `;
     document.body.insertAdjacentHTML('beforeend', rhythmGameHTML);
 }
-
-let rhythmScore = 0;
-let rhythmRunning = false;
-let bpm = 60;
-let beatInterval = null;
-let lastBeatTime = 0;
-let perfectCount = 0;
 
 function startRhythmGame() {
     rhythmScore = 0;
