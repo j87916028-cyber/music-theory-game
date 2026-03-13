@@ -162,7 +162,7 @@
             console.warn('AudioContext not supported');
         }
         const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
-        const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
+        const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88, 'Do#': 277.18, 'Re#': 311.13, 'Fa#': 369.99, 'Sol#': 415.30, 'La#': 466.16 };
         const rhythms = [{ name: '全音符', beats: 4, symbol: '⬤' }, { name: '二分音符', beats: 2, symbol: '◯' }, { name: '四分音符', beats: 1, symbol: '◯' }, { name: '八分音符', beats: 0.5, symbol: '♪' }];
         const chords = [{ name: 'C', notes: ['Do','Mi','Sol'] }, { name: 'G', notes: ['Sol','Si','Re'] }, { name: 'F', notes: ['Fa','La','Do'] }, { name: 'Am', notes: ['La','Do','Mi'] }, { name: 'Dm', notes: ['Re','Fa','La'] }, { name: 'Em', notes: ['Mi','Sol','Si'] }];
         const scales = [{ name: 'C大調', notes: ['Do','Re','Mi','Fa','Sol','La','Si'] }, { name: 'A小調', notes: ['La','Si','Do','Re','Mi','Fa','Sol'] }, { name: 'G大調', notes: ['Sol','La','Si','Do','Re','Mi','Fa#'] }];
@@ -262,7 +262,10 @@
             saveData(); updateQuests();
         }
         
-        function playNote(note) { const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = noteFreqs[note]; osc.type = 'sine'; gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); }
+        function playNote(note) { 
+            if (!audioCtx || !noteFreqs[note]) { console.warn('Cannot play note:', note); return; }
+            const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = noteFreqs[note]; osc.type = 'sine'; gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); 
+        }
         
         function switchTab(tab) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
         
