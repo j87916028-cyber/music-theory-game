@@ -490,14 +490,12 @@ function updateAllTexts() {
     document.querySelectorAll('.tab-btn')[1].textContent = '📋 ' + t('quest');
     document.querySelectorAll('.tab-btn')[2].textContent = '🎨 ' + t('collection');
     document.querySelectorAll('.tab-btn')[3].textContent = '🏆 ' + t('achievement');
-    document.querySelectorAll('.stat-label')[0].textContent = t('level');
-    document.querySelectorAll('.stat-label')[1].textContent = t('xp');
-    document.querySelectorAll('.stat-label')[2].textContent = t('coins') + ' 💰';
-    document.querySelectorAll('.stat-label')[3].textContent = t('days');
-    document.querySelectorAll('.stat-box')[0].querySelector('.stat-label').textContent = t('level');
-    document.querySelectorAll('.stat-box')[1].querySelector('.stat-label').textContent = t('xp');
-    document.querySelectorAll('.stat-box')[2].querySelector('.stat-label').textContent = t('coins') + ' 💰';
-    document.querySelectorAll('.stat-box')[3].querySelector('.stat-label').textContent = t('days');
+    // 更新首頁統計數值的標籤（只選取首頁的 stat-box，排除遊戲區域）
+    const homeStatBoxes = document.querySelectorAll('#homePage .stat-box');
+    if (homeStatBoxes[0]) homeStatBoxes[0].querySelector('.stat-label').textContent = t('level');
+    if (homeStatBoxes[1]) homeStatBoxes[1].querySelector('.stat-label').textContent = t('xp');
+    if (homeStatBoxes[2]) homeStatBoxes[2].querySelector('.stat-label').textContent = t('coins') + ' 💰';
+    if (homeStatBoxes[3]) homeStatBoxes[3].querySelector('.stat-label').textContent = t('days');
     document.querySelector('.daily-reward').querySelector('div').textContent = '📅 ' + t('daily');
     document.querySelectorAll('.mode-card')[0].querySelector('.name').textContent = t('ear');
     document.querySelectorAll('.mode-card')[1].querySelector('.name').textContent = t('note');
@@ -526,8 +524,10 @@ function updateGameTexts() {
     else if(hint.textContent.includes('聽和弦')) hint.textContent = t('chordName');
     else if(hint.textContent.includes('聽音階')) hint.textContent = t('scaleName');
     else if(hint.textContent.includes('BOSS')) hint.textContent = t('bossTitle');
-    document.querySelectorAll('.stat-box')[0].querySelector('.stat-label').textContent = t('score');
-    document.querySelectorAll('.stat-box')[1].querySelector('.stat-label').textContent = t('combo');
+    // 只更新遊戲區域的 stat-box
+    const gameStatBoxes = document.querySelectorAll('#gameArea .stat-box');
+    if (gameStatBoxes[0]) gameStatBoxes[0].querySelector('.stat-label').textContent = t('score');
+    if (gameStatBoxes[1]) gameStatBoxes[1].querySelector('.stat-label').textContent = t('combo');
 }
 
 // Initialize
