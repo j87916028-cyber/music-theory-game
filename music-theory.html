@@ -227,6 +227,13 @@
             border-color: #f44336 !important;
             opacity: 0.5;
         }
+        /* 鍵盤選擇時的視覺焦點 */
+        .option-btn.keyboard-focus {
+            background: rgba(255,215,0,0.4);
+            border-color: #ffd700;
+            box-shadow: 0 0 20px rgba(255,215,0,0.5);
+            transform: scale(1.05);
+        }
         .score-display {
             font-size: 1.5rem;
             margin-bottom: 20px;
@@ -571,6 +578,18 @@
             const maxOptions = currentLevel === 1 ? 7 : 4;
             if (e.key >= '1' && e.key <= String(maxOptions)) {
                 const index = parseInt(e.key) - 1;
+                
+                // 清除之前的鍵盤焦點樣式
+                document.querySelectorAll('.option-btn.keyboard-focus').forEach(btn => {
+                    btn.classList.remove('keyboard-focus');
+                });
+                
+                // 添加鍵盤焦點樣式到目前選項
+                const buttons = document.querySelectorAll('.option-btn');
+                if (buttons[index]) {
+                    buttons[index].classList.add('keyboard-focus');
+                }
+                
                 // 確保選項存在且題目未結束
                 if (currentOptions[index] && !document.querySelector('.option-btn.correct')) {
                     let option = currentOptions[index];
