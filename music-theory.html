@@ -185,14 +185,15 @@
     <p class="hint">從零開始，輕鬆學樂理</p>
     
     <div class="level-select">
-        <button class="level-btn active" onclick="setLevel(1)">🌱 認識音符</button>
-        <button class="level-btn" onclick="setLevel(2)">📖 音名與唱名</button>
-        <button class="level-btn" onclick="setLevel(3)">🎼 節奏練習</button>
-        <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識</button>
+        <button class="level-btn active" onclick="setLevel(1)">🌱 認識音符 (Q)</button>
+        <button class="level-btn" onclick="setLevel(2)">📖 音名與唱名 (W)</button>
+        <button class="level-btn" onclick="setLevel(3)">🎼 節奏練習 (E)</button>
+        <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識 (R)</button>
     </div>
     
     <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥</div>
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
+    <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音</p>
     
     <div id="gameArea">
         <div class="feedback" id="feedback"></div>
@@ -215,6 +216,43 @@
         let currentQuestion = null;
         let questionsAnswered = 0;
         let correctAnswers = 0;
+        let currentOptions = []; // 儲存當前題目的選項
+
+        // 鍵盤事件監聽
+        document.addEventListener('keydown', (e) => {
+            // 數字鍵 1-7 選擇答案 (Level 1 有 7 個選項)
+            if (e.key >= '1' && e.key <= '7') {
+                const index = parseInt(e.key) - 1;
+                if (currentOptions[index] && !document.querySelector('.option-btn.correct')) {
+                    const option = currentOptions[index];
+                    // 取得正確答案
+                    let correctAnswer = currentQuestion;
+                    if (currentLevel === 3) {
+                        // Level 3: 節奏題 - 從 beats 取得正確答案
+                        const rhythm = rhythms.find(r => r.name === currentQuestion);
+                        if (rhythm) correctAnswer = rhythm.beats;
+                    }
+                    checkAnswer(option, correctAnswer);
+                }
+            }
+            // Q/W/E/R 選擇關卡
+            if (e.key.toLowerCase() === 'q') setLevel(1);
+            if (e.key.toLowerCase() === 'w') setLevel(2);
+            if (e.key.toLowerCase() === 'e') setLevel(3);
+            if (e.key.toLowerCase() === 'r') setLevel(4);
+            // 空白鍵播放聲音
+            if (e.key === ' ' && currentQuestion) {
+                e.preventDefault();
+                if (currentLevel === 4) {
+                    // 找到當前和弦並播放
+                    const chord = chords.find(c => c.name === currentQuestion);
+                    if (chord) playChord(chord.notes.join(','));
+                } else {
+                    const note = currentLevel === 3 ? 'Do' : currentQuestion;
+                    playNote(note);
+                }
+            }
+        });
         
         function playNote(note) {
             const osc = audioCtx.createOscillator();
@@ -261,16 +299,15 @@
         function level1Question() {
             const correctNote = notes[Math.floor(Math.random() * notes.length)];
             currentQuestion = correctNote;
+            currentOptions = [...notes]; // 儲存選項順序
             
             const html = `
-                <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？</p>
+                <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？ (按 1-7 選答案)</p>
                 <button onclick="playNote('${correctNote}')" style="font-size:3rem;background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
                 <div class="options">
-                    ${notes.map(n => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${n}</button>`).join('')}
+                    ${notes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${i+1}. ${n}</button>`).join('')}
                 </div>
             `;
-            document.getElementById('questionArea').innerHTML = html;
-        }
         
         // 📖 Level 2: 音名與唱名
         function level2Question() {
@@ -292,13 +329,14 @@
                 if (!options.includes(opt)) options.push(opt);
             }
             options = shuffleArray(options);
+            currentOptions = options; // 儲存選項順序
             
             const html = `
-                <p class="hint">🎧 ${question}</p>
+                <p class="hint">🎧 ${question} (按 1-4 選答案)</p>
                 <div class="note-display">${note}</div>
                 <button onclick="playNote('${note}')" style="font-size:2rem;background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:10px 20px;cursor:pointer;">🔊 再聽一次</button>
                 <div class="options">
-                    ${options.map(n => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')">${n}</button>`).join('')}
+                    ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')">${i+1}. ${n}</button>`).join('')}
                 </div>
             `;
             document.getElementById('questionArea').innerHTML = html;
@@ -316,12 +354,15 @@
             const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
             currentQuestion = rhythm.name;
             
+            const options = [0.5, 1, 2, 4];
+            currentOptions = options.map(String); // 儲存選項順序 (轉為字串比對)
+            
             const html = `
-                <p class="hint">這個音符有幾拍？</p>
+                <p class="hint">這個音符有幾拍？ (按 1-4 選答案)</p>
                 <div class="note-display">${rhythm.symbol}</div>
                 <p style="font-size:1.5rem;margin:20px 0;">${rhythm.name}</p>
                 <div class="options">
-                    ${[0.5,1,2,4].map(n => `<button class="option-btn" onclick="checkAnswer(${n},${rhythm.beats})">${n} 拍</button>`).join('')}
+                    ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer(${n},${rhythm.beats})">${i+1}. ${n} 拍</button>`).join('')}
                 </div>
             `;
             document.getElementById('questionArea').innerHTML = html;
@@ -368,15 +409,16 @@
         function level4Question() {
             const chord = chords[Math.floor(Math.random() * chords.length)];
             currentQuestion = chord.name;
+            currentOptions = chords.map(c => c.name); // 儲存選項順序
             
             const html = `
-                <p class="hint">🎧 聽和弦，選擇正確的名稱</p>
+                <p class="hint">🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案)</p>
                 <button onclick="playChord('${chord.notes.join(',')}')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
                 <div class="piano">
                     ${notes.map(n => `<div class="key" onclick="playNote('${n}')" style="${chord.notes.includes(n)?'background:#ffd700':''}">${n[0]}</div>`).join('')}
                 </div>
                 <div class="options">
-                    ${chords.map(c => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${c.name}</button>`).join('')}
+                    ${chords.map((c, i) => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${i+1}. ${c.name}</button>`).join('')}
                 </div>
             `;
             document.getElementById('questionArea').innerHTML = html;
