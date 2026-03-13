@@ -306,7 +306,15 @@
         
         function updateGameUI() { document.getElementById('gameScore').textContent = gameScore; document.getElementById('gameCombo').textContent = gameCombo; }
         
-        function nextQuestion() { document.getElementById('gameContent').innerHTML = ''; switch(currentMode) { case 'ear': earTraining(); break; case 'note': noteRecognition(); break; case 'rhythm': rhythmTraining(); break; case 'chord': chordTraining(); break; case 'scale': scaleTraining(); break; case 'boss': bossBattle(); break; case 'weekly': weeklyQuest(); break; case 'practice': practiceMode(); break; } }
+        function nextQuestion() { 
+            document.getElementById('gameContent').innerHTML = ''; 
+            // 恢復所有選項按鈕的可用性
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.style.pointerEvents = 'auto';
+                btn.style.opacity = '1';
+            });
+            switch(currentMode) { case 'ear': earTraining(); break; case 'note': noteRecognition(); break; case 'rhythm': rhythmTraining(); break; case 'chord': chordTraining(); break; case 'scale': scaleTraining(); break; case 'boss': bossBattle(); break; case 'weekly': weeklyQuest(); break; case 'practice': practiceMode(); break; } 
+        }
         
         function earTraining() {
             const correct = notes[Math.floor(Math.random() * notes.length)];
@@ -400,13 +408,30 @@
             document.getElementById('gameContent').innerHTML = q.display + '<div class="options-grid">' + q.options + '</div>';
         }
         
+        // 答案冷卻機制 - 防止重複點擊導致分數計算錯誤
+        let isProcessingAnswer = false;
+        
         function checkAnswer(answer, correct) {
+            // 如果正在處理答案，直接忽略重複點擊
+            if (isProcessingAnswer) return;
+            isProcessingAnswer = true;
+            
+            // 禁用所有選項按鈕
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.style.pointerEvents = 'none';
+                btn.style.opacity = '0.7';
+            });
+            
             questionsAnswered++; playerData.totalPlayed++;
             const isCorrect = String(answer) === String(correct);
             if (isCorrect) { gameScore += 10 + gameCombo * 2; gameCombo++; correctThisRound++; playerData.coins += 5; playerData.xp += 3; playSound('correct'); showFeedback('✅', '#4caf50'); if (gameCombo >= 5) { playSound('coin'); showFeedback('🔥 ' + gameCombo + ' COMBO!', '#ffd700'); } }
             else { gameCombo = 0; correctThisRound = 0; playSound('wrong'); showFeedback('❌', '#f44336'); }
             updateGameUI(); checkQuests(); saveData();
-            setTimeout(nextQuestion, 800);
+            // 延遲後重置冷卻狀態並載入下一題
+            setTimeout(() => {
+                isProcessingAnswer = false;
+                nextQuestion();
+            }, 800);
         }
         
         function showFeedback(text, color) { const el = document.createElement('div'); el.className = 'feedback-popup'; el.textContent = text; el.style.color = color; document.body.appendChild(el); setTimeout(() => el.remove(), 600); }
