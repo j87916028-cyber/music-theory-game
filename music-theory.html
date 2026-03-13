@@ -157,6 +157,15 @@
         .feedback.wrong { color: #f44336; animation: shake 0.3s; }
         @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
+        
+        /* 問題區域淡入動畫 */
+        #questionArea {
+            animation: fadeIn 0.4s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
         .staff {
             font-size: 6rem;
             line-height: 1.2;
@@ -624,19 +633,20 @@
         // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
         // 黑鍵位置根據鋼琴八度內的相對位置計算
         // 修正：黑鍵正確位置應在白鍵之間（傳統鋼琴佈局）
+        // 鋼琴鍵盤配置：正確的黑鍵位置（Mi♯ 和 Si♯ 不存在）
         const pianoKeys = [
-            { note: 'Do', isBlack: false, keyIndex: 0, key: 'a' },
-            { note: 'Do♯', isBlack: true, keyIndex: 0, key: 'w' },   // 在 Do 和 Re 之間
-            { note: 'Re', isBlack: false, keyIndex: 1, key: 's' },
-            { note: 'Re♯', isBlack: true, keyIndex: 1, key: 'e' },   // 在 Re 和 Mi 之間
-            { note: 'Mi', isBlack: false, keyIndex: 2, key: 'd' },
-            { note: 'Fa', isBlack: false, keyIndex: 3, key: 'f' },
-            { note: 'Fa♯', isBlack: true, keyIndex: 3, key: 't' },   // 在 Fa 和 Sol 之間
-            { note: 'Sol', isBlack: false, keyIndex: 4, key: 'g' },
-            { note: 'Sol♯', isBlack: true, keyIndex: 4, key: 'y' },   // 在 Sol 和 La 之間
-            { note: 'La', isBlack: false, keyIndex: 5, key: 'h' },
-            { note: 'La♯', isBlack: true, keyIndex: 5, key: 'u' },   // 在 La 和 Si 之間
-            { note: 'Si', isBlack: false, keyIndex: 6, key: 'j' }
+            { note: 'Do', isBlack: false, blackKeyIndex: null, key: 'a' },
+            { note: 'Do♯', isBlack: true, blackKeyIndex: 0, key: 'w' },   // 在 Do 和 Re 之間
+            { note: 'Re', isBlack: false, blackKeyIndex: null, key: 's' },
+            { note: 'Re♯', isBlack: true, blackKeyIndex: 1, key: 'e' },   // 在 Re 和 Mi 之間
+            { note: 'Mi', isBlack: false, blackKeyIndex: null, key: 'd' },
+            { note: 'Fa', isBlack: false, blackKeyIndex: null, key: 'f' },
+            { note: 'Fa♯', isBlack: true, blackKeyIndex: 2, key: 't' },   // 在 Fa 和 Sol 之間
+            { note: 'Sol', isBlack: false, blackKeyIndex: null, key: 'g' },
+            { note: 'Sol♯', isBlack: true, blackKeyIndex: 3, key: 'y' },   // 在 Sol 和 La 之間
+            { note: 'La', isBlack: false, blackKeyIndex: null, key: 'h' },
+            { note: 'La♯', isBlack: true, blackKeyIndex: 4, key: 'u' },   // 在 La 和 Si 之間
+            { note: 'Si', isBlack: false, blackKeyIndex: null, key: 'j' }
         ];
 
         function level4Question() {
@@ -655,9 +665,9 @@
             const blackKeyWidth = window.innerWidth <= 480 ? 18 : 24;
             const renderPiano = pianoKeys.map(k => {
                 if (k.isBlack) {
-                    // 黑鍵位置：在對應白鍵的右側，稍微重疊
-                    // keyIndex 是黑鍵所屬的白鍵索引，黑鍵位置 = (keyIndex + 1) * 白鍵寬度 - 黑鍵寬度/2
-                    const leftPos = (k.keyIndex + 1) * whiteKeyWidth - (blackKeyWidth / 2);
+                    // 黑鍵位置：使用 blackKeyIndex 計算，正確地位於兩個白鍵之間
+                    // blackKeyIndex = 0 表示在第1個白鍵(Do)之後，即 Do 和 Re 之間
+                    const leftPos = (k.blackKeyIndex + 1) * whiteKeyWidth - (blackKeyWidth / 2);
                     return `<div class="key black" style="left:${leftPos}px" onclick="playPianoKey('${k.note}')" title="${k.note} (${k.key.toUpperCase()})"></div>`;
                 } else {
                     const isHighlight = activeKeys.includes(k.note);
