@@ -154,12 +154,19 @@
     
     <script defer>
         console.log("🎵 音樂達人 loaded!");
-        // 音頻上下文（帶錯誤處理）
+        // 音頻上下文（延遲初始化，確保在使用者互動後創建）
         let audioCtx = null;
-        try {
-            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-        } catch(e) {
-            console.warn('AudioContext not supported');
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {
+                    console.warn('AudioContext not supported');
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
         }
         const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
         const noteNames = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
@@ -264,6 +271,7 @@
         }
         
         function playNote(note) { 
+            initAudio();
             if (!audioCtx || !noteFreqs[note]) { console.warn('Cannot play note:', note); return; }
             const osc = audioCtx.createOscillator(); const gain = audioCtx.createGain(); osc.connect(gain); gain.connect(audioCtx.destination); osc.frequency.value = noteFreqs[note]; osc.type = 'sine'; gain.gain.setValueAtTime(0.3, audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5); osc.start(); osc.stop(audioCtx.currentTime + 0.5); 
         }
