@@ -696,7 +696,11 @@ function practiceEar() {
     const correct = notes[Math.floor(Math.random() * notes.length)];
     playNote(correct);
     document.getElementById('gameHint').textContent = '👂 這是什麼音符？';
-    document.getElementById('gameContent').innerHTML = '<button onclick="practiceEar()" style="font-size:2rem;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + notes.map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+    // 洗牌選項，讓使用者學習而不是記憶位置
+    const shuffledNotes = shuffleArray([...notes]);
+    document.getElementById('gameContent').innerHTML = '<button onclick="practiceEar()" style="font-size:2rem;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + shuffledNotes.map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+    // 自動聚焦第一個選項
+    setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
 
 function practiceNote() {
@@ -704,20 +708,33 @@ function practiceNote() {
     const mode = Math.random() > 0.5;
     const correct = mode ? noteNames[note] : note;
     document.getElementById('gameHint').textContent = mode ? '這個音符的音名是？' : '這個音符的唱名是？';
-    document.getElementById('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + note + '</div><div class="options-grid">' + (mode ? ['C','D','E','F','G','A','B'] : notes).map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+    // 洗牌選項
+    const noteOptions = mode ? ['C','D','E','F','G','A','B'] : [...notes];
+    const shuffledOptions = shuffleArray(noteOptions);
+    document.getElementById('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + note + '</div><div class="options-grid">' + shuffledOptions.map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+    // 自動聚焦第一個選項
+    setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
 
 function practiceRhythm() {
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     document.getElementById('gameHint').textContent = '這個音符有幾拍？';
-    document.getElementById('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + rhythm.symbol + '</div><div class="options-grid">' + [0.5,1,2,4].map(n => '<button class="option-btn" onclick="practiceAnswer(this,' + n + ',' + rhythm.beats + ')">' + n + ' 拍</button>').join('') + '</div>';
+    // 洗牌選項
+    const beatOptions = shuffleArray([0.5, 1, 2, 4]);
+    document.getElementById('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + rhythm.symbol + '</div><div class="options-grid">' + beatOptions.map(n => '<button class="option-btn" onclick="practiceAnswer(this,' + n + ',' + rhythm.beats + ')">' + n + ' 拍</button>').join('') + '</div>';
+    // 自動聚焦第一個選項
+    setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
 
 function practiceChord() {
     const chord = chords[Math.floor(Math.random() * chords.length)];
     playChord(chord.notes);
     document.getElementById('gameHint').textContent = '這是什麼和弦？';
-    document.getElementById('gameContent').innerHTML = '<button onclick="practiceChord()" style="font-size:2rem;background:rgba(155,89,182,0.3);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + chords.map(c => '<button class="option-btn" onclick="practiceAnswer(this,\'' + c.name + '\',\'' + chord.name + '\')">' + c.name + '</button>').join('') + '</div>';
+    // 洗牌和弦選項
+    const shuffledChords = shuffleArray([...chords]);
+    document.getElementById('gameContent').innerHTML = '<button onclick="practiceChord()" style="font-size:2rem;background:rgba(155,89,182,0.3);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + shuffledChords.map(c => '<button class="option-btn" onclick="practiceAnswer(this,\'' + c.name + '\',\'' + chord.name + '\')">' + c.name + '</button>').join('') + '</div>';
+    // 自動聚焦第一個選項
+    setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
 
 function practiceAnswer(btn, answer, correct) {
