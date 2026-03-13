@@ -252,15 +252,17 @@
 
         // 鍵盤事件監聽
         document.addEventListener('keydown', (e) => {
-            // 數字鍵 1-7 選擇答案 (Level 1 有 7 個選項)
+            // 數字鍵 1-7 選擇答案
             if (e.key >= '1' && e.key <= '7') {
                 const index = parseInt(e.key) - 1;
+                // 確保選項存在且題目未結束
                 if (currentOptions[index] && !document.querySelector('.option-btn.correct')) {
-                    const option = currentOptions[index];
+                    let option = currentOptions[index];
                     // 取得正確答案
                     let correctAnswer = currentQuestion;
                     if (currentLevel === 3) {
-                        // Level 3: 節奏題 - 從 beats 取得正確答案
+                        // Level 3: 節奏題 - 選項是 beats 值，需轉為數字比對
+                        option = parseFloat(option);
                         const rhythm = rhythms.find(r => r.name === currentQuestion);
                         if (rhythm) correctAnswer = rhythm.beats;
                     }
