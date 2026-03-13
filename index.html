@@ -273,10 +273,28 @@
             saveData(); updateQuests();
         }
         
-        function playNote(note) { 
+        // 節流機制：防止快速點擊導致音頻節點堆積
+        const noteThrottle = {};
+        function playNote(note) {
+            // 節流：每個音符 100ms 內只能播放一次
+            const now = Date.now();
+            if (noteThrottle[note] && now - noteThrottle[note] < 100) return;
+            noteThrottle[note] = now;
+            
             initAudio();
             if (!window.audioCtx || !noteFreqs[note]) { console.warn('Cannot play note:', note); return; }
-            const osc = window.audioCtx.createOscillator(); const gain = window.audioCtx.createGain(); osc.connect(gain); gain.connect(window.audioCtx.destination); osc.frequency.value = noteFreqs[note]; osc.type = 'sine'; gain.gain.setValueAtTime(0.3, window.audioCtx.currentTime); gain.gain.exponentialRampToValueAtTime(0.01, window.audioCtx.currentTime + 0.5); osc.start(); osc.stop(window.audioCtx.currentTime + 0.5); 
+            const osc = window.audioCtx.createOscillator();
+            const gain = window.audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(window.audioCtx.destination);
+            osc.frequency.value = noteFreqs[note];
+            osc.type = 'sine';
+            gain.gain.setValueAtTime(0.3, window.audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, window.audioCtx.currentTime + 0.5);
+            osc.start();
+            osc.stop(window.audioCtx.currentTime + 0.5);
+            // 音頻節點使用後自動清理，防止記憶體洩漏
+            setTimeout(() => { osc.disconnect(); gain.disconnect(); }, 600);
         }
         
         function switchTab(tab) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
