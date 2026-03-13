@@ -398,6 +398,9 @@
 
         // 鍵盤事件監聽
         document.addEventListener('keydown', (e) => {
+            // 防止重複觸發（按住不放）
+            if (e.repeat) return;
+            
             // 數字鍵 1-4 選擇答案（Level 1 可用 1-7）
             const maxOptions = currentLevel === 1 ? 7 : 4;
             if (e.key >= '1' && e.key <= String(maxOptions)) {
@@ -443,7 +446,19 @@
                     const keyElement = document.querySelector(`.key[onclick*="${pianoKey.note}"]`);
                     if (keyElement) {
                         keyElement.classList.add('playing');
-                        setTimeout(() => keyElement.classList.remove('playing'), 200);
+                    }
+                }
+            }
+        });
+        
+        // 鍵盤放開事件 - 移除鋼琴按鍵的視覺效果
+        document.addEventListener('keyup', (e) => {
+            if (currentLevel === 4 && currentQuestion) {
+                const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
+                if (pianoKey) {
+                    const keyElement = document.querySelector(`.key[onclick*="${pianoKey.note}"]`);
+                    if (keyElement) {
+                        keyElement.classList.remove('playing');
                     }
                 }
             }
