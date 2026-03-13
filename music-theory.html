@@ -6,6 +6,16 @@
     <title>🎵 音樂小學堂 - 從零開始學樂理</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
+        :root {
+            --white-key-width: 35px;
+            --black-key-width: 24px;
+        }
+        @media (max-width: 480px) {
+            :root {
+                --white-key-width: 28px;
+                --black-key-width: 18px;
+            }
+        }
         body {
             font-family: 'Noto Sans TC', 'Comic Sans MS', sans-serif;
             background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
@@ -180,9 +190,18 @@
             height: 120px;
             max-width: 100%;
             overflow-x: auto;
+            --white-key-width: 35px;
+            --black-key-width: 24px;
+        }
+        @media (max-width: 480px) {
+            .piano {
+                height: 100px;
+                --white-key-width: 28px;
+                --black-key-width: 18px;
+            }
         }
         .key {
-            width: 35px;
+            width: var(--white-key-width, 35px);
             height: 120px;
             background: white;
             border: 1px solid #333;
@@ -202,7 +221,7 @@
         }
         @media (max-width: 480px) {
             .key {
-                width: 28px;
+                width: var(--white-key-width, 28px);
                 height: 100px;
                 font-size: 0.6rem;
                 padding-bottom: 5px;
@@ -212,7 +231,7 @@
             }
             .key.black {
                 height: 60px;
-                width: 20px;
+                width: var(--black-key-width, 18px);
             }
         }
         .key:active, .key.playing {
@@ -220,7 +239,7 @@
         }
         .key.black {
             position: absolute;
-            width: 24px;
+            width: var(--black-key-width, 24px);
             height: 75px;
             background: #1a1a1a;
             z-index: 2;
@@ -676,9 +695,18 @@
             };
             const activeKeys = chord.notes.map(n => chordKeyMap[n]);
             
-            const whiteKeyWidth = window.innerWidth <= 480 ? 28 : 35;
-            const blackKeyWidth = window.innerWidth <= 480 ? 18 : 24;
-            const renderPiano = pianoKeys.map(k => {
+            // 從 CSS 變數獲取鍵盤尺寸
+            const getKeyWidths = () => {
+                // 先使用 fallback 值渲染，確保第一次也能正常顯示
+                const isMobile = window.innerWidth <= 480;
+                return {
+                    white: isMobile ? 28 : 35,
+                    black: isMobile ? 18 : 24
+                };
+            };
+            const { white: whiteKeyWidth, black: blackKeyWidth } = getKeyWidths();
+            
+            const pianoHtml = pianoKeys.map(k => {
                 if (k.isBlack) {
                     // 黑鍵位置：使用 blackKeyIndex 計算，正確地位於兩個白鍵之間
                     // blackKeyIndex = 0 表示在第1個白鍵(Do)之後，即 Do 和 Re 之間
@@ -694,7 +722,7 @@
                 <p class="hint">🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | A-J 彈鋼琴)（黃色鍵為和弦組成音）</p>
                 <button onclick="playChord('${chord.notes.join(',')}')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
                 <div class="piano">
-                    ${renderPiano}
+                    ${pianoHtml}
                 </div>
                 <div class="options">
                     ${chords.map((c, i) => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${i+1}. ${c.name}</button>`).join('')}
