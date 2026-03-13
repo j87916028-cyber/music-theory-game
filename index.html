@@ -167,6 +167,16 @@
             { id: 'band', emoji: '🎷', name: '樂團', unlockXP: 25000 }];
         const achievements = [{ id: 'first', name: '初試身手', desc: '完成第一題', icon: '🎯', req: 1 }, { id: 'streak5', name: '熱身完畢', desc: '達成 5 連擊', icon: '🔥', req: 5 }, { id: 'streak10', name: '火力全開', desc: '達成 10 連擊', icon: '💥', req: 10 }, { id: 'coins100', name: '小有積蓄', desc: '獲得 100 金幣', icon: '💰', req: 100 }, { id: 'coins500', name: '小富翁', desc: '獲得 500 金幣', icon: '🤑', req: 500 }, { id: 'level5', name: '初露頭角', desc: '達到 5 級', icon: '⭐', req: 5 }, { id: 'level10', name: '音樂新星', desc: '達到 10 級', icon: '🌟', req: 10 }, { id: 'daily7', name: '持之以恆', desc: '連續登入 7 天', icon: '📅', req: 7 }];
         
+        // localStorage 錯誤處理
+        let storageAvailable = true;
+        try {
+            localStorage.setItem('test', 'test');
+            localStorage.removeItem('test');
+        } catch(e) {
+            console.warn('localStorage 不可用:', e);
+            storageAvailable = false;
+        }
+        
         let playerData = { xp: parseInt(localStorage.getItem('musicXP') || '0'), coins: parseInt(localStorage.getItem('musicCoins') || '0'), level: 1, dayStreak: parseInt(localStorage.getItem('musicStreak') || '0'), lastLogin: localStorage.getItem('musicLastLogin') || '', totalPlayed: parseInt(localStorage.getItem('musicPlayed') || '0'), achievements: JSON.parse(localStorage.getItem('musicAchievements') || '[]'), instruments: JSON.parse(localStorage.getItem('musicInstruments') || '["piano"]'), equippedInstrument: localStorage.getItem('musicEquipped') || 'piano', dailyQuests: JSON.parse(localStorage.getItem('musicDailyQuests') || '{}'},
         
         let gameScore = 0, gameCombo = 0, currentMode = '', currentQuestion = null, questionsAnswered = 0, correctThisRound = 0;
