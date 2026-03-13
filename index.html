@@ -140,7 +140,7 @@
                 </div>
             </div>
             <div id="tabQuest" class="tab-content" style="display:none"><div id="dailyQuests"></div></div>
-            <div id="tabCollection" class="tab-content" style="display:none"><h3 style="margin-bottom:15px;">🎹 樂器主題</h3><div class="collection-grid" id="instrumentCollection"></div></div>
+            <div id="tabCollection" class="tab-content" style="display:none"><h3 id="instrumentThemeHeader" style="margin-bottom:15px;">🎹 樂器主題</h3><div class="collection-grid" id="instrumentCollection"></div></div>
             <div id="tabAchievement" class="tab-content" style="display:none"><div id="achievementsList"></div></div>
         </div>
     </div>
@@ -447,11 +447,11 @@
 const langNames = { 'zh-TW': '繁中', 'zh-CN': '簡中', en: 'English', ko: '한국어', ja: '日本語' };
 const langOrder = ['zh-TW', 'zh-CN', 'en', 'ko', 'ja'];
 const translations = {
-    'zh-TW': { home: '🎹 音樂達人', play: '遊戲', quest: '任務', collection: '收藏', achievement: '成就', level: '等級', xp: '經驗值', coins: '金幣', days: '天數', daily: '每日登入', claim: '點擊領取！', claimed: '已領取', ear: '聽力大師', note: '音符認識', rhythm: '節奏訓練', chord: '和弦教室', scale: '音階練習', boss: 'BOSS戰', bossLock: '🔒 Lv. 5', listen: '🎧 聽聲音，選音符', noteName: '音名？', solfege: '唱名？', beats: '這個音符有幾拍？', beatUnit: '拍', chordName: '🎧 聽和弦，選名稱', scaleName: '🎧 聽音階，選名稱', bossTitle: '👑 BOSS挑戰！', score: '分數', combo: 'COMBO', back: '返回', unlock: '解鎖 ', complete: '任務完成！' },
-    'zh-CN': { home: '🎹 音乐达人', play: '游戏', quest: '任务', collection: '收藏', achievement: '成就', level: '等级', xp: '经验值', coins: '金币', days: '天数', daily: '每日登录', claim: '点击领取！', claimed: '已领取', ear: '听力大师', note: '音符认识', rhythm: '节奏训练', chord: '和弦教室', scale: '音阶练习', boss: 'BOSS战', bossLock: '🔒 Lv. 5', listen: '🎧 听声音，选音符', noteName: '音名？', solfege: '唱名？', beats: '这个音符有几拍？', beatUnit: '拍', chordName: '🎧 听和弦，选名称', scaleName: '🎧 听音阶，选名称', bossTitle: '👑 BOSS挑战！', score: '分数', combo: 'COMBO', back: '返回', unlock: '解锁 ', complete: '任务完成！' },
-    en: { home: '🎹 Music Master', play: 'Play', quest: 'Quests', collection: 'Collection', achievement: 'Achievements', level: 'Level', xp: 'XP', coins: 'Coins', days: 'Days', daily: 'Daily Login', claim: 'Click to claim!', claimed: 'Claimed', ear: 'Ear Training', note: 'Note Reading', rhythm: 'Rhythm', chord: 'Chords', scale: 'Scales', boss: 'BOSS', bossLock: '🔒 Lv. 5', listen: '🎧 Listen and choose', noteName: 'Note name?', solfege: 'Solfege?', beats: 'How many beats?', beatUnit: 'beats', chordName: '🎧 Listen and name', scaleName: '🎧 Listen and name', bossTitle: '👑 BOSS Challenge!', score: 'Score', combo: 'COMBO', back: 'Back', unlock: 'Unlocked ', complete: 'Quest complete!' },
-    ko: { home: '🎹 음악 마스터', play: '게임', quest: '퀘스트', collection: '컬렉션', achievement: '업적', level: '레벨', xp: '경험치', coins: '코인', days: '일', daily: '일일 로그인', claim: '클릭して 받기!', claimed: '받음', ear: '청음 훈련', note: '음표 인식', rhythm: '리듬 훈련', chord: '화음', scale: '음계', boss: '보스', bossLock: '🔒 Lv. 5', listen: '🎧 소리를 듣고 선택', noteName: '음명?', solfege: '음階?', beats: '박자는?', chordName: '🎧 화음을 듣고 선택', scaleName: '🎧 음계를 듣고 선택', bossTitle: '👑 보스 챌린지!', score: '점수', combo: '콤보', back: '뒤로', unlock: '해금 ', complete: '퀘스트 완료!' },
-    ja: { home: '🎹 音楽マスター', play: 'ゲーム', quest: 'クエスト', collection: 'コレクション', achievement: '実績', level: 'レベル', xp: '経験値', coins: 'コイン', days: '日', daily: 'デイリーログイン', claim: 'クリックして受け取る！', claimed: '受け取った', ear: '聴音トレーニング', note: '音符認識', rhythm: 'リズム訓練', chord: '和弦教室', scale: '音階練習', boss: 'ボス', bossLock: '🔒 Lv. 5', listen: '🎧 音を聞いて選択', noteName: '音名？', solfege: '音階？', beats: 'この音符は何拍？', chordName: '🎧 和音を聞いて選択', scaleName: '🎧 音階を聞いて選択', bossTitle: '👑 ボスチャレンジ！', score: 'スコア', combo: 'コンボ', back: '戻る', unlock: 'アンロック ', complete: 'クエスト完了！' }
+    'zh-TW': { home: '🎹 音樂達人', play: '遊戲', quest: '任務', collection: '收藏', achievement: '成就', level: '等級', xp: '經驗值', coins: '金幣', days: '天數', daily: '每日登入', claim: '點擊領取！', claimed: '已領取', ear: '聽力大師', note: '音符認識', rhythm: '節奏訓練', chord: '和弦教室', scale: '音階練習', boss: 'BOSS戰', bossLock: '🔒 Lv. 5', listen: '🎧 聽聲音，選音符', noteName: '音名？', solfege: '唱名？', beats: '這個音符有幾拍？', beatUnit: '拍', chordName: '🎧 聽和弦，選名稱', scaleName: '🎧 聽音階，選名稱', bossTitle: '👑 BOSS挑戰！', score: '分數', combo: 'COMBO', back: '返回', unlock: '解鎖 ', complete: '任務完成！', freePlay: '自由彈奏', freePlayDesc: '隨意彈鋼琴', instrumentTheme: '樂器主題' },
+    'zh-CN': { home: '🎹 音乐达人', play: '游戏', quest: '任务', collection: '收藏', achievement: '成就', level: '等级', xp: '经验值', coins: '金币', days: '天数', daily: '每日登录', claim: '点击领取！', claimed: '已领取', ear: '听力大师', note: '音符认识', rhythm: '节奏训练', chord: '和弦教室', scale: '音阶练习', boss: 'BOSS战', bossLock: '🔒 Lv. 5', listen: '🎧 听声音，选音符', noteName: '音名？', solfege: '唱名？', beats: '这个音符有几拍？', beatUnit: '拍', chordName: '🎧 听和弦，选名称', scaleName: '🎧 听音阶，选名称', bossTitle: '👑 BOSS挑战！', score: '分数', combo: 'COMBO', back: '返回', unlock: '解锁 ', complete: '任务完成！', freePlay: '自由弹奏', freePlayDesc: '随意弹钢琴', instrumentTheme: '乐器主题' },
+    en: { home: '🎹 Music Master', play: 'Play', quest: 'Quests', collection: 'Collection', achievement: 'Achievements', level: 'Level', xp: 'XP', coins: 'Coins', days: 'Days', daily: 'Daily Login', claim: 'Click to claim!', claimed: 'Claimed', ear: 'Ear Training', note: 'Note Reading', rhythm: 'Rhythm', chord: 'Chords', scale: 'Scales', boss: 'BOSS', bossLock: '🔒 Lv. 5', listen: '🎧 Listen and choose', noteName: 'Note name?', solfege: 'Solfege?', beats: 'How many beats?', beatUnit: 'beats', chordName: '🎧 Listen and name', scaleName: '🎧 Listen and name', bossTitle: '👑 BOSS Challenge!', score: 'Score', combo: 'COMBO', back: 'Back', unlock: 'Unlocked ', complete: 'Quest complete!', freePlay: 'Free Play', freePlayDesc: 'Play piano freely', instrumentTheme: 'Instrument Themes' },
+    ko: { home: '🎹 음악 마스터', play: '게임', quest: '퀘스트', collection: '컬렉션', achievement: '업적', level: '레벨', xp: '경험치', coins: '코인', days: '일', daily: '일일 로그인', claim: '클릭して 받기!', claimed: '받음', ear: '청음 훈련', note: '음표 인식', rhythm: '리듬 훈련', chord: '화음', scale: '음계', boss: '보스', bossLock: '🔒 Lv. 5', listen: '🎧 소리를 듣고 선택', noteName: '음명?', solfege: '음階?', beats: '박자는?', chordName: '🎧 화음을 듣고 선택', scaleName: '🎧 음계를 듣고 선택', bossTitle: '👑 보스 챌린지!', score: '점수', combo: '콤보', back: '뒤로', unlock: '해금 ', complete: '퀘스트 완료！', freePlay: '프리 플레이', freePlayDesc: '자유롭게 피아노 연주', instrumentTheme: '악기 테마' },
+    ja: { home: '🎹 音楽マスター', play: 'ゲーム', quest: 'クエスト', collection: 'コレクション', achievement: '実績', level: 'レベル', xp: '経験値', coins: 'コイン', days: '日', daily: 'デイリーログイン', claim: 'クリックして受け取る！', claimed: '受け取った', ear: '聴音トレーニング', note: '音符認識', rhythm: 'リズム訓練', chord: '和弦教室', scale: '音階練習', boss: 'ボス', bossLock: '🔒 Lv. 5', listen: '🎧 音を聞いて選択', noteName: '音名？', solfege: '音階？', beats: 'この音符は何拍？', chordName: '🎧 和音を聞いて選択', scaleName: '🎧 音階を聞いて選択', bossTitle: '👑 ボスチャレンジ！', score: 'スコア', combo: 'コンボ', back: '戻る', unlock: 'アンロック ', complete: 'クエスト完了！', freePlay: 'フリープレイ', freePlayDesc: '自由にピアノを弾く', instrumentTheme: '楽器テーマ' }
 };
 
 let currentLang = localStorage.getItem('musicLang') || 'zh-TW';
@@ -491,6 +491,11 @@ function updateAllTexts() {
     if(document.getElementById('bossLock')) document.getElementById('bossLock').textContent = t('bossLock');
     if(document.querySelector('.quest-card')) document.querySelector('.quest-card').querySelector('.quest-title').parentElement.parentElement.querySelector('h3').textContent = '📋 ' + t('quest');
     if(document.querySelector('.collection-item')) document.querySelector('.collection-item').parentElement.querySelector('h3').textContent = '🎨 ' + t('collection');
+    // 更新樂器主題標題
+    const instrumentHeader = document.getElementById('instrumentThemeHeader');
+    if (instrumentHeader) instrumentHeader.textContent = '🎹 ' + t('instrumentTheme');
+    // 更新自由彈奏按鈕
+    updateFreePlayText();
     if(document.getElementById('gameHint')) updateGameTexts();
 }
 
@@ -510,6 +515,7 @@ function updateGameTexts() {
 
 // Initialize
 document.getElementById('langLabel').textContent = langNames[currentLang];
+updateAllTexts();
 </script>
 
 <script>
@@ -571,22 +577,30 @@ function showPiano() {
     const pianoHTML = `
         <div style="position:fixed;bottom:0;left:0;right:0;background:linear-gradient(to top,#1a1a2e,#0d0d1a);padding:20px;z-index:2000;border-top:2px solid #ffd700;">
             <div style="text-align:center;margin-bottom:15px;">
-                <span style="color:#ffd700;font-size:1.2rem;">🎹 自由彈奏</span>
+                <span style="color:#ffd700;font-size:1.2rem;">🎹 ${t('freePlay')}</span>
                 <button onclick="this.parentElement.parentElement.remove()" style="float:right;background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
             </div>
             <div style="display:flex;justify-content:center;position:relative;height:150px;">
                 ${['Do','Re','Mi','Fa','Sol','La','Si'].map((n,i) => `<div class="piano-key" onclick="playNote('${n}')" style="width:45px;height:150px;background:white;border-radius:0 0 5px 5px;margin:0 2px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;color:#333;font-weight:bold;user-select:none;position:relative;z-index:2;">${n}</div>`).join('')}
                 ${blackKeyPositions.map(bk => `<div onclick="playNote('${bk.note}')" style="width:30px;height:90px;background:#333;border-radius:0 0 3px 3px;position:absolute;left:${bk.left};top:20px;z-index:3;cursor:pointer;color:white;font-size:0.7rem;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;box-shadow:2px 2px 5px rgba(0,0,0,0.5);">${bk.note}</div>`).join('')}
             </div>
-            <div style="text-align:center;margin-top:20px;color:#888;font-size:0.9rem;">點擊音符發聲 🎵</div>
+            <div style="text-align:center;margin-top:20px;color:#888;font-size:0.9rem;">🎵 ${t('freePlayDesc')}</div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', pianoHTML);
 }
 
 // 在首頁添加鋼琴按鈕
-document.querySelector('.mode-grid').insertAdjacentHTML('beforeend', '<div class="mode-card" onclick="showPiano()"><div class="icon">🎹</div><div class="name">自由彈奏</div><div class="desc">隨意彈鋼琴</div></div>');
+const freePlayCard = '<div class="mode-card" id="freePlayCard" onclick="showPiano()"><div class="icon">🎹</div><div class="name" id="freePlayName">自由彈奏</div><div class="desc" id="freePlayDesc">隨意彈鋼琴</div></div>';
+document.querySelector('.mode-grid').insertAdjacentHTML('beforeend', freePlayCard);
 
+// 更新自由彈奏按鈕的翻譯
+function updateFreePlayText() {
+    const nameEl = document.getElementById('freePlayName');
+    const descEl = document.getElementById('freePlayDesc');
+    if (nameEl) nameEl.textContent = t('freePlay');
+    if (descEl) descEl.textContent = t('freePlayDesc');
+}
 // 升級特效（使用增強版）
 
 function createConfetti() {
