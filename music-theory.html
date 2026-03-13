@@ -247,7 +247,7 @@
     
     <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥</div>
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
-    <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音</p>
+    <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音 | A-J 彈鋼琴</p>
     
     <div id="gameArea">
         <div class="feedback" id="feedback"></div>
@@ -381,6 +381,20 @@
                 } else {
                     const note = currentLevel === 3 ? 'Do' : currentQuestion;
                     playNote(note);
+                }
+            }
+            // 鋼琴鍵盤快捷鍵 (Level 4)
+            if (currentLevel === 4 && currentQuestion) {
+                const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
+                if (pianoKey) {
+                    e.preventDefault();
+                    playPianoKey(pianoKey.note);
+                    // 添加視覺反饋
+                    const keyElement = document.querySelector(`.key[onclick*="${pianoKey.note}"]`);
+                    if (keyElement) {
+                        keyElement.classList.add('playing');
+                        setTimeout(() => keyElement.classList.remove('playing'), 200);
+                    }
                 }
             }
         });
@@ -564,18 +578,18 @@
         // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
         // 黑鍵位置根據鋼琴八度內的相對位置計算
         const pianoKeys = [
-            { note: 'Do', isBlack: false, position: 0 },
-            { note: 'Do♯', isBlack: true, position: 1 },   // 白鍵1之後
-            { note: 'Re', isBlack: false, position: 1 },
-            { note: 'Re♯', isBlack: true, position: 2 },   // 白鍵2之後
-            { note: 'Mi', isBlack: false, position: 2 },
-            { note: 'Fa', isBlack: false, position: 3 },
-            { note: 'Fa♯', isBlack: true, position: 4 },    // 白鍵4之後
-            { note: 'Sol', isBlack: false, position: 4 },
-            { note: 'Sol♯', isBlack: true, position: 5 },  // 白鍵5之後
-            { note: 'La', isBlack: false, position: 5 },
-            { note: 'La♯', isBlack: true, position: 6 },   // 白鍵6之後
-            { note: 'Si', isBlack: false, position: 6 }
+            { note: 'Do', isBlack: false, position: 0, key: 'a' },
+            { note: 'Do♯', isBlack: true, position: 1, key: 'w' },   // 白鍵1之後
+            { note: 'Re', isBlack: false, position: 1, key: 's' },
+            { note: 'Re♯', isBlack: true, position: 2, key: 'e' },   // 白鍵2之後
+            { note: 'Mi', isBlack: false, position: 2, key: 'd' },
+            { note: 'Fa', isBlack: false, position: 3, key: 'f' },
+            { note: 'Fa♯', isBlack: true, position: 4, key: 't' },    // 白鍵4之後
+            { note: 'Sol', isBlack: false, position: 4, key: 'g' },
+            { note: 'Sol♯', isBlack: true, position: 5, key: 'y' },  // 白鍵5之後
+            { note: 'La', isBlack: false, position: 5, key: 'h' },
+            { note: 'La♯', isBlack: true, position: 6, key: 'u' },   // 白鍵6之後
+            { note: 'Si', isBlack: false, position: 6, key: 'j' }
         ];
 
         function level4Question() {
@@ -595,15 +609,15 @@
                 if (k.isBlack) {
                     // 黑鍵使用 position 計算 left 位置
                     const leftPos = k.position * whiteKeyWidth - 10;
-                    return `<div class="key black" style="left:${leftPos}px" onclick="playPianoKey('${k.note}')"></div>`;
+                    return `<div class="key black" style="left:${leftPos}px" onclick="playPianoKey('${k.note}')" title="${k.note} (${k.key.toUpperCase()})"></div>`;
                 } else {
                     const isHighlight = activeKeys.includes(k.note);
-                    return `<div class="key ${isHighlight?'highlight':''}" onclick="playPianoKey('${k.note}')">${k.note}</div>`;
+                    return `<div class="key ${isHighlight?'highlight':''}" onclick="playPianoKey('${k.note}')">${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span></div>`;
                 }
             }).join('');
             
             const html = `
-                <p class="hint">🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案)（黃色鍵為和弦組成音）</p>
+                <p class="hint">🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | A-J 彈鋼琴)（黃色鍵為和弦組成音）</p>
                 <button onclick="playChord('${chord.notes.join(',')}')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
                 <div class="piano">
                     ${renderPiano}
