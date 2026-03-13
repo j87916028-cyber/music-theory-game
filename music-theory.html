@@ -683,6 +683,10 @@
         
         function nextQuestion() {
             document.getElementById('feedback').textContent = '';
+            // 清除鍵盤焦點樣式
+            document.querySelectorAll('.option-btn.keyboard-focus').forEach(btn => {
+                btn.classList.remove('keyboard-focus');
+            });
             // 重新創建 questionArea 以觸發動畫
             const questionArea = document.getElementById('questionArea');
             const newArea = questionArea.cloneNode(false);
@@ -1024,6 +1028,8 @@
             // 標記答案按鈕（答對顯示綠色，答錯顯示紅色+綠色標記正確答案）
             const buttons = document.querySelectorAll('.option-btn');
             buttons.forEach(btn => {
+                // 移除鍵盤焦點樣式
+                btn.classList.remove('keyboard-focus');
                 const btnText = btn.textContent.replace(/^\d+\.\s*/, '').trim(); // 移除前面的數字編號
                 if (isCorrect) {
                     if (btnText === String(correct)) {
