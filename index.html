@@ -910,21 +910,24 @@ loadSettings();
 <script>
 // ========== Bug Fixes ==========
 
-// 修復練習模式回調
+// 練習模式回調 - 答對答錯都自動載入新題目
 function practiceAnswer(btn, answer, correct) {
     const isCorrect = String(answer) === String(correct);
     btn.classList.add(isCorrect ? 'correct' : 'wrong');
     // 添加視覺反饋彈窗（與一般遊戲模式一致）
     showFeedback(isCorrect ? '✅' : '❌', isCorrect ? '#4caf50' : '#f44336');
+    
+    // 自動載入下一題（無論對錯）
+    setTimeout(() => {
+        const hint = document.getElementById('gameHint').textContent;
+        if (hint.includes('聽力') || hint.includes('聽')) practiceEar();
+        else if (hint.includes('音名') || hint.includes('唱名')) practiceNote();
+        else if (hint.includes('幾拍')) practiceRhythm();
+        else if (hint.includes('和弦')) practiceChord();
+    }, 600);
+    
     if (isCorrect) {
         playSound('correct');
-        setTimeout(() => {
-            const hint = document.getElementById('gameHint').textContent;
-            if (hint.includes('聽力') || hint.includes('聽')) practiceEar();
-            else if (hint.includes('音名') || hint.includes('唱名')) practiceNote();
-            else if (hint.includes('幾拍')) practiceRhythm();
-            else if (hint.includes('和弦')) practiceChord();
-        }, 600);
     } else {
         playSound('wrong');
     }
