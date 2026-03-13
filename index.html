@@ -325,7 +325,29 @@
             setTimeout(() => playChord(chord.notes), 300);
         }
         
-        function playChord(notesStr) { notesStr.split(',').forEach((n, i) => { setTimeout(() => playNote(n), i * 100); }); }
+        // 和弦同時播放（所有音符一起發聲）
+        function playChord(notesStr) { 
+            initAudio();
+            if (!window.audioCtx) return;
+            const notes = notesStr.split(',');
+            const masterGain = window.audioCtx.createGain();
+            masterGain.connect(window.audioCtx.destination);
+            masterGain.gain.setValueAtTime(0.3, window.audioCtx.currentTime);
+            masterGain.gain.exponentialRampToValueAtTime(0.01, window.audioCtx.currentTime + 1.0);
+            
+            notes.forEach(note => {
+                if (!noteFreqs[note]) return;
+                const osc = window.audioCtx.createOscillator();
+                const gain = window.audioCtx.createGain();
+                osc.connect(gain);
+                gain.connect(masterGain);
+                osc.frequency.value = noteFreqs[note];
+                osc.type = 'sine';
+                gain.gain.setValueAtTime(1, window.audioCtx.currentTime);
+                osc.start();
+                osc.stop(window.audioCtx.currentTime + 1.0);
+            });
+        }
         
         function scaleTraining() {
             const scale = scales[Math.floor(Math.random() * scales.length)];
