@@ -52,6 +52,20 @@
             background: linear-gradient(135deg, #ffd700, #ff8c00);
             color: #000;
         }
+        .reset-btn {
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .reset-btn:hover {
+            background: rgba(255,0,0,0.3);
+            border-color: #ff4444;
+            transform: scale(1.05);
+        }
         #gameArea {
             width: 100%;
             max-width: 600px;
@@ -240,6 +254,7 @@
         <button class="level-btn" onclick="setLevel(2)">📖 音名與唱名 (W)</button>
         <button class="level-btn" onclick="setLevel(3)">🎼 節奏練習 (E)</button>
         <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識 (R)</button>
+        <button class="reset-btn" onclick="resetProgress()" title="重置進度">🗑️</button>
     </div>
     
     <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥</div>
@@ -272,12 +287,66 @@
         const noteNames = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
         const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
         
-        let score = 0;
-        let streak = 0;
-        let currentLevel = 1;
+        // 從 localStorage 載入儲存的進度
+        function loadProgress() {
+            const saved = localStorage.getItem('musicTheoryProgress');
+            if (saved) {
+                try {
+                    const data = JSON.parse(saved);
+                    return {
+                        score: data.score || 0,
+                        streak: data.streak || 0,
+                        currentLevel: data.currentLevel || 1,
+                        questionsAnswered: data.questionsAnswered || 0,
+                        correctAnswers: data.correctAnswers || 0
+                    };
+                } catch (e) {
+                    console.error('載入進度失敗:', e);
+                }
+            }
+            return null;
+        }
+
+        // 儲存進度到 localStorage
+        function saveProgress() {
+            const data = {
+                score: score,
+                streak: streak,
+                currentLevel: currentLevel,
+                questionsAnswered: questionsAnswered,
+                correctAnswers: correctAnswers,
+                lastPlayed: new Date().toISOString()
+            };
+            localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
+        }
+
+        // 清除儲存的進度
+        function resetProgress() {
+            localStorage.removeItem('musicTheoryProgress');
+            score = 0;
+            streak = 0;
+            currentLevel = 1;
+            questionsAnswered = 0;
+            correctAnswers = 0;
+            updateUI();
+            setLevel(1);
+        }
+
+        // 更新 UI 顯示
+        function updateUI() {
+            document.getElementById('score').textContent = score;
+            document.getElementById('streakCount').textContent = streak;
+            updateProgress();
+        }
+
+        // 初始化進度
+        let savedProgress = loadProgress();
+        let score = savedProgress ? savedProgress.score : 0;
+        let streak = savedProgress ? savedProgress.streak : 0;
+        let currentLevel = savedProgress ? savedProgress.currentLevel : 1;
+        let questionsAnswered = savedProgress ? savedProgress.questionsAnswered : 0;
+        let correctAnswers = savedProgress ? savedProgress.correctAnswers : 0;
         let currentQuestion = null;
-        let questionsAnswered = 0;
-        let correctAnswers = 0;
         let currentOptions = []; // 儲存當前題目的選項
 
         // 鍵盤事件監聽
@@ -340,6 +409,7 @@
             questionsAnswered = 0;
             correctAnswers = 0;
             updateProgress();
+            saveProgress();
             nextQuestion();
         }
         
@@ -586,6 +656,9 @@
             document.getElementById('streakCount').textContent = streak;
             updateProgress();
             
+            // 儲存進度到 localStorage
+            saveProgress();
+            
             // 答錯顯示正確答案
             if (!isCorrect) {
                 setTimeout(() => {
@@ -599,8 +672,11 @@
             setTimeout(nextQuestion, 1500);
         }
         
-        // 初始化
-        setLevel(1);
+        // 初始化 - 恢復儲存的進度
+        document.getElementById('score').textContent = score;
+        document.getElementById('streakCount').textContent = streak;
+        updateProgress();
+        setLevel(currentLevel);
     </script>
 </body>
 </html>
