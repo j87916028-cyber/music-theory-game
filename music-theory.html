@@ -66,6 +66,23 @@
             border-color: #ff4444;
             transform: scale(1.05);
         }
+        .sound-btn {
+            padding: 15px;
+            background: rgba(255,255,255,0.1);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 1.2rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .sound-btn:hover {
+            background: rgba(0,255,0,0.2);
+            border-color: #44ff44;
+            transform: scale(1.05);
+        }
+        .sound-btn.muted {
+            opacity: 0.5;
+        }
         #gameArea {
             width: 100%;
             max-width: 600px;
@@ -242,6 +259,7 @@
         <button class="level-btn" onclick="setLevel(2)">📖 音名與唱名 (W)</button>
         <button class="level-btn" onclick="setLevel(3)">🎼 節奏練習 (E)</button>
         <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識 (R)</button>
+        <button class="sound-btn active" id="soundToggle" onclick="toggleSound()" title="切換音效">🔊</button>
         <button class="reset-btn" onclick="resetProgress()" title="重置進度">🗑️</button>
     </div>
     
@@ -345,6 +363,29 @@
         let correctAnswers = savedProgress ? savedProgress.correctAnswers : 0;
         let currentQuestion = null;
         let currentOptions = []; // 儲存當前題目的選項
+        let soundEnabled = true; // 音效開關狀態
+        
+        // 切換音效開關
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            const btn = document.getElementById('soundToggle');
+            btn.textContent = soundEnabled ? '🔊' : '🔇';
+            btn.classList.toggle('muted', !soundEnabled);
+            // 儲存音效設定
+            localStorage.setItem('musicTheorySound', soundEnabled ? 'on' : 'off');
+        }
+        
+        // 載入音效設定
+        function loadSoundSetting() {
+            const saved = localStorage.getItem('musicTheorySound');
+            if (saved === 'off') {
+                soundEnabled = false;
+                const btn = document.getElementById('soundToggle');
+                btn.textContent = '🔇';
+                btn.classList.add('muted');
+            }
+        }
+        loadSoundSetting();
 
         // 鍵盤事件監聽
         document.addEventListener('keydown', (e) => {
@@ -400,6 +441,7 @@
         });
         
         function playNote(note) {
+            if (!soundEnabled) return;
             const ctx = getAudioContext();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
@@ -562,6 +604,7 @@
         
         // 播放答錯時的音效
         function playWrongSound() {
+            if (!soundEnabled) return;
             const ctx = getAudioContext();
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
