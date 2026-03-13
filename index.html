@@ -354,6 +354,45 @@
         
         function showFeedback(text, color) { const el = document.createElement('div'); el.className = 'feedback-popup'; el.textContent = text; el.style.color = color; document.body.appendChild(el); setTimeout(() => el.remove(), 600); }
         
+        // 鍵盤支持 - 按數字鍵 1-4 或方向鍵選擇答案
+        let selectedOptionIndex = 0;
+        document.addEventListener('keydown', function(e) {
+            if (!document.getElementById('gameArea').classList.contains('active')) return;
+            const buttons = document.querySelectorAll('.option-btn');
+            if (buttons.length === 0) return;
+            
+            // 數字鍵 1-4 選擇
+            if (e.key >= '1' && e.key <= '4') {
+                const idx = parseInt(e.key) - 1;
+                if (buttons[idx]) buttons[idx].click();
+                return;
+            }
+            // 方向鍵導航
+            if (e.key === 'ArrowRight' || e.key === 'ArrowDown') {
+                selectedOptionIndex = (selectedOptionIndex + 1) % buttons.length;
+                buttons[selectedOptionIndex].focus();
+            } else if (e.key === 'ArrowLeft' || e.key === 'ArrowUp') {
+                selectedOptionIndex = (selectedOptionIndex - 1 + buttons.length) % buttons.length;
+                buttons[selectedOptionIndex].focus();
+            } else if (e.key === 'Enter' || e.key === ' ') {
+                if (document.activeElement.classList.contains('option-btn')) {
+                    document.activeElement.click();
+                }
+            }
+        });
+        
+        // 每次生成新問題時重置選項索引
+        const originalNextQuestion = nextQuestion;
+        nextQuestion = function() {
+            selectedOptionIndex = 0;
+            originalNextQuestion();
+            // 自動聚焦第一個選項
+            setTimeout(() => {
+                const btn = document.querySelector('.option-btn');
+                if (btn) btn.focus();
+            }, 100);
+        };
+        
         updateUI();
     </script>
 </body>
