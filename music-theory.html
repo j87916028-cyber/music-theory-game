@@ -706,10 +706,29 @@
             osc.stop(ctx.currentTime + 0.5);
         }
         
+        // 真正同時播放和弦（而非依次彈奏）
         function playChord(notesStr) {
+            if (!soundEnabled) return;
             const notes = notesStr.split(',');
-            notes.forEach((n, i) => {
-                setTimeout(() => playNote(n), i * 50);
+            const ctx = getAudioContext();
+            
+            // 同時創建多個振盪器，每個音符一個
+            notes.forEach((noteName, i) => {
+                const osc = ctx.createOscillator();
+                const gain = ctx.createGain();
+                
+                osc.connect(gain);
+                gain.connect(ctx.destination);
+                osc.frequency.value = noteFreqs[noteName];
+                osc.type = 'sine'; // 和弦使用正弦波更和諧
+                
+                // 稍微錯開開始時間避免相位問題，創造更豐滿的音色
+                gain.gain.setValueAtTime(0, ctx.currentTime);
+                gain.gain.linearRampToValueAtTime(0.2, ctx.currentTime + 0.02);
+                gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+                
+                osc.start(ctx.currentTime);
+                osc.stop(ctx.currentTime + 0.8);
             });
         }
         
