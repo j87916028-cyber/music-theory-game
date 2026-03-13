@@ -296,7 +296,7 @@
         }
         
         function rhythmTraining() {
-            const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+            const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
             currentQuestion = rhythm.name;
             document.getElementById('gameHint').textContent = '這個音符有幾拍？';
             document.getElementById('gameContent').innerHTML = '<div class="note-display">' + rhythm.symbol + '</div><div class="options-grid">' + [0.5,1,2,4].map(n => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + rhythm.beats + ')">' + n + ' 拍</button>').join('') + '</div>';
@@ -547,7 +547,7 @@ function practiceNote() {
 }
 
 function practiceRhythm() {
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     document.getElementById('gameHint').textContent = '這個音符有幾拍？';
     document.getElementById('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + rhythm.symbol + '</div><div class="options-grid">' + [0.5,1,2,4].map(n => '<button class="option-btn" onclick="practiceAnswer(this,' + n + ',' + rhythm.beats + ')">' + n + ' 拍</button>').join('') + '</div>';
 }
@@ -3783,7 +3783,7 @@ const oldRhythmTraining = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     document.getElementById('gameContent').innerHTML = 
@@ -3811,7 +3811,7 @@ const oldRhythmTraining2 = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     const symbolHTML = rhythmSymbols[rhythm.beats];
@@ -3845,7 +3845,7 @@ const oldRT3 = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     document.getElementById('gameContent').innerHTML = 
@@ -3872,7 +3872,7 @@ const oldRT4 = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     document.getElementById('gameContent').innerHTML = 
@@ -3899,7 +3899,7 @@ const oldRT5 = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     document.getElementById('gameContent').innerHTML = 
@@ -3926,7 +3926,7 @@ const oldRT6 = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     document.getElementById('gameContent').innerHTML = 
@@ -3953,7 +3953,7 @@ const oldRT7 = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     document.getElementById('gameContent').innerHTML = 
@@ -3984,7 +3984,7 @@ const oldRT8 = rhythmTraining;
 rhythmTraining = function() {
     document.getElementById('gameHint').textContent = t('beats');
     
-    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length);
+    const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     document.getElementById('gameContent').innerHTML = 
