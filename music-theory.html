@@ -329,6 +329,8 @@
                     ${notes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${i+1}. ${n}</button>`).join('')}
                 </div>
             `;
+            document.getElementById('questionArea').innerHTML = html;
+        }
         
         // 📖 Level 2: 音名與唱名
         function level2Question() {
