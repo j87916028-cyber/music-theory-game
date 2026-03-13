@@ -305,7 +305,7 @@
         
         function updateGameUI() { document.getElementById('gameScore').textContent = gameScore; document.getElementById('gameCombo').textContent = gameCombo; }
         
-        function nextQuestion() { document.getElementById('gameContent').innerHTML = ''; switch(currentMode) { case 'ear': earTraining(); break; case 'note': noteRecognition(); break; case 'rhythm': rhythmTraining(); break; case 'chord': chordTraining(); break; case 'scale': scaleTraining(); break; case 'boss': bossBattle(); break; } }
+        function nextQuestion() { document.getElementById('gameContent').innerHTML = ''; switch(currentMode) { case 'ear': earTraining(); break; case 'note': noteRecognition(); break; case 'rhythm': rhythmTraining(); break; case 'chord': chordTraining(); break; case 'scale': scaleTraining(); break; case 'boss': bossBattle(); break; case 'weekly': weeklyQuest(); break; case 'practice': practiceMode(); break; } }
         
         function earTraining() {
             const correct = notes[Math.floor(Math.random() * notes.length)];
