@@ -323,7 +323,7 @@
         function playScale(notesStr) { notesStr.split(',').forEach((n, i) => { setTimeout(() => playNote(n), i * 300); }); }
         
         function bossBattle() {
-            const bosses = [{ name: '節奏怪獸', q: () => { const r = rhythms[Math.floor(Math.random() * rhythms.length); currentQuestion = r.name; document.getElementById('gameHint').textContent = '👑 BOSS挑戰！這是什麼音符？'; return { display: '<div class="note-display">' + r.symbol + '</div>', options: [0.5,1,2,4].map(n => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + r.beats + ')">' + n + ' 拍</button>').join('') }; } }];
+            const bosses = [{ name: '節奏怪獸', q: () => { const r = rhythms[Math.floor(Math.random() * rhythms.length)]; currentQuestion = r.name; document.getElementById('gameHint').textContent = '👑 BOSS挑戰！這是什麼音符？'; return { display: '<div class="note-display">' + r.symbol + '</div>', options: [0.5,1,2,4].map(n => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + r.beats + ')">' + n + ' 拍</button>').join('') }; } }];
             const boss = bosses[0]; const q = boss.q();
             document.getElementById('gameContent').innerHTML = q.display + '<div class="options-grid">' + q.options + '</div>';
         }
