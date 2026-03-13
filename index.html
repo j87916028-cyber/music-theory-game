@@ -90,6 +90,8 @@
         .collection-item:hover { transform: scale(1.1); }
         .collection-item.owned { background: rgba(255,215,0,0.2); border: 2px solid #ffd700; }
         .collection-item.equipped { border-color: #4caf50; box-shadow: 0 0 20px #4caf50; }
+            button:focus { outline: 2px solid #ffd700; outline-offset: 2px; }
+        a:focus { outline: 2px solid #ffd700; outline-offset: 2px; }
     </style>
 </head>
 <body>
@@ -4408,7 +4410,9 @@ setTimeout(adjustLayout, 100);
     .main-container { max-width: 800px; }
     .mode-grid { grid-template-columns: repeat(4, 1fr); }
 }
-</style>
+        button:focus { outline: 2px solid #ffd700; outline-offset: 2px; }
+        a:focus { outline: 2px solid #ffd700; outline-offset: 2px; }
+    </style>
 
 <script>
 // ========== 浮動幫助按鈕 ==========
