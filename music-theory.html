@@ -392,6 +392,7 @@
         let currentQuestion = null;
         let currentOptions = []; // 儲存當前題目的選項
         let soundEnabled = true; // 音效開關狀態
+        let isAnswering = false; // 防止重複答題
         
         // 切換音效開關
         function toggleSound() {
@@ -517,7 +518,10 @@
         
         function nextQuestion() {
             document.getElementById('feedback').textContent = '';
-            document.getElementById('questionArea').innerHTML = '';
+            // 重新創建 questionArea 以觸發動畫
+            const questionArea = document.getElementById('questionArea');
+            const newArea = questionArea.cloneNode(false);
+            questionArea.parentNode.replaceChild(newArea, questionArea);
             
             switch(currentLevel) {
                 case 1: level1Question(); break;
@@ -786,6 +790,10 @@
         }
         
         function checkAnswer(answer, correct) {
+            // 防止重複答題
+            if (isAnswering) return;
+            isAnswering = true;
+            
             const isCorrect = String(answer) === String(correct);
             questionsAnswered++;
             
@@ -846,7 +854,10 @@
             // 播放答題結果的音效反饋
             setTimeout(() => playAnswerFeedback(isCorrect), 300);
             
-            setTimeout(nextQuestion, 1500);
+            setTimeout(() => {
+                isAnswering = false; // 重置答題鎖定
+                nextQuestion();
+            }, 1500);
         }
         
         // 初始化 - 恢復儲存的進度
