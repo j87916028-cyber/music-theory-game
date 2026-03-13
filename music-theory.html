@@ -923,14 +923,12 @@
             };
             const activeKeys = chord.notes.map(n => chordKeyMap[n]);
             
-            // 從 CSS 變數獲取鍵盤尺寸
+            // 從 CSS 變數獲取鍵盤尺寸（直接讀取 CSS custom properties 確保一致性）
             const getKeyWidths = () => {
-                // 先使用 fallback 值渲染，確保第一次也能正常顯示
-                const isMobile = window.innerWidth <= 480;
-                return {
-                    white: isMobile ? 28 : 35,
-                    black: isMobile ? 18 : 24
-                };
+                const root = getComputedStyle(document.documentElement);
+                const white = parseFloat(root.getPropertyValue('--white-key-width')) || 35;
+                const black = parseFloat(root.getPropertyValue('--black-key-width')) || 24;
+                return { white, black };
             };
             const { white: whiteKeyWidth, black: blackKeyWidth } = getKeyWidths();
             
