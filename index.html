@@ -486,7 +486,7 @@ function showPiano() {
             </div>
             <div style="display:flex;justify-content:center;position:relative;">
                 ${['Do','Re','Mi','Fa','Sol','La','Si'].map((n,i) => `<div class="piano-key" onclick="playNote('${n}')" style="width:45px;height:150px;background:white;border-radius:0 0 5px 5px;margin:0 2px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;color:#333;font-weight:bold;user-select:none;">${n}</div>`).join('')}
-                ${['Do#','Re#','Fa#','Sol#','La#'].map((n,i) => `<div onclick="playNote('${n.replace('#','')}')" style="width:30px;height:90px;background:#333;border-radius:0 0 3px 3px;margin:0 -17px;z-index:1;cursor:pointer;position:relative;top:-90px;color:white;font-size:0.7rem;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;">${n}</div>`).join('')}
+                ${['Do#','Re#','Fa#','Sol#','La#'].map((n,i) => `<div onclick="playNote('${n}')" style="width:30px;height:90px;background:#333;border-radius:0 0 3px 3px;margin:0 -17px;z-index:1;cursor:pointer;position:relative;top:-90px;color:white;font-size:0.7rem;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;">${n}</div>`).join('')}
             </div>
             <div style="text-align:center;margin-top:20px;color:#888;font-size:0.9rem;">點擊音符發聲 🎵</div>
         </div>
