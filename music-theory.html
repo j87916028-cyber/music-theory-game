@@ -677,78 +677,55 @@
             bindPianoEvents();
         }
         
-        // 綁定鋼琴鍵盤事件 - 使用事件委託避免重複註冊
-        // 使用帶有標記的事件綁定，確保只綁定一次
+        // 綁定鋼琴鍵盤事件 - 使用 document 層級的事件委託
+        // 這樣即使 DOM 更換（每次換題目時），事件監聽器仍然有效
         let pianoEventsBound = false;
         
         function bindPianoEvents() {
-            const pianoContainer = document.querySelector('.piano');
-            if (!pianoContainer) return;
-            
             // 避免重複綁定事件
             if (pianoEventsBound) return;
             pianoEventsBound = true;
             
-            // 使用事件委託 - 將事件監聽器添加到父容器
-            // 這比為每個鍵添加單獨的監聽器更高效，且避免記憶體洩漏
-            const handlePianoInput = (note) => {
-                playPianoKey(note);
-            };
-            
-            const handlePianoStart = (note, element) => {
-                element.classList.add('playing');
-                playPianoKey(note);
-            };
-            
-            const handlePianoEnd = (note, element) => {
-                element.classList.remove('playing');
-            };
-            
-            // 統一的事件處理函數
-            pianoContainer.addEventListener('piano-play', (e) => {
-                const { note, element } = e.detail;
-                handlePianoStart(note, element);
-            });
-            
-            pianoContainer.addEventListener('piano-stop', (e) => {
-                const { note, element } = e.detail;
-                handlePianoEnd(note, element);
-            });
-            
+            // 使用 document 層級的事件委託
+            // 這樣每次更換題目時，雖然 .piano 元素被替換，但事件監聽仍然有效
             // 處理觸控和滑鼠事件
-            pianoContainer.addEventListener('touchstart', (e) => {
+            document.addEventListener('touchstart', (e) => {
                 const key = e.target.closest('.key');
-                if (key && key.dataset.note) {
+                if (key && key.dataset.note && key.closest('.piano')) {
                     e.preventDefault();
                     key.classList.add('playing');
                     playPianoKey(key.dataset.note);
                 }
             }, { passive: false });
             
-            pianoContainer.addEventListener('touchend', (e) => {
+            document.addEventListener('touchend', (e) => {
                 const key = e.target.closest('.key');
-                if (key) {
+                if (key && key.closest('.piano')) {
                     e.preventDefault();
                     key.classList.remove('playing');
                 }
             }, { passive: false });
             
-            pianoContainer.addEventListener('mousedown', (e) => {
+            document.addEventListener('mousedown', (e) => {
                 const key = e.target.closest('.key');
-                if (key && key.dataset.note) {
+                if (key && key.dataset.note && key.closest('.piano')) {
                     key.classList.add('playing');
                     playPianoKey(key.dataset.note);
                 }
             });
             
-            pianoContainer.addEventListener('mouseup', (e) => {
+            document.addEventListener('mouseup', (e) => {
                 const key = e.target.closest('.key');
-                if (key) key.classList.remove('playing');
+                if (key && key.closest('.piano')) {
+                    key.classList.remove('playing');
+                }
             });
             
-            pianoContainer.addEventListener('mouseleave', (e) => {
+            document.addEventListener('mouseleave', (e) => {
                 const key = e.target.closest('.key');
-                if (key) key.classList.remove('playing');
+                if (key && key.closest('.piano')) {
+                    key.classList.remove('playing');
+                }
             });
         }
         
