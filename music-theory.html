@@ -138,9 +138,11 @@
             margin: 20px 0;
             position: relative;
             height: 120px;
+            max-width: 100%;
+            overflow-x: auto;
         }
         .key {
-            width: 40px;
+            width: 35px;
             height: 120px;
             background: white;
             border: 1px solid #333;
@@ -153,22 +155,50 @@
             padding-bottom: 8px;
             color: #333;
             font-weight: bold;
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             position: relative;
             z-index: 1;
+            flex-shrink: 0;
+        }
+        @media (max-width: 480px) {
+            .key {
+                width: 28px;
+                height: 100px;
+                font-size: 0.6rem;
+                padding-bottom: 5px;
+            }
+            .piano {
+                height: 100px;
+            }
+            .key.black {
+                height: 60px;
+                width: 20px;
+            }
         }
         .key:active, .key.playing {
             background: #ddd;
         }
         .key.black {
             position: absolute;
-            width: 28px;
+            width: 24px;
             height: 75px;
             background: #1a1a1a;
             z-index: 2;
             border-radius: 0 0 4px 4px;
             color: white;
             top: 0;
+        }
+        .key.black:nth-of-type(2) { left: calc(35px * 1 - 12px); }
+        .key.black:nth-of-type(4) { left: calc(35px * 2 - 12px); }
+        .key.black:nth-of-type(7) { left: calc(35px * 5 - 12px); }
+        .key.black:nth-of-type(9) { left: calc(35px * 6 - 12px); }
+        .key.black:nth-of-type(11) { left: calc(35px * 7 - 12px); }
+        @media (max-width: 480px) {
+            .key.black:nth-of-type(2) { left: calc(28px * 1 - 10px); }
+            .key.black:nth-of-type(4) { left: calc(28px * 2 - 10px); }
+            .key.black:nth-of-type(7) { left: calc(28px * 5 - 10px); }
+            .key.black:nth-of-type(9) { left: calc(28px * 6 - 10px); }
+            .key.black:nth-of-type(11) { left: calc(28px * 7 - 10px); }
         }
         .key.black:active, .key.black.playing {
             background: #444;
@@ -446,16 +476,16 @@
         // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
         const pianoKeys = [
             { note: 'Do', isBlack: false },
-            { note: 'Do♯', isBlack: true, offset: 28 },
+            { note: 'Do♯', isBlack: true, blackIndex: 1 },
             { note: 'Re', isBlack: false },
-            { note: 'Re♯', isBlack: true, offset: 70 },
+            { note: 'Re♯', isBlack: true, blackIndex: 2 },
             { note: 'Mi', isBlack: false },
             { note: 'Fa', isBlack: false },
-            { note: 'Fa♯', isBlack: true, offset: 154 },
+            { note: 'Fa♯', isBlack: true, blackIndex: 3 },
             { note: 'Sol', isBlack: false },
-            { note: 'Sol♯', isBlack: true, offset: 196 },
+            { note: 'Sol♯', isBlack: true, blackIndex: 4 },
             { note: 'La', isBlack: false },
-            { note: 'La♯', isBlack: true, offset: 238 },
+            { note: 'La♯', isBlack: true, blackIndex: 5 },
             { note: 'Si', isBlack: false }
         ];
 
@@ -473,7 +503,7 @@
             
             const renderPiano = pianoKeys.map(k => {
                 if (k.isBlack) {
-                    return `<div class="key black" style="left:${k.offset}px" onclick="playPianoKey('${k.note}')"></div>`;
+                    return `<div class="key black black-${k.blackIndex}" onclick="playPianoKey('${k.note}')"></div>`;
                 } else {
                     const isHighlight = activeKeys.includes(k.note);
                     return `<div class="key ${isHighlight?'highlight':''}" onclick="playPianoKey('${k.note}')">${k.note}</div>`;
