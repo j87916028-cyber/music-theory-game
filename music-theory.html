@@ -291,7 +291,7 @@
                 const opt = allOptions[Math.floor(Math.random() * allOptions.length)];
                 if (!options.includes(opt)) options.push(opt);
             }
-            options = options.sort(() => Math.random() - 0.5);
+            options = shuffleArray(options);
             
             const html = `
                 <p class="hint">🎧 ${question}</p>
@@ -334,6 +334,16 @@
             { name: 'F大和弦', notes: ['Fa','La','Do'], symbol: 'F' },
             { name: 'Dm和弦', notes: ['Re','Fa','La'], symbol: 'Dm' }
         ];
+
+        // Fisher-Yates 洗牌算法 (公平隨機)
+        function shuffleArray(array) {
+            const arr = [...array];
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+            return arr;
+        }
         
         function level4Question() {
             const chord = chords[Math.floor(Math.random() * chords.length)];

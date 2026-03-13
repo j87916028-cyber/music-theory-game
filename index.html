@@ -325,7 +325,7 @@
             document.getElementById('gameHint').textContent = mode ? '這個音符的音名是？' : '這個音符的唱名是？';
             let opts = [correct]; const all = mode ? ['C','D','E','F','G','A','B'] : notes;
             while (opts.length < 4) { const o = all[Math.floor(Math.random() * all.length)]; if (!opts.includes(o)) opts.push(o); }
-            opts.sort(() => Math.random() - 0.5);
+            opts = shuffleArray(opts);
             document.getElementById('gameContent').innerHTML = '<div class="note-display">' + note + '</div><button onclick="playNote(\'' + note + '\')" style="font-size:1.5rem;background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:10px 20px;cursor:pointer;margin:10px;">🔊 再聽</button><div class="options-grid">' + opts.map(n => '<button class="option-btn" onclick="checkAnswer(\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
         }
         
@@ -1838,7 +1838,7 @@ function loadDailyChallenges() {
     
     if (!saved || saved.date !== today) {
         // 隨機選擇 3 個挑戰
-        const shuffled = [...dailyChallenges].sort(() => 0.5 - Math.random());
+        const shuffled = shuffleArray(dailyChallenges);
         const selected = shuffled.slice(0, 3);
         
         const newData = {
@@ -2136,7 +2136,7 @@ document.querySelector('.mode-grid').innerHTML += '<div class="mode-card" onclic
 
 function showMemoryGame() {
     const notes4 = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La'];
-    const cards = [...notes4, ...notes4].sort(() => Math.random() - 0.5);
+    const cards = shuffleArray([...notes4, ...notes4]);
     
     const memoryHTML = `
         <div id="memoryPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:linear-gradient(135deg,#1a1a2e,#0d0d1a);z-index:3500;overflow-y:auto;">
