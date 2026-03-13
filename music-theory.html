@@ -620,19 +620,20 @@
 
         // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
         // 黑鍵位置根據鋼琴八度內的相對位置計算
+        // 修正：黑鍵正確位置應在白鍵之間（傳統鋼琴佈局）
         const pianoKeys = [
-            { note: 'Do', isBlack: false, position: 0, key: 'a' },
-            { note: 'Do♯', isBlack: true, position: 1, key: 'w' },   // 白鍵1之後
-            { note: 'Re', isBlack: false, position: 1, key: 's' },
-            { note: 'Re♯', isBlack: true, position: 2, key: 'e' },   // 白鍵2之後
-            { note: 'Mi', isBlack: false, position: 2, key: 'd' },
-            { note: 'Fa', isBlack: false, position: 3, key: 'f' },
-            { note: 'Fa♯', isBlack: true, position: 4, key: 't' },    // 白鍵4之後
-            { note: 'Sol', isBlack: false, position: 4, key: 'g' },
-            { note: 'Sol♯', isBlack: true, position: 5, key: 'y' },  // 白鍵5之後
-            { note: 'La', isBlack: false, position: 5, key: 'h' },
-            { note: 'La♯', isBlack: true, position: 6, key: 'u' },   // 白鍵6之後
-            { note: 'Si', isBlack: false, position: 6, key: 'j' }
+            { note: 'Do', isBlack: false, keyIndex: 0, key: 'a' },
+            { note: 'Do♯', isBlack: true, keyIndex: 0, key: 'w' },   // 在 Do 和 Re 之間
+            { note: 'Re', isBlack: false, keyIndex: 1, key: 's' },
+            { note: 'Re♯', isBlack: true, keyIndex: 1, key: 'e' },   // 在 Re 和 Mi 之間
+            { note: 'Mi', isBlack: false, keyIndex: 2, key: 'd' },
+            { note: 'Fa', isBlack: false, keyIndex: 3, key: 'f' },
+            { note: 'Fa♯', isBlack: true, keyIndex: 3, key: 't' },   // 在 Fa 和 Sol 之間
+            { note: 'Sol', isBlack: false, keyIndex: 4, key: 'g' },
+            { note: 'Sol♯', isBlack: true, keyIndex: 4, key: 'y' },   // 在 Sol 和 La 之間
+            { note: 'La', isBlack: false, keyIndex: 5, key: 'h' },
+            { note: 'La♯', isBlack: true, keyIndex: 5, key: 'u' },   // 在 La 和 Si 之間
+            { note: 'Si', isBlack: false, keyIndex: 6, key: 'j' }
         ];
 
         function level4Question() {
@@ -648,10 +649,12 @@
             const activeKeys = chord.notes.map(n => chordKeyMap[n]);
             
             const whiteKeyWidth = window.innerWidth <= 480 ? 28 : 35;
+            const blackKeyWidth = window.innerWidth <= 480 ? 18 : 24;
             const renderPiano = pianoKeys.map(k => {
                 if (k.isBlack) {
-                    // 黑鍵使用 position 計算 left 位置
-                    const leftPos = k.position * whiteKeyWidth - 10;
+                    // 黑鍵位置：在對應白鍵的右側，稍微重疊
+                    // keyIndex 是黑鍵所屬的白鍵索引，黑鍵位置 = (keyIndex + 1) * 白鍵寬度 - 黑鍵寬度/2
+                    const leftPos = (k.keyIndex + 1) * whiteKeyWidth - (blackKeyWidth / 2);
                     return `<div class="key black" style="left:${leftPos}px" onclick="playPianoKey('${k.note}')" title="${k.note} (${k.key.toUpperCase()})"></div>`;
                 } else {
                     const isHighlight = activeKeys.includes(k.note);
