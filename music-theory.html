@@ -32,6 +32,7 @@
             margin-bottom: 10px;
             text-shadow: 0 0 20px #e94560;
             animation: glow 2s ease-in-out infinite alternate;
+            will-change: text-shadow;
         }
         @keyframes glow {
             from { text-shadow: 0 0 20px #e94560, 0 0 40px #ff6b6b; }
@@ -191,6 +192,7 @@
             font-size: 8rem;
             margin: 20px 0;
             animation: bounce 0.5s ease infinite;
+            will-change: transform;
         }
         @keyframes bounce {
             0%, 100% { transform: translateY(0); }
@@ -247,6 +249,7 @@
             font-size: 2rem;
             margin: 20px 0;
             height: 50px;
+            will-change: transform, opacity;
         }
         .feedback.correct { color: #4caf50; animation: pop 0.3s; }
         .feedback.wrong { color: #f44336; animation: shake 0.3s; }
@@ -364,7 +367,7 @@
             font-weight: bold;
             display: none;
         }
-        .streak.show { display: block; animation: pulse 0.5s; }
+        .streak.show { display: block; animation: pulse 0.5s; will-change: transform; }
         @keyframes pulse { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
         .welcome-back {
             position: fixed;
