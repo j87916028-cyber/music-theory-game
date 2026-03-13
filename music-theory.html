@@ -224,8 +224,19 @@
     <div class="streak" id="streakPopup">🔥 5連擊！</div>
     
     <script>
-        // 音頻上下文
-        const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        // 音頻上下文 - 延遲初始化，確保在用戶互動後才創建
+        let audioCtx = null;
+        
+        function getAudioContext() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+            // 喚醒 AudioContext（解決瀏覽器自動播放政策限制）
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+            return audioCtx;
+        }
         
         const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
         const noteNames = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
@@ -276,16 +287,17 @@
         });
         
         function playNote(note) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const ctx = getAudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
             osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(ctx.destination);
             osc.frequency.value = noteFreqs[note];
             osc.type = 'sine';
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
+            osc.stop(ctx.currentTime + 0.5);
         }
         
         function setLevel(level) {
@@ -494,16 +506,17 @@
         }
 
         function playPianoNote(freq) {
-            const osc = audioCtx.createOscillator();
-            const gain = audioCtx.createGain();
+            const ctx = getAudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
             osc.connect(gain);
-            gain.connect(audioCtx.destination);
+            gain.connect(ctx.destination);
             osc.frequency.value = freq;
             osc.type = 'sine';
-            gain.gain.setValueAtTime(0.3, audioCtx.currentTime);
-            gain.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.5);
+            gain.gain.setValueAtTime(0.3, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
             osc.start();
-            osc.stop(audioCtx.currentTime + 0.5);
+            osc.stop(ctx.currentTime + 0.5);
         }
         
         function playChord(notesStr) {
