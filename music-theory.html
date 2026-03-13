@@ -366,6 +366,24 @@
         }
         .streak.show { display: block; animation: pulse 0.5s; }
         @keyframes pulse { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+        .welcome-back {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #4caf50, #2e7d32);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            display: none;
+            z-index: 100;
+            animation: fadeInDown 0.5s ease-out;
+        }
+        .welcome-back.show { display: block; }
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -392,6 +410,7 @@
     </div>
     
     <div class="streak" id="streakPopup">🔥 5連擊！</div>
+    <div class="welcome-back" id="welcomeBack"></div>
     
     <script>
         // 音頻上下文 - 延遲初始化，確保在用戶互動後才創建
@@ -423,13 +442,46 @@
                         streak: Math.min(Math.max(parseInt(data.streak) || 0, 0), 999),
                         currentLevel: Math.min(Math.max(parseInt(data.currentLevel) || 1, 1), 4),
                         questionsAnswered: Math.max(parseInt(data.questionsAnswered) || 0, 0),
-                        correctAnswers: Math.max(parseInt(data.correctAnswers) || 0, 0)
+                        correctAnswers: Math.max(parseInt(data.correctAnswers) || 0, 0),
+                        lastPlayed: data.lastPlayed || null
                     };
                 } catch (e) {
                     console.error('載入進度失敗:', e);
                 }
             }
             return null;
+        }
+
+        // 顯示歡迎回來提示
+        function showWelcomeBack(lastPlayed) {
+            if (!lastPlayed) return;
+            
+            const welcomeEl = document.getElementById('welcomeBack');
+            const lastDate = new Date(lastPlayed);
+            const now = new Date();
+            const diffMs = now - lastDate;
+            const diffMins = Math.floor(diffMs / 60000);
+            const diffHours = Math.floor(diffMins / 60);
+            const diffDays = Math.floor(diffHours / 24);
+            
+            let timeAgo = '';
+            if (diffMins < 1) {
+                timeAgo = '剛剛';
+            } else if (diffMins < 60) {
+                timeAgo = `${diffMins} 分鐘前`;
+            } else if (diffHours < 24) {
+                timeAgo = `${diffHours} 小時前`;
+            } else {
+                timeAgo = `${diffDays} 天前`;
+            }
+            
+            welcomeEl.innerHTML = `👋 歡迎回來！<br><small>上次遊玩：${timeAgo}</small>`;
+            welcomeEl.classList.add('show');
+            
+            // 5秒後自動隱藏
+            setTimeout(() => {
+                welcomeEl.classList.remove('show');
+            }, 5000);
         }
 
         // 儲存進度到 localStorage
@@ -994,6 +1046,11 @@
         document.getElementById('streakCount').textContent = streak;
         updateProgress();
         setLevel(currentLevel);
+        
+        // 顯示歡迎回來提示（如果有之前的記錄）
+        if (savedProgress && savedProgress.lastPlayed) {
+            showWelcomeBack(savedProgress.lastPlayed);
+        }
         
         // 顯示幫助 Modal
         function showHelp() {
