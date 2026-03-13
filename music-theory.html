@@ -677,38 +677,78 @@
             bindPianoEvents();
         }
         
-        // 綁定鋼琴鍵盤事件 - 支援觸控設備
+        // 綁定鋼琴鍵盤事件 - 使用事件委託避免重複註冊
+        // 使用帶有標記的事件綁定，確保只綁定一次
+        let pianoEventsBound = false;
+        
         function bindPianoEvents() {
             const pianoContainer = document.querySelector('.piano');
             if (!pianoContainer) return;
             
-            const keys = pianoContainer.querySelectorAll('.key');
-            keys.forEach(key => {
-                const note = key.dataset.note;
-                if (!note) return;
-                
-                // 觸控開始 - 立即播放並顯示視覺反饋
-                key.addEventListener('touchstart', (e) => {
+            // 避免重複綁定事件
+            if (pianoEventsBound) return;
+            pianoEventsBound = true;
+            
+            // 使用事件委託 - 將事件監聽器添加到父容器
+            // 這比為每個鍵添加單獨的監聽器更高效，且避免記憶體洩漏
+            const handlePianoInput = (note) => {
+                playPianoKey(note);
+            };
+            
+            const handlePianoStart = (note, element) => {
+                element.classList.add('playing');
+                playPianoKey(note);
+            };
+            
+            const handlePianoEnd = (note, element) => {
+                element.classList.remove('playing');
+            };
+            
+            // 統一的事件處理函數
+            pianoContainer.addEventListener('piano-play', (e) => {
+                const { note, element } = e.detail;
+                handlePianoStart(note, element);
+            });
+            
+            pianoContainer.addEventListener('piano-stop', (e) => {
+                const { note, element } = e.detail;
+                handlePianoEnd(note, element);
+            });
+            
+            // 處理觸控和滑鼠事件
+            pianoContainer.addEventListener('touchstart', (e) => {
+                const key = e.target.closest('.key');
+                if (key && key.dataset.note) {
                     e.preventDefault();
                     key.classList.add('playing');
-                    playPianoKey(note);
-                }, { passive: false });
-                
-                // 觸控結束 - 移除視覺反饋
-                key.addEventListener('touchend', (e) => {
+                    playPianoKey(key.dataset.note);
+                }
+            }, { passive: false });
+            
+            pianoContainer.addEventListener('touchend', (e) => {
+                const key = e.target.closest('.key');
+                if (key) {
                     e.preventDefault();
                     key.classList.remove('playing');
-                }, { passive: false });
-                
-                // 滑鼠點擊
-                key.addEventListener('mousedown', () => {
+                }
+            }, { passive: false });
+            
+            pianoContainer.addEventListener('mousedown', (e) => {
+                const key = e.target.closest('.key');
+                if (key && key.dataset.note) {
                     key.classList.add('playing');
-                    playPianoKey(note);
-                });
-                
-                // 滑鼠離開/結束
-                key.addEventListener('mouseup', () => key.classList.remove('playing'));
-                key.addEventListener('mouseleave', () => key.classList.remove('playing'));
+                    playPianoKey(key.dataset.note);
+                }
+            });
+            
+            pianoContainer.addEventListener('mouseup', (e) => {
+                const key = e.target.closest('.key');
+                if (key) key.classList.remove('playing');
+            });
+            
+            pianoContainer.addEventListener('mouseleave', (e) => {
+                const key = e.target.closest('.key');
+                if (key) key.classList.remove('playing');
             });
         }
         
