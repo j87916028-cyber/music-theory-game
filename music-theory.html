@@ -765,6 +765,26 @@
             feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
             feedback.textContent = isCorrect ? '✅ 答對了！' : '❌ 錯了～';
             
+            // 標記答案按鈕（答對顯示綠色，答錯顯示紅色+綠色標記正確答案）
+            const buttons = document.querySelectorAll('.option-btn');
+            buttons.forEach(btn => {
+                const btnText = btn.textContent.replace(/^\d+\.\s*/, '').trim(); // 移除前面的數字編號
+                if (isCorrect) {
+                    if (btnText === String(correct)) {
+                        btn.classList.add('correct');
+                    }
+                } else {
+                    // 答錯時標記錯誤答案和正確答案
+                    if (btnText === String(answer)) {
+                        btn.classList.add('wrong');
+                    }
+                    if (btnText === String(correct)) {
+                        btn.classList.add('correct');
+                    }
+                }
+                btn.disabled = true; // 禁用所有按鈕防止重複答題
+            });
+            
             if (isCorrect) {
                 score += 10 + streak * 2;
                 streak++;
