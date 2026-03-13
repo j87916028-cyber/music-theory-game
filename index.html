@@ -574,6 +574,8 @@ function practiceChord() {
 function practiceAnswer(btn, answer, correct) {
     const isCorrect = String(answer) === String(correct);
     btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    // 添加視覺反饋彈窗（與一般遊戲模式一致）
+    showFeedback(isCorrect ? '✅' : '❌', isCorrect ? '#4caf50' : '#f44336');
     if (isCorrect) {
         playSound('correct');
         setTimeout(() => {
@@ -789,6 +791,8 @@ loadSettings();
 function practiceAnswer(btn, answer, correct) {
     const isCorrect = String(answer) === String(correct);
     btn.classList.add(isCorrect ? 'correct' : 'wrong');
+    // 添加視覺反饋彈窗（與一般遊戲模式一致）
+    showFeedback(isCorrect ? '✅' : '❌', isCorrect ? '#4caf50' : '#f44336');
     if (isCorrect) {
         playSound('correct');
         setTimeout(() => {
