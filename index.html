@@ -402,8 +402,8 @@
         function checkAnswer(answer, correct) {
             questionsAnswered++; playerData.totalPlayed++;
             const isCorrect = String(answer) === String(correct);
-            if (isCorrect) { gameScore += 10 + gameCombo * 2; gameCombo++; correctThisRound++; playerData.coins += 5; playerData.xp += 3; showFeedback('✅', '#4caf50'); if (gameCombo >= 5) showFeedback('🔥 ' + gameCombo + ' COMBO!', '#ffd700'); }
-            else { gameCombo = 0; correctThisRound = 0; showFeedback('❌', '#f44336'); }
+            if (isCorrect) { gameScore += 10 + gameCombo * 2; gameCombo++; correctThisRound++; playerData.coins += 5; playerData.xp += 3; playSound('correct'); showFeedback('✅', '#4caf50'); if (gameCombo >= 5) { playSound('coin'); showFeedback('🔥 ' + gameCombo + ' COMBO!', '#ffd700'); } }
+            else { gameCombo = 0; correctThisRound = 0; playSound('wrong'); showFeedback('❌', '#f44336'); }
             updateGameUI(); checkQuests(); saveData();
             setTimeout(nextQuestion, 800);
         }
