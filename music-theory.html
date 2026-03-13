@@ -202,17 +202,15 @@
             color: white;
             top: 0;
         }
-        .key.black:nth-of-type(2) { left: calc(35px * 1 - 12px); }
-        .key.black:nth-of-type(4) { left: calc(35px * 2 - 12px); }
-        .key.black:nth-of-type(7) { left: calc(35px * 5 - 12px); }
-        .key.black:nth-of-type(9) { left: calc(35px * 6 - 12px); }
-        .key.black:nth-of-type(11) { left: calc(35px * 7 - 12px); }
-        @media (max-width: 480px) {
-            .key.black:nth-of-type(2) { left: calc(28px * 1 - 10px); }
-            .key.black:nth-of-type(4) { left: calc(28px * 2 - 10px); }
-            .key.black:nth-of-type(7) { left: calc(28px * 5 - 10px); }
-            .key.black:nth-of-type(9) { left: calc(28px * 6 - 10px); }
-            .key.black:nth-of-type(11) { left: calc(28px * 7 - 10px); }
+        .key.black {
+            position: absolute;
+            width: 24px;
+            height: 75px;
+            background: #1a1a1a;
+            z-index: 2;
+            border-radius: 0 0 4px 4px;
+            color: white;
+            top: 0;
         }
         .key.black:active, .key.black.playing {
             background: #444;
@@ -525,38 +523,59 @@
 
         // 根據目前關卡播放答題結果的音效反饋
         function playAnswerFeedback(isCorrect) {
-            if (currentLevel === 4) {
-                // Level 4: 和弦 - 播放正確答案的和弦
-                const chord = chords.find(c => c.name === currentQuestion);
-                if (chord) {
-                    playChord(chord.notes.join(','));
+            if (isCorrect) {
+                if (currentLevel === 4) {
+                    // Level 4: 和弦 - 播放正確答案的和弦
+                    const chord = chords.find(c => c.name === currentQuestion);
+                    if (chord) {
+                        playChord(chord.notes.join(','));
+                    }
+                } else {
+                    // Level 1-3: 播放正確音符
+                    let correctNote = currentQuestion;
+                    if (currentLevel === 3) {
+                        // Level 3: 節奏題 - 找出對應的音符名稱
+                        const rhythm = rhythms.find(r => r.name === currentQuestion);
+                        if (rhythm) correctNote = notes[0]; // 播放 Do 作為回饋
+                    }
+                    playNote(correctNote);
                 }
             } else {
-                // Level 1-3: 播放正確音符
-                let correctNote = currentQuestion;
-                if (currentLevel === 3) {
-                    // Level 3: 節奏題 - 找出對應的音符名稱
-                    const rhythm = rhythms.find(r => r.name === currentQuestion);
-                    if (rhythm) correctNote = notes[0]; // 播放 Do 作為回饋
-                }
-                playNote(correctNote);
+                // 答錯時播放低沉的失敗音效
+                playWrongSound();
             }
+        }
+        
+        // 播放答錯時的音效
+        function playWrongSound() {
+            const ctx = getAudioContext();
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.frequency.value = 150; // 較低的頻率
+            osc.type = 'sawtooth';
+            gain.gain.setValueAtTime(0.2, ctx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
+            osc.start();
+            osc.stop(ctx.currentTime + 0.3);
         }
 
         // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
+        // 黑鍵位置根據鋼琴八度內的相對位置計算
         const pianoKeys = [
-            { note: 'Do', isBlack: false },
-            { note: 'Do♯', isBlack: true, blackIndex: 1 },
-            { note: 'Re', isBlack: false },
-            { note: 'Re♯', isBlack: true, blackIndex: 2 },
-            { note: 'Mi', isBlack: false },
-            { note: 'Fa', isBlack: false },
-            { note: 'Fa♯', isBlack: true, blackIndex: 3 },
-            { note: 'Sol', isBlack: false },
-            { note: 'Sol♯', isBlack: true, blackIndex: 4 },
-            { note: 'La', isBlack: false },
-            { note: 'La♯', isBlack: true, blackIndex: 5 },
-            { note: 'Si', isBlack: false }
+            { note: 'Do', isBlack: false, position: 0 },
+            { note: 'Do♯', isBlack: true, position: 1 },   // 白鍵1之後
+            { note: 'Re', isBlack: false, position: 1 },
+            { note: 'Re♯', isBlack: true, position: 2 },   // 白鍵2之後
+            { note: 'Mi', isBlack: false, position: 2 },
+            { note: 'Fa', isBlack: false, position: 3 },
+            { note: 'Fa♯', isBlack: true, position: 4 },    // 白鍵4之後
+            { note: 'Sol', isBlack: false, position: 4 },
+            { note: 'Sol♯', isBlack: true, position: 5 },  // 白鍵5之後
+            { note: 'La', isBlack: false, position: 5 },
+            { note: 'La♯', isBlack: true, position: 6 },   // 白鍵6之後
+            { note: 'Si', isBlack: false, position: 6 }
         ];
 
         function level4Question() {
@@ -571,9 +590,12 @@
             };
             const activeKeys = chord.notes.map(n => chordKeyMap[n]);
             
+            const whiteKeyWidth = window.innerWidth <= 480 ? 28 : 35;
             const renderPiano = pianoKeys.map(k => {
                 if (k.isBlack) {
-                    return `<div class="key black black-${k.blackIndex}" onclick="playPianoKey('${k.note}')"></div>`;
+                    // 黑鍵使用 position 計算 left 位置
+                    const leftPos = k.position * whiteKeyWidth - 10;
+                    return `<div class="key black" style="left:${leftPos}px" onclick="playPianoKey('${k.note}')"></div>`;
                 } else {
                     const isHighlight = activeKeys.includes(k.note);
                     return `<div class="key ${isHighlight?'highlight':''}" onclick="playPianoKey('${k.note}')">${k.note}</div>`;
