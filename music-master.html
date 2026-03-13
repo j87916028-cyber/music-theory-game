@@ -140,6 +140,17 @@
     
     <script>
         const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+        
+        // 確保 AudioContext 處於運行狀態
+        function resumeAudio() {
+            if (audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+        
+        // 為所有交互添加音頻恢復
+        document.addEventListener('click', resumeAudio, { once: true });
+        document.addEventListener('touchstart', resumeAudio, { once: true });
         const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
         const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
         const rhythms = [{ name: '全音符', beats: 4, symbol: '𝅝' }, { name: '二分音符', beats: 2, symbol: '𝅗𝅥' }, { name: '四分音符', beats: 1, symbol: '♩' }, { name: '八分音符', beats: 0.5, symbol: '♪' }];
@@ -430,22 +441,69 @@ function playSound(type) {
     }
 }
 
-// 可彈奏的鋼琴
+// 可彈奏的鋼琴 - 支援觸控
 function showPiano() {
+    const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+    const blackNotes = [
+        { note: 'Do#', base: 'Do' },
+        { note: 'Re#', base: 'Re' },
+        { note: 'Fa#', base: 'Fa' },
+        { note: 'Sol#', base: 'Sol' },
+        { note: 'La#', base: 'La' }
+    ];
+    
     const pianoHTML = `
-        <div style="position:fixed;bottom:0;left:0;right:0;background:linear-gradient(to top,#1a1a2e,#0d0d1a);padding:20px;z-index:2000;border-top:2px solid #ffd700;">
+        <div id="pianoModal" style="position:fixed;bottom:0;left:0;right:0;background:linear-gradient(to top,#1a1a2e,#0d0d1a);padding:20px;z-index:2000;border-top:2px solid #ffd700;">
             <div style="text-align:center;margin-bottom:15px;">
                 <span style="color:#ffd700;font-size:1.2rem;">🎹 自由彈奏</span>
-                <button onclick="this.parentElement.parentElement.remove()" style="float:right;background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
+                <button onclick="closePiano()" style="float:right;background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
             </div>
-            <div style="display:flex;justify-content:center;position:relative;">
-                ${['Do','Re','Mi','Fa','Sol','La','Si'].map((n,i) => `<div class="piano-key" onclick="playNote('${n}')" style="width:45px;height:150px;background:white;border-radius:0 0 5px 5px;margin:0 2px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;color:#333;font-weight:bold;user-select:none;">${n}</div>`).join('')}
-                ${['Do#','Re#','Fa#','Sol#','La#'].map((n,i) => `<div onclick="playNote('${n.replace('#','')}')" style="width:30px;height:90px;background:#333;border-radius:0 0 3px 3px;margin:0 -17px;z-index:1;cursor:pointer;position:relative;top:-90px;color:white;font-size:0.7rem;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;">${n}</div>`).join('')}
+            <div style="display:flex;justify-content:center;position:relative;height:150px;">
+                ${notes.map((n, i) => `
+                    <div class="piano-key" data-note="${n}" 
+                        style="width:45px;height:150px;background:white;border-radius:0 0 5px 5px;margin:0 2px;cursor:pointer;display:flex;align-items:flex-end;justify-content:center;padding-bottom:10px;color:#333;font-weight:bold;user-select:none;touch-action:none;"
+                        onmouseenter="playNote('${n}')"
+                        ontouchstart="handlePianoTouch(event, '${n}')"
+                        ontouchend="handlePianoTouchEnd(event)">
+                        ${n}
+                    </div>
+                `).join('')}
             </div>
-            <div style="text-align:center;margin-top:20px;color:#888;font-size:0.9rem;">點擊音符發聲 🎵</div>
+            <div style="display:flex;justify-content:center;position:relative;height:90px;margin-top:-90px;z-index:1;pointer-events:none;">
+                ${blackNotes.map((bn, i) => `
+                    <div class="piano-key black-key" data-note="${bn.base}#"
+                        style="width:30px;height:90px;background:#333;border-radius:0 0 3px 3px;margin:0 -17px;cursor:pointer;color:white;font-size:0.7rem;display:flex;align-items:flex-end;justify-content:center;padding-bottom:5px;pointer-events:auto;touch-action:none;"
+                        ontouchstart="handlePianoTouch(event, '${bn.base}')"
+                        ontouchend="handlePianoTouchEnd(event)"
+                        onmouseenter="playNote('${bn.base}')">
+                        ${bn.note}
+                    </div>
+                `).join('')}
+            </div>
+            <div style="text-align:center;margin-top:20px;color:#888;font-size:0.9rem;">點擊或觸摸音符發聲 🎵</div>
         </div>
     `;
     document.body.insertAdjacentHTML('beforeend', pianoHTML);
+    
+    // 防止觸控穿透
+    document.getElementById('pianoModal').addEventListener('touchmove', e => e.preventDefault(), { passive: false });
+}
+
+function handlePianoTouch(event, note) {
+    event.preventDefault();
+    playNote(note);
+    event.target.style.background = '#ffd700';
+    event.target.style.transform = 'scale(0.95)';
+}
+
+function handlePianoTouchEnd(event) {
+    event.target.style.background = '';
+    event.target.style.transform = '';
+}
+
+function closePiano() {
+    const piano = document.getElementById('pianoModal');
+    if (piano) piano.remove();
 }
 
 // 在首頁添加鋼琴按鈕
@@ -496,7 +554,11 @@ checkAnswer = function(answer, correct) {
 
 // 添加 CSS
 const extraStyle = document.createElement('style');
-extraStyle.textContent = '.piano-key:active { background: #ddd !important; transform: scale(0.98); }';
+extraStyle.textContent = `
+    .piano-key:active { background: #ddd !important; transform: scale(0.98); }
+    .piano-key.black-key:active { background: #555 !important; }
+    .piano-key:focus { outline: 2px solid #ffd700; outline-offset: -2px; }
+`;
 document.head.appendChild(extraStyle);
 </script>
 
