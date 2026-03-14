@@ -630,7 +630,7 @@ const pianoKeys = [
 function level4Question() {
     const chord = chords[Math.floor(Math.random() * chords.length)];
     currentQuestion = chord.name;
-    currentOptions = chords.map(c => c.name); // 儲存選項順序
+    currentOptions = shuffleArray(chords.map(c => c.name)); // 洗牌選項順序
     
     // 直接使用 chord.notes（冗餘的 chordKeyMap 已移除）
     const activeKeys = chord.notes;
