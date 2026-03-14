@@ -728,16 +728,9 @@
                 
                 // 確保選項存在且題目未結束
                 if (currentOptions[index] && !document.querySelector('.option-btn.correct')) {
-                    let option = currentOptions[index];
-                    // 取得正確答案
-                    let correctAnswer = currentQuestion;
-                    if (currentLevel === 3) {
-                        // Level 3: 節奏題 - 選項是 beats 值，需轉為數字比對
-                        option = parseFloat(option);
-                        const rhythm = rhythms.find(r => r.name === currentQuestion);
-                        if (rhythm) correctAnswer = rhythm.beats;
-                    }
-                    checkAnswer(option, correctAnswer);
+                    // 直接使用 currentOptions 和 currentQuestion 進行比對
+                    // Level 3 的 currentOptions 已經儲存音符名稱，currentQuestion 也是名稱
+                    checkAnswer(currentOptions[index], currentQuestion);
                 }
             }
             // Q/W/E/R 選擇關卡（Level 4 除外，避免與鋼琴鍵盤快捷鍵衝突）
