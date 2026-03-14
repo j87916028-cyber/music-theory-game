@@ -115,10 +115,10 @@
         </div>
         <div class="main-container">
             <div class="tab-buttons">
-                <button class="tab-btn active" onclick="switchTab('play')">🎮 遊戲</button>
-                <button class="tab-btn" onclick="switchTab('quest')">📋 任務</button>
-                <button class="tab-btn" onclick="switchTab('collection')">🎨 收藏</button>
-                <button class="tab-btn" onclick="switchTab('achievement')">🏆 成就</button>
+                <button class="tab-btn active" onclick="switchTab('play', this)">🎮 遊戲</button>
+                <button class="tab-btn" onclick="switchTab('quest', this)">📋 任務</button>
+                <button class="tab-btn" onclick="switchTab('collection', this)">🎨 收藏</button>
+                <button class="tab-btn" onclick="switchTab('achievement', this)">🏆 成就</button>
             </div>
             <div id="tabPlay" class="tab-content">
                 <div class="mode-grid">
@@ -303,7 +303,7 @@
             setTimeout(() => { osc.disconnect(); gain.disconnect(); }, 600);
         }
         
-        function switchTab(tab) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
+        function switchTab(tab, btn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
         
         function showHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('gameArea').classList.remove('active'); document.getElementById('backBtn').style.display = 'none'; updateUI(); }
         
