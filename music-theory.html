@@ -385,6 +385,16 @@
         .key.black:active, .key.black.playing {
             background: #444;
         }
+        /* 鍵盤焦點樣式 - 提高無障礙存取性 */
+        .key:focus {
+            outline: 3px solid #00d4ff;
+            outline-offset: -3px;
+            z-index: 10;
+        }
+        .key.black:focus {
+            outline: 3px solid #00d4ff;
+            outline-offset: -2px;
+        }
         .key.highlight {
             background: #ffd700 !important;
             box-shadow: 0 0 15px rgba(255, 215, 0, 0.7);
@@ -720,7 +730,7 @@
                     e.preventDefault();
                     playPianoKey(pianoKey.note);
                     // 添加視覺反饋
-                    const keyElement = document.querySelector(`.key[onclick*="${pianoKey.note}"]`);
+                    const keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
                     if (keyElement) {
                         keyElement.classList.add('playing');
                     }
@@ -733,10 +743,30 @@
             if (currentLevel === 4 && currentQuestion) {
                 const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
                 if (pianoKey) {
-                    const keyElement = document.querySelector(`.key[onclick*="${pianoKey.note}"]`);
+                    const keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
                     if (keyElement) {
                         keyElement.classList.remove('playing');
                     }
+                }
+            }
+            // 支援 Tab 鍵導航到鋼琴鍵後用 Enter/Space 彈奏
+            if (e.key === 'Enter' || e.key === ' ') {
+                const focusedKey = document.activeElement;
+                if (focusedKey && focusedKey.classList.contains('key') && focusedKey.dataset.note) {
+                    e.preventDefault();
+                    focusedKey.classList.remove('playing');
+                }
+            }
+        });
+        
+        // 鋼琴鍵盤的鍵盤彈奏事件（Enter/Space）
+        document.addEventListener('keydown', (e) => {
+            if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+                const focusedKey = document.activeElement;
+                if (focusedKey && focusedKey.classList.contains('key') && focusedKey.dataset.note) {
+                    e.preventDefault();
+                    focusedKey.classList.add('playing');
+                    playPianoKey(focusedKey.dataset.note);
                 }
             }
         });
@@ -1062,10 +1092,10 @@
                     // 例如 blackKeyIndex=1 表示在 Do(第0個白鍵) 之後，即 Do♯
                     // 正確公式：N * 白鍵寬度 - 黑鍵寬度的一半
                     const leftPos = k.blackKeyIndex * whiteKeyWidth - (blackKeyWidth / 2);
-                    return `<div class="key black" style="left:${leftPos}px" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})"></div>`;
+                    return `<div class="key black" style="left:${leftPos}px" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})" role="button" aria-label="${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}"></div>`;
                 } else {
                     const isHighlight = activeKeys.includes(k.note);
-                    return `<div class="key ${isHighlight?'highlight':''}" data-note="${k.note}">${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span></div>`;
+                    return `<div class="key ${isHighlight?'highlight':''}" data-note="${k.note}" role="button" aria-label="${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0">${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span></div>`;
                 }
             }).join('');
             
