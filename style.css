@@ -389,6 +389,22 @@ h1 {
     visibility: visible;
 }
 
+/* 無障礙：尊重使用者的減少動畫偏好 */
+@media (prefers-reduced-motion: reduce) {
+    .modal-overlay.show {
+        transition: none;
+    }
+    
+    .modal {
+        animation: none;
+    }
+    
+    .modal-overlay.show .modal {
+        transform: none;
+        opacity: 1;
+    }
+}
+
 .modal {
     background: linear-gradient(135deg, var(--bg-gradient-mid), var(--bg-gradient-end));
     padding: 30px;
