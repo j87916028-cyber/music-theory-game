@@ -421,6 +421,17 @@
         }
         .streak.show { display: block; animation: pulse 0.5s; will-change: transform; }
         @keyframes pulse { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+        
+        /* 新記錄達成動畫 */
+        .new-record {
+            animation: recordFlash 0.6s ease-out;
+        }
+        @keyframes recordFlash {
+            0% { transform: scale(1); color: inherit; }
+            50% { transform: scale(1.4); color: #ffd700; text-shadow: 0 0 20px #ffd700; }
+            100% { transform: scale(1); color: inherit; }
+        }
+        
         .welcome-back {
             position: fixed;
             top: 20px;
@@ -455,7 +466,17 @@
         <button class="help-btn" onclick="showHelp()" title="鍵盤快捷鍵" aria-label="顯示鍵盤快捷鍵說明">❓</button>
     </div>
     
-    <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥</div>
+    <div class="score-display">
+        <span title="總得分">🏆 <span id="score">0</span></span>
+        <span style="margin: 0 10px;">|</span>
+        <span title="最高分">⭐ <span id="highScore">0</span></span>
+        <span style="margin: 0 10px;">|</span>
+        <span title="連續答對">🔥 <span id="streakCount">0</span></span>
+        <span style="margin: 0 10px;">|</span>
+        <span title="最佳連擊">💪 <span id="bestStreak">0</span></span>
+        <span style="margin: 0 10px;">|</span>
+        <span title="答題正確率">🎯 <span id="accuracy">0</span>%</span>
+    </div>
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
     <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音 | A-J 彈鋼琴</p>
     
@@ -516,6 +537,8 @@
                     return {
                         score: Math.min(Math.max(parseInt(data.score) || 0, 0), 999999),
                         streak: Math.min(Math.max(parseInt(data.streak) || 0, 0), 999),
+                        highScore: Math.min(Math.max(parseInt(data.highScore) || 0, 0), 999999),
+                        bestStreak: Math.min(Math.max(parseInt(data.bestStreak) || 0, 0), 999),
                         currentLevel: Math.min(Math.max(parseInt(data.currentLevel) || 1, 1), 4),
                         questionsAnswered: Math.max(parseInt(data.questionsAnswered) || 0, 0),
                         correctAnswers: Math.max(parseInt(data.correctAnswers) || 0, 0),
@@ -527,6 +550,26 @@
             }
             return null;
         }
+        
+        // 遷移舊資料到新的 perLevelStats 結構（向後兼容性）
+        function migrateOldData() {
+            const saved = localStorage.getItem('musicTheoryProgress');
+            if (saved && !localStorage.getItem('musicTheoryPerLevelStats')) {
+                try {
+                    const data = JSON.parse(saved);
+                    const currentLevel = Math.min(Math.max(parseInt(data.currentLevel) || 1, 1), 4);
+                    // 將舊資料遷移到 perLevelStats
+                    perLevelStats[currentLevel] = {
+                        answered: Math.max(parseInt(data.questionsAnswered) || 0, 0),
+                        correct: Math.max(parseInt(data.correctAnswers) || 0, 0)
+                    };
+                    localStorage.setItem('musicTheoryPerLevelStats', JSON.stringify(perLevelStats));
+                } catch (e) {
+                    console.error('資料遷移失敗:', e);
+                }
+            }
+        }
+        migrateOldData();
 
         // 顯示歡迎回來提示
         function showWelcomeBack(lastPlayed) {
@@ -579,6 +622,8 @@
                 const data = {
                     score: Math.min(score, 999999), // 分數上限保護
                     streak: Math.min(streak, 999),
+                    highScore: Math.min(Math.max(highScore, 0), 999999),
+                    bestStreak: Math.min(Math.max(bestStreak, 0), 999),
                     currentLevel: currentLevel,
                     questionsAnswered: questionsAnswered,
                     correctAnswers: correctAnswers,
@@ -593,15 +638,25 @@
         // 立即儲存進度（用於需要立即保存的場景）
         function saveProgress() {
             try {
+                // 更新當前關卡的統計數據
+                perLevelStats[currentLevel] = {
+                    answered: questionsAnswered,
+                    correct: correctAnswers
+                };
+                
                 const data = {
                     score: Math.min(score, 999999), // 分數上限保護
                     streak: Math.min(streak, 999),
+                    highScore: Math.min(Math.max(highScore, 0), 999999),
+                    bestStreak: Math.min(Math.max(bestStreak, 0), 999),
                     currentLevel: currentLevel,
                     questionsAnswered: questionsAnswered,
                     correctAnswers: correctAnswers,
                     lastPlayed: new Date().toISOString()
                 };
                 localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
+                // 儲存每個關卡的獨立統計
+                localStorage.setItem('musicTheoryPerLevelStats', JSON.stringify(perLevelStats));
             } catch (e) {
                 console.warn('儲存進度失敗:', e);
             }
@@ -615,11 +670,23 @@
         // 清除儲存的進度
         function resetProgress() {
             localStorage.removeItem('musicTheoryProgress');
+            localStorage.removeItem('musicTheoryPerLevelStats');
             score = 0;
             streak = 0;
+            highScore = 0;
+            bestStreak = 0;
             currentLevel = 1;
             questionsAnswered = 0;
             correctAnswers = 0;
+            perLevelStats = {
+                1: { answered: 0, correct: 0 },
+                2: { answered: 0, correct: 0 },
+                3: { answered: 0, correct: 0 },
+                4: { answered: 0, correct: 0 }
+            };
+            document.getElementById('accuracy').textContent = 0;
+            document.getElementById('highScore').textContent = 0;
+            document.getElementById('bestStreak').textContent = 0;
             updateUI();
             setLevel(1);
         }
@@ -627,7 +694,12 @@
         // 更新 UI 顯示
         function updateUI() {
             document.getElementById('score').textContent = score;
+            document.getElementById('highScore').textContent = highScore;
             document.getElementById('streakCount').textContent = streak;
+            document.getElementById('bestStreak').textContent = bestStreak;
+            // 計算並顯示正確率
+            const accuracy = questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy;
             updateProgress();
         }
 
@@ -635,12 +707,15 @@
         let savedProgress = loadProgress();
         let score = savedProgress ? savedProgress.score : 0;
         let streak = savedProgress ? savedProgress.streak : 0;
+        let highScore = savedProgress ? savedProgress.highScore : 0;
+        let bestStreak = savedProgress ? savedProgress.bestStreak : 0;
         let currentLevel = savedProgress ? savedProgress.currentLevel : 1;
         let questionsAnswered = savedProgress ? savedProgress.questionsAnswered : 0;
         let correctAnswers = savedProgress ? savedProgress.correctAnswers : 0;
         let currentQuestion = null;
         let currentOptions = []; // 儲存當前題目的選項
         let soundEnabled = true; // 音效開關狀態
+        let isHelpOpen = false; // 追蹤幫助Modal是否開啟
         let isAnswering = false; // 防止重複答題
         
         // 切換音效開關
@@ -688,16 +763,9 @@
                 
                 // 確保選項存在且題目未結束
                 if (currentOptions[index] && !document.querySelector('.option-btn.correct')) {
-                    let option = currentOptions[index];
-                    // 取得正確答案
-                    let correctAnswer = currentQuestion;
-                    if (currentLevel === 3) {
-                        // Level 3: 節奏題 - 選項是 beats 值，需轉為數字比對
-                        option = parseFloat(option);
-                        const rhythm = rhythms.find(r => r.name === currentQuestion);
-                        if (rhythm) correctAnswer = rhythm.beats;
-                    }
-                    checkAnswer(option, correctAnswer);
+                    // 直接使用 currentOptions 和 currentQuestion 進行比對
+                    // Level 3 的 currentOptions 已經儲存音符名稱，currentQuestion 也是名稱
+                    checkAnswer(currentOptions[index], currentQuestion);
                 }
             }
             // Q/W/E/R 選擇關卡（Level 4 除外，避免與鋼琴鍵盤快捷鍵衝突）
@@ -724,14 +792,20 @@
                     playNote(note);
                 }
             }
-            // Escape 鍵重新開始當前關卡
+            // Escape 鍵：關閉幫助Modal 或 重新開始當前關卡
             if (e.key === 'Escape') {
                 e.preventDefault();
-                questionsAnswered = 0;
-                correctAnswers = 0;
-                streak = 0;
-                updateProgress();
-                nextQuestion();
+                if (isHelpOpen) {
+                    // 如果幫助Modal開啟，先關閉它
+                    closeHelp();
+                } else {
+                    // 否則重新開始當前關卡
+                    questionsAnswered = 0;
+                    correctAnswers = 0;
+                    streak = 0;
+                    updateProgress();
+                    nextQuestion();
+                }
             }
             // 鋼琴鍵盤快捷鍵 (Level 4)
             if (currentLevel === 4 && currentQuestion) {
@@ -795,16 +869,51 @@
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
             osc.start();
             osc.stop(ctx.currentTime + 0.5);
+            // 及時斷開連接以避免記憶體洩漏（使用 setTimeout 確保音頻播放完畢）
+            setTimeout(() => {
+                osc.disconnect();
+                gain.disconnect();
+            }, 600);
         }
+        
+        // 每個關卡獨立的統計數據
+        let perLevelStats = {
+            1: { answered: 0, correct: 0 },
+            2: { answered: 0, correct: 0 },
+            3: { answered: 0, correct: 0 },
+            4: { answered: 0, correct: 0 }
+        };
+        
+        // 載入每個關卡的統計數據
+        function loadPerLevelStats() {
+            const saved = localStorage.getItem('musicTheoryPerLevelStats');
+            if (saved) {
+                try {
+                    perLevelStats = JSON.parse(saved);
+                    // 確保所有關卡鍵存在
+                    for (let i = 1; i <= 4; i++) {
+                        if (!perLevelStats[i]) {
+                            perLevelStats[i] = { answered: 0, correct: 0 };
+                        }
+                    }
+                } catch (e) {
+                    console.error('載入關卡統計失敗:', e);
+                }
+            }
+        }
+        loadPerLevelStats();
         
         function setLevel(level) {
             currentLevel = level;
             document.querySelectorAll('.level-btn').forEach((btn, i) => {
                 btn.classList.toggle('active', i + 1 === level);
             });
-            questionsAnswered = 0;
-            correctAnswers = 0;
+            // 載入該關卡的統計數據
+            questionsAnswered = perLevelStats[level].answered;
+            correctAnswers = perLevelStats[level].correct;
+            streak = 0; // 連勝只重置當前關卡
             updateProgress();
+            updateUI();
             saveProgress();
             nextQuestion();
         }
@@ -1061,6 +1170,11 @@
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
             osc.start();
             osc.stop(ctx.currentTime + 0.3);
+            // 及時斷開連接以避免記憶體洩漏
+            setTimeout(() => {
+                osc.disconnect();
+                gain.disconnect();
+            }, 400);
         }
 
         // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
@@ -1137,6 +1251,11 @@
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
             osc.start();
             osc.stop(ctx.currentTime + 0.5);
+            // 及時斷開連接以避免記憶體洩漏
+            setTimeout(() => {
+                osc.disconnect();
+                gain.disconnect();
+            }, 600);
         }
         
         // 真正同時播放和弦（而非依次彈奏）
@@ -1163,6 +1282,11 @@
                 
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.8);
+                // 及時斷開連接以避免記憶體洩漏
+                setTimeout(() => {
+                    osc.disconnect();
+                    gain.disconnect();
+                }, 900);
             });
         }
         
@@ -1208,6 +1332,28 @@
                 streak++;
                 correctAnswers++;
                 
+                // 檢查並更新最高分記錄
+                if (score > highScore) {
+                    highScore = score;
+                    document.getElementById('highScore').textContent = highScore;
+                    // 播放新記錄動畫
+                    const hsEl = document.getElementById('highScore');
+                    hsEl.classList.remove('new-record');
+                    void hsEl.offsetWidth; // 觸發重繪
+                    hsEl.classList.add('new-record');
+                }
+                
+                // 檢查並更新最佳連擊記錄
+                if (streak > bestStreak) {
+                    bestStreak = streak;
+                    document.getElementById('bestStreak').textContent = bestStreak;
+                    // 播放新記錄動畫
+                    const bsEl = document.getElementById('bestStreak');
+                    bsEl.classList.remove('new-record');
+                    void bsEl.offsetWidth; // 觸發重繪
+                    bsEl.classList.add('new-record');
+                }
+                
                 // 顯示浮動分數提示
                 showFloatingScore(pointsEarned);
                 
@@ -1248,6 +1394,9 @@
         // 初始化 - 恢復儲存的進度
         document.getElementById('score').textContent = score;
         document.getElementById('streakCount').textContent = streak;
+        // 初始化正確率顯示
+        const initialAccuracy = questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0;
+        document.getElementById('accuracy').textContent = initialAccuracy;
         updateProgress();
         setLevel(currentLevel);
         
@@ -1260,24 +1409,19 @@
         function showHelp() {
             const modal = document.getElementById('helpModal');
             modal.classList.add('show');
+            isHelpOpen = true; // 追蹤幫助Modal狀態
         }
         
         // 關閉幫助 Modal
         function closeHelp() {
             const modal = document.getElementById('helpModal');
             modal.classList.remove('show');
+            isHelpOpen = false; // 追蹤幫助Modal狀態
         }
         
         // 點擊 Modal 背景關閉
         document.getElementById('helpModal').addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-overlay')) {
-                closeHelp();
-            }
-        });
-        
-        // ESC 鍵關閉 Modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
                 closeHelp();
             }
         });
