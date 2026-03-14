@@ -36,6 +36,15 @@
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
         @keyframes float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
         
+        /* 可訪問性：減少動畫偏好支援 */
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
         .xp-bar { width: 100%; max-width: 500px; height: 20px; background: rgba(255,255,255,0.2); border-radius: 10px; overflow: hidden; margin: 10px 0; }
         .xp-fill { height: 100%; background: linear-gradient(90deg, #ff6b6b, #ffd700, #4caf50, #00bfff); background-size: 200% 200%; animation: rainbow 2s ease infinite; transition: width 0.5s; }
         .level-badge { font-size: 1.5rem; font-weight: bold; padding: 5px 20px; background: linear-gradient(135deg, #ffd700, #ff8c00); border-radius: 20px; color: #000; animation: pulse 2s infinite; }

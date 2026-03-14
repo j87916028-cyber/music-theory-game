@@ -22,6 +22,17 @@
     box-sizing: border-box;
 }
 
+/* 可訪問性：減少動畫偏好支援 */
+@media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}
+
 body {
     font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
     background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
