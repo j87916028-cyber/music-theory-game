@@ -680,6 +680,7 @@
         let currentQuestion = null;
         let currentOptions = []; // 儲存當前題目的選項
         let soundEnabled = true; // 音效開關狀態
+        let isHelpOpen = false; // 追蹤幫助Modal是否開啟
         let isAnswering = false; // 防止重複答題
         
         // 切換音效開關
@@ -763,14 +764,20 @@
                     playNote(note);
                 }
             }
-            // Escape 鍵重新開始當前關卡
+            // Escape 鍵：關閉幫助Modal 或 重新開始當前關卡
             if (e.key === 'Escape') {
                 e.preventDefault();
-                questionsAnswered = 0;
-                correctAnswers = 0;
-                streak = 0;
-                updateProgress();
-                nextQuestion();
+                if (isHelpOpen) {
+                    // 如果幫助Modal開啟，先關閉它
+                    closeHelp();
+                } else {
+                    // 否則重新開始當前關卡
+                    questionsAnswered = 0;
+                    correctAnswers = 0;
+                    streak = 0;
+                    updateProgress();
+                    nextQuestion();
+                }
             }
             // 鋼琴鍵盤快捷鍵 (Level 4)
             if (currentLevel === 4 && currentQuestion) {
@@ -1324,24 +1331,19 @@
         function showHelp() {
             const modal = document.getElementById('helpModal');
             modal.classList.add('show');
+            isHelpOpen = true; // 追蹤幫助Modal狀態
         }
         
         // 關閉幫助 Modal
         function closeHelp() {
             const modal = document.getElementById('helpModal');
             modal.classList.remove('show');
+            isHelpOpen = false; // 追蹤幫助Modal狀態
         }
         
         // 點擊 Modal 背景關閉
         document.getElementById('helpModal').addEventListener('click', (e) => {
             if (e.target.classList.contains('modal-overlay')) {
-                closeHelp();
-            }
-        });
-        
-        // ESC 鍵關閉 Modal
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
                 closeHelp();
             }
         });
