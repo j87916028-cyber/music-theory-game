@@ -639,28 +639,71 @@ function level4Question() {
     // 直接使用 chord.notes
     const activeKeys = chord.notes;
     
-    // 使用 CSS Grid 實現黑鍵定位，無需 JavaScript 計算位置
-    const pianoHtml = pianoKeys.map(k => {
+    // 使用 DocumentFragment 優化 DOM 渲染效能（減少 layout thrashing）
+    const pianoContainer = document.createDocumentFragment();
+    
+    pianoKeys.forEach(k => {
+        const keyEl = document.createElement('div');
+        
         if (k.isBlack) {
-            // 黑鍵位置由 CSS grid-column 屬性控制
-            return `<div class="key black" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})" role="button" aria-label="${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0"></div>`;
+            // 使用 CSS Grid 定位（黑鍵由 grid-column 控制）
+            keyEl.className = 'key black';
+            keyEl.dataset.note = k.note;
+            keyEl.title = `${k.note} (${k.key.toUpperCase()})`;
+            keyEl.setAttribute('role', 'button');
+            keyEl.setAttribute('aria-label', `${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}`);
+            keyEl.setAttribute('tabindex', '0');
         } else {
             const isHighlight = activeKeys.includes(k.note);
-            return `<div class="key ${isHighlight?'highlight':''}" data-note="${k.note}" role="button" aria-label="${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0">${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span></div>`;
+            keyEl.className = `key ${isHighlight ? 'highlight' : ''}`;
+            keyEl.dataset.note = k.note;
+            keyEl.setAttribute('role', 'button');
+            keyEl.setAttribute('aria-label', `${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}`);
+            keyEl.setAttribute('tabindex', '0');
+            keyEl.innerHTML = `${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span>`;
         }
-    }).join('');
+        
+        pianoContainer.appendChild(keyEl);
+    });
     
-    const html = `
-        <p class="hint">🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | A-J 彈鋼琴)（黃色鍵為和弦組成音）</p>
-        <button onclick="playChord('${chord.notes.join(',')}')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
-        <div class="piano">
-            ${pianoHtml}
-        </div>
-        <div class="options">
-            ${shuffledChords.map((c, i) => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${i+1}. ${c.name}</button>`).join('')}
-        </div>
-    `;
-    document.getElementById('questionArea').innerHTML = html;
+    // 建立選項按鈕片段
+    const optionsContainer = document.createDocumentFragment();
+    shuffledChords.forEach((c, i) => {
+        const btn = document.createElement('button');
+        btn.className = 'option-btn';
+        btn.textContent = `${i + 1}. ${c.name}`;
+        btn.onclick = () => checkAnswer(c.name, chord.name);
+        optionsContainer.appendChild(btn);
+    });
+    
+    // 使用 DOM 元素构建问题区域（DocumentFragment 減少迼回流）
+    const questionArea = document.getElementById('questionArea');
+    questionArea.innerHTML = '';
+    
+    // 添加提示文字
+    const hint = document.createElement('p');
+    hint.className = 'hint';
+    hint.textContent = '🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | A-J 彈鋼琴)（黃色鍵為和弦組成音）';
+    questionArea.appendChild(hint);
+    
+    // 添加播放按鈕
+    const playBtn = document.createElement('button');
+    playBtn.style.cssText = 'font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;';
+    playBtn.textContent = '🔊';
+    playBtn.onclick = () => playChord(chord.notes.join(','));
+    questionArea.appendChild(playBtn);
+    
+    // 添加鋼琴容器
+    const pianoDiv = document.createElement('div');
+    pianoDiv.className = 'piano';
+    pianoDiv.appendChild(pianoContainer);
+    questionArea.appendChild(pianoDiv);
+    
+    // 添加選項容器
+    const optionsDiv = document.createElement('div');
+    optionsDiv.className = 'options';
+    optionsDiv.appendChild(optionsContainer);
+    questionArea.appendChild(optionsDiv);
 }
 
 function playPianoKey(note) {
