@@ -521,16 +521,6 @@ const chords = [
     { name: 'Dm和弦', notes: ['Re','Fa','La'], symbol: 'Dm' }
 ];
 
-// Level 4 鋼琴鍵盤音符名稱映射（原 chordKeyMap 冗餘，已移除）
-
-// 從 CSS 變數獲取鍵盤尺寸（快取計算結果）
-function getKeyWidths() {
-    const root = getComputedStyle(document.documentElement);
-    const white = parseFloat(root.getPropertyValue('--white-key-width')) || 35;
-    const black = parseFloat(root.getPropertyValue('--black-key-width')) || 24;
-    return { white, black };
-}
-
 // Fisher-Yates 洗牌算法 (公平隨機)
 function shuffleArray(array) {
     const arr = [...array];
@@ -632,19 +622,14 @@ function level4Question() {
     currentQuestion = chord.name;
     currentOptions = shuffleArray(chords.map(c => c.name)); // 洗牌選項順序
     
-    // 直接使用 chord.notes（冗餘的 chordKeyMap 已移除）
+    // 直接使用 chord.notes
     const activeKeys = chord.notes;
     
-    // 使用模組級別的 getKeyWidths 函數
-    const { white: whiteKeyWidth, black: blackKeyWidth } = getKeyWidths();
-    
+    // 使用 CSS Grid 實現黑鍵定位，無需 JavaScript 計算位置
     const pianoHtml = pianoKeys.map(k => {
         if (k.isBlack) {
-            // 黑鍵位置計算：blackKeyIndex 代表該黑鍵位於第 N 個白鍵之後
-            // 例如 blackKeyIndex=1 表示在 Do(第0個白鍵) 之後，即 Do♯
-            // 正確公式：N * 白鍵寬度 - 黑鍵寬度的一半
-            const leftPos = k.blackKeyIndex * whiteKeyWidth - (blackKeyWidth / 2);
-            return `<div class="key black" style="left:${leftPos}px" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})" role="button" aria-label="${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0"></div>`;
+            // 黑鍵位置由 CSS grid-column 屬性控制
+            return `<div class="key black" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})" role="button" aria-label="${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0"></div>`;
         } else {
             const isHighlight = activeKeys.includes(k.note);
             return `<div class="key ${isHighlight?'highlight':''}" data-note="${k.note}" role="button" aria-label="${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0">${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span></div>`;
