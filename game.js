@@ -234,10 +234,9 @@ document.addEventListener('keydown', (e) => {
             // 取得正確答案
             let correctAnswer = currentQuestion;
             if (currentLevel === 3) {
-                // Level 3: 節奏題 - 選項是 beats 值，需轉為數字比對
-                option = parseFloat(option);
-                const rhythm = rhythms.find(r => r.name === currentQuestion);
-                if (rhythm) correctAnswer = rhythm.beats;
+                // Level 3: 節奏題 - 選項已是音符名稱，直接使用
+                // currentOptions 儲存的是音符名稱（如 "四分音符"），currentQuestion 也是名稱
+                // 無需額外轉換，直接比對字串
             }
             checkAnswer(option, correctAnswer);
         }
