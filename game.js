@@ -406,6 +406,15 @@ function nextQuestion() {
 // 鋼琴事件綁定狀態追蹤
 let pianoEventsBound = false;
 
+// 儲存事件處理器以便清理（防止記憶體洩漏）
+const pianoEventHandlers = {
+    touchstart: null,
+    touchend: null,
+    mousedown: null,
+    mouseup: null,
+    mouseleave: null
+};
+
 function bindPianoEvents() {
     // 使用 document 層級的事件委託，所以綁定一次就足夠
     // 這樣無論用戶如何切換關卡，鋼琴事件都會正常工作
@@ -414,54 +423,85 @@ function bindPianoEvents() {
     
     // 使用 document 層級的事件委託
     // 這樣每次更換題目時，雖然 .piano 元素被替換，但事件監聽仍然有效
-    // 處理觸控事件（優先處理，preventDefault 避免雙重觸發）
-    document.addEventListener('touchstart', (e) => {
+    // 處理觸控和滑鼠事件
+    
+    // 儲存處理器以便清理（使用具名函數以便 removeEventListener）
+    pianoEventHandlers.touchstart = function(e) {
         const key = e.target.closest('.key');
         if (key && key.dataset.note && key.closest('.piano')) {
             e.preventDefault();
             key.classList.add('playing');
             playPianoKey(key.dataset.note);
         }
-    }, { passive: false });
+    };
     
-    document.addEventListener('touchend', (e) => {
+    pianoEventHandlers.touchend = function(e) {
         const key = e.target.closest('.key');
         if (key && key.closest('.piano')) {
             e.preventDefault();
             key.classList.remove('playing');
         }
-    }, { passive: false });
+    };
     
-    // 處理觸控取消（防呆）
-    document.addEventListener('touchcancel', (e) => {
+    // 處理觸控取消（防呆）- 也需要清理
+    pianoEventHandlers.touchcancel = function(e) {
         document.querySelectorAll('.piano .key.playing').forEach(key => {
             key.classList.remove('playing');
         });
-    });
+    };
     
-    // 處理滑鼠事件
-    document.addEventListener('mousedown', (e) => {
+    pianoEventHandlers.mousedown = function(e) {
         const key = e.target.closest('.key');
         if (key && key.dataset.note && key.closest('.piano')) {
             key.classList.add('playing');
             playPianoKey(key.dataset.note);
         }
-    });
+    };
     
-    document.addEventListener('mouseup', (e) => {
+    pianoEventHandlers.mouseup = function(e) {
         const key = e.target.closest('.key');
         if (key && key.closest('.piano')) {
             key.classList.remove('playing');
         }
-    });
+    };
     
-    document.addEventListener('mouseleave', (e) => {
+    pianoEventHandlers.mouseleave = function(e) {
         const key = e.target.closest('.key');
         if (key && key.closest('.piano')) {
             key.classList.remove('playing');
         }
-    });
+    };
+    
+    // 綁定事件監聽器
+    document.addEventListener('touchstart', pianoEventHandlers.touchstart, { passive: false });
+    document.addEventListener('touchend', pianoEventHandlers.touchend, { passive: false });
+    document.addEventListener('mousedown', pianoEventHandlers.mousedown);
+    document.addEventListener('mouseup', pianoEventHandlers.mouseup);
+    document.addEventListener('mouseleave', pianoEventHandlers.mouseleave);
 }
+
+// 清理鋼琴事件監聽器（防止記憶體洩漏）
+function cleanupPianoEvents() {
+    if (!pianoEventsBound) return;
+    
+    document.removeEventListener('touchstart', pianoEventHandlers.touchstart);
+    document.removeEventListener('touchend', pianoEventHandlers.touchend);
+    document.removeEventListener('mousedown', pianoEventHandlers.mousedown);
+    document.removeEventListener('mouseup', pianoEventHandlers.mouseup);
+    document.removeEventListener('mouseleave', pianoEventHandlers.mouseleave);
+    
+    // 重置狀態
+    pianoEventsBound = false;
+    pianoEventHandlers.touchstart = null;
+    pianoEventHandlers.touchend = null;
+    pianoEventHandlers.mousedown = null;
+    pianoEventHandlers.mouseup = null;
+    pianoEventHandlers.mouseleave = null;
+}
+
+// 頁面卸載時清理事件監聽器（防止記憶體洩漏）
+window.addEventListener('beforeunload', cleanupPianoEvents);
+window.addEventListener('unload', cleanupPianoEvents); // 相容性備用
 
 // 🌱 Level 1: 認識音符 - 聽聲音選音符
 function level1Question() {
