@@ -472,14 +472,24 @@
         let audioCtx = null;
         
         function getAudioContext() {
-            if (!audioCtx) {
-                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            try {
+                if (!audioCtx) {
+                    const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContextClass) {
+                        console.warn('AudioContext not supported in this browser');
+                        return null;
+                    }
+                    audioCtx = new AudioContextClass();
+                }
+                // 喚醒 AudioContext（解決瀏覽器自動播放政策限制）
+                if (audioCtx.state === 'suspended') {
+                    audioCtx.resume();
+                }
+                return audioCtx;
+            } catch (e) {
+                console.error('Failed to initialize AudioContext:', e);
+                return null;
             }
-            // 喚醒 AudioContext（解決瀏覽器自動播放政策限制）
-            if (audioCtx.state === 'suspended') {
-                audioCtx.resume();
-            }
-            return audioCtx;
         }
         
         const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
@@ -774,6 +784,7 @@
         function playNote(note) {
             if (!soundEnabled) return;
             const ctx = getAudioContext();
+            if (!ctx) return;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -1039,6 +1050,7 @@
         function playWrongSound() {
             if (!soundEnabled) return;
             const ctx = getAudioContext();
+            if (!ctx) return;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -1114,6 +1126,7 @@
 
         function playPianoNote(freq) {
             const ctx = getAudioContext();
+            if (!ctx) return;
             const osc = ctx.createOscillator();
             const gain = ctx.createGain();
             osc.connect(gain);
@@ -1131,6 +1144,7 @@
             if (!soundEnabled) return;
             const notes = notesStr.split(',');
             const ctx = getAudioContext();
+            if (!ctx) return;
             
             // 同時創建多個振盪器，每個音符一個
             notes.forEach((noteName, i) => {
