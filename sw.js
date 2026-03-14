@@ -1,11 +1,12 @@
 // 音樂小學堂 - Service Worker 快取離線支援
-const CACHE_NAME = 'music-theory-game-v2';
+const CACHE_NAME = 'music-theory-game-v3';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './music-theory.html',
     './game.js',
     './style.css',
+    './manifest.json',
     // 快取 Google Fonts 以支援離線顯示
     'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap'
 ];

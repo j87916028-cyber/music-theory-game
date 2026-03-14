@@ -1,0 +1,20 @@
+{
+    "name": "音樂小學堂 - 從零開始學樂理",
+    "short_name": "音樂小學堂",
+    "description": "🎵 學習音樂理論的趣味遊戲！聽力訓練、音符認識、節奏訓練、和弦教室",
+    "start_url": "./music-theory.html",
+    "display": "standalone",
+    "background_color": "#0d0d1a",
+    "theme_color": "#1a1a2e",
+    "orientation": "portrait-primary",
+    "icons": [
+        {
+            "src": "data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎹</text></svg>",
+            "sizes": "any",
+            "type": "image/svg+xml",
+            "purpose": "any maskable"
+        }
+    ],
+    "categories": ["games", "education", "music"],
+    "lang": "zh-TW"
+}
