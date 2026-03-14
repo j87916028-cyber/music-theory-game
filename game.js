@@ -564,6 +564,8 @@ function playNote(note) {
 
 // 按鍵音效 - 數字鍵按下時的輕脆提示音
 function playKeyPressSound() {
+    // 觸發輕微震動回饋
+    triggerHapticFeedback('light');
     if (!soundEnabled) return;
     const ctx = getAudioContext();
     if (!ctx) return;
@@ -1046,6 +1048,8 @@ function playPianoKey(note) {
         console.warn('Invalid piano note:', note);
         return;
     }
+    // 觸發輕微震動回饋
+    triggerHapticFeedback('light');
     // 使用模組層面的 pianoNoteFreqs 物件（避免每次創建新物件）
     playPianoNote(pianoNoteFreqs[note] || 261.63);
 }
@@ -1068,6 +1072,37 @@ function playPianoNote(freq) {
         osc.disconnect();
         gain.disconnect();
     };
+}
+
+// 震動回饋函數 - 支援觸控裝置
+function triggerHapticFeedback(type = 'light') {
+    // 檢查是否支援震動 API
+    if (!navigator.vibrate) return;
+    
+    try {
+        switch(type) {
+            case 'light':
+                // 輕微震動 - 按鍵反饋
+                navigator.vibrate(10);
+                break;
+            case 'medium':
+                // 中等震動 - 答對反饋
+                navigator.vibrate(30);
+                break;
+            case 'heavy':
+                // 強烈震動 - 答錯/連擊反饋
+                navigator.vibrate([50, 30, 50]);
+                break;
+            case 'success':
+                // 成功震動 - 連擊觸發
+                navigator.vibrate([20, 20, 20, 20, 40]);
+                break;
+            default:
+                navigator.vibrate(10);
+        }
+    } catch (e) {
+        // 靜默失敗，避免影響主要功能
+    }
 }
 
 // 真正同時播放和弦（而非依次彈奏）
@@ -1157,6 +1192,8 @@ function checkAnswer(answer, correct) {
             const popup = getDomElement('streakPopup');
             popup.textContent = `🔥 ${streak}連擊！`;
             popup.classList.add('show');
+            // 連擊時觸發成功震動回饋
+            triggerHapticFeedback('success');
             setTimeout(() => popup.classList.remove('show'), 1000);
         } else if (streak === 2) {
             // 即將達成連擊！給予視覺提示
@@ -1165,9 +1202,14 @@ function checkAnswer(answer, correct) {
             popup.classList.add('show');
             popup.style.background = 'rgba(255, 215, 0, 0.3)';
             setTimeout(() => popup.classList.remove('show'), 1500);
+        } else {
+            // 答對時觸發中等震動回饋
+            triggerHapticFeedback('medium');
         }
     } else {
         streak = 0;
+        // 答錯時觸發強烈震動回饋
+        triggerHapticFeedback('heavy');
     }
     
     getDomElement('score').textContent = score;
