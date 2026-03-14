@@ -768,16 +768,13 @@
             bindPianoEvents();
         }
         
-        // 鋼琴事件綁定狀態追蹤 - 修復：只在 Level 4 第一次載入時綁定事件
+        // 鋼琴事件綁定狀態追蹤
         let pianoEventsBound = false;
         
         function bindPianoEvents() {
-            // 修復：只有在 currentLevel === 4 時才綁定鋼琴事件
-            // 因為使用 document 層級的事件委託，所以綁定一次就足夠
-            // 避免在 Level 1-3 時過早標記為已綁定，導致 Level 4 時鋼琴事件失效
-            if (currentLevel !== 4) return;
-            
-            if (pianoEventsBound) return; // 避免重複綁定事件監聽器
+            // 使用 document 層級的事件委託，所以綁定一次就足夠
+            // 這樣無論用戶如何切換關卡，鋼琴事件都會正常工作
+            if (pianoEventsBound) return;
             pianoEventsBound = true;
             
             // 使用 document 層級的事件委託
