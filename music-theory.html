@@ -455,7 +455,13 @@
         <button class="help-btn" onclick="showHelp()" title="鍵盤快捷鍵" aria-label="顯示鍵盤快捷鍵說明">❓</button>
     </div>
     
-    <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥</div>
+    <div class="score-display">
+        <span title="總得分">🏆 <span id="score">0</span></span>
+        <span style="margin: 0 10px;">|</span>
+        <span title="連續答對">🔥 <span id="streakCount">0</span></span>
+        <span style="margin: 0 10px;">|</span>
+        <span title="答題正確率">🎯 <span id="accuracy">0</span>%</span>
+    </div>
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
     <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音 | A-J 彈鋼琴</p>
     
@@ -620,6 +626,7 @@
             currentLevel = 1;
             questionsAnswered = 0;
             correctAnswers = 0;
+            document.getElementById('accuracy').textContent = 0;
             updateUI();
             setLevel(1);
         }
@@ -628,6 +635,9 @@
         function updateUI() {
             document.getElementById('score').textContent = score;
             document.getElementById('streakCount').textContent = streak;
+            // 計算並顯示正確率
+            const accuracy = questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0;
+            document.getElementById('accuracy').textContent = accuracy;
             updateProgress();
         }
 
@@ -1248,6 +1258,9 @@
         // 初始化 - 恢復儲存的進度
         document.getElementById('score').textContent = score;
         document.getElementById('streakCount').textContent = streak;
+        // 初始化正確率顯示
+        const initialAccuracy = questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0;
+        document.getElementById('accuracy').textContent = initialAccuracy;
         updateProgress();
         setLevel(currentLevel);
         
