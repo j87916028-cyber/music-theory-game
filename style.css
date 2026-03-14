@@ -491,22 +491,63 @@ h1 {
         min-width: 100px;
     }
     
+    /* 優化鋼琴鍵盤觸控體驗 - 增大尺寸和間距 */
     :root {
-        --white-key-width: 28px;
-        --black-key-width: 18px;
+        --white-key-width: 32px;
+        --black-key-width: 22px;
+    }
+    
+    .piano {
+        /* 增加鋼琴與上方元素的間距，方便觸控 */
+        margin: 25px auto;
+        /* 觸控優化：確保鍵盤足夠大 */
+        touch-action: manipulation;
     }
     
     .piano .key {
-        height: 110px;
+        height: 120px;
+        /* 觸控優化：增加按鍵之間的視覺間距 */
+        margin: 0 1px;
     }
     
     .piano .key.black {
-        height: 70px;
+        height: 75px;
+    }
+    
+    /* 觸控設備優化：鋼琴鍵盤增加點擊區域 */
+    .piano .key::after {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -5px;
+        right: -5px;
+        bottom: 0;
     }
     
     .score-display {
         font-size: 1rem;
         padding: 8px 15px;
+    }
+    
+    /* 觸控設備：禁用選項按鈕的 hover 效果，避免誤觸 */
+    .option-btn:active:not(:disabled) {
+        transform: scale(0.95);
+    }
+}
+
+/* 更小螢幕優化 */
+@media (max-width: 400px) {
+    :root {
+        --white-key-width: 26px;
+        --black-key-width: 18px;
+    }
+    
+    .piano .key {
+        height: 100px;
+    }
+    
+    .piano .key.black {
+        height: 60px;
     }
 }
 

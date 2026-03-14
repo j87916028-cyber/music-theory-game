@@ -411,7 +411,7 @@ function bindPianoEvents() {
     
     // 使用 document 層級的事件委託
     // 這樣每次更換題目時，雖然 .piano 元素被替換，但事件監聽仍然有效
-    // 處理觸控和滑鼠事件
+    // 處理觸控事件（優先處理，preventDefault 避免雙重觸發）
     document.addEventListener('touchstart', (e) => {
         const key = e.target.closest('.key');
         if (key && key.dataset.note && key.closest('.piano')) {
@@ -429,6 +429,14 @@ function bindPianoEvents() {
         }
     }, { passive: false });
     
+    // 處理觸控取消（防呆）
+    document.addEventListener('touchcancel', (e) => {
+        document.querySelectorAll('.piano .key.playing').forEach(key => {
+            key.classList.remove('playing');
+        });
+    });
+    
+    // 處理滑鼠事件
     document.addEventListener('mousedown', (e) => {
         const key = e.target.closest('.key');
         if (key && key.dataset.note && key.closest('.piano')) {
