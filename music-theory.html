@@ -1029,9 +1029,10 @@
             
             const pianoHtml = pianoKeys.map(k => {
                 if (k.isBlack) {
-                    // 黑鍵位置：使用 blackKeyIndex 計算，正確地位於兩個白鍵之間
-                    // blackKeyIndex = 0 表示在第1個白鍵(Do)之後，即 Do 和 Re 之間
-                    const leftPos = (k.blackKeyIndex + 1) * whiteKeyWidth - (blackKeyWidth / 2);
+                    // 黑鍵位置計算：blackKeyIndex 代表該黑鍵位於第 N 個白鍵之後
+                    // 例如 blackKeyIndex=1 表示在 Do(第0個白鍵) 之後，即 Do♯
+                    // 正確公式：N * 白鍵寬度 - 黑鍵寬度的一半
+                    const leftPos = k.blackKeyIndex * whiteKeyWidth - (blackKeyWidth / 2);
                     return `<div class="key black" style="left:${leftPos}px" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})"></div>`;
                 } else {
                     const isHighlight = activeKeys.includes(k.note);
