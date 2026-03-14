@@ -61,13 +61,87 @@ function loadProgress() {
                 currentLevel: Math.min(Math.max(parseInt(data.currentLevel) || 1, 1), 4),
                 questionsAnswered: Math.max(parseInt(data.questionsAnswered) || 0, 0),
                 correctAnswers: Math.max(parseInt(data.correctAnswers) || 0, 0),
-                lastPlayed: data.lastPlayed || null
+                lastPlayed: data.lastPlayed || null,
+                totalPlayTime: Math.max(parseInt(data.totalPlayTime) || 0, 0) // 遊戲時長（秒）
             };
         } catch (e) {
             console.error('載入進度失敗:', e);
         }
     }
     return null;
+}
+
+// 遊戲時長追蹤
+let sessionStartTime = null; // 當前session開始時間
+let totalPlayTime = 0; // 總遊戲時長（秒）
+
+// 初始化遊戲時長（在 loadProgress 後調用）
+function initPlayTime() {
+    if (savedProgress && savedProgress.totalPlayTime) {
+        totalPlayTime = savedProgress.totalPlayTime;
+    }
+    // 設置當前session開始時間
+    sessionStartTime = Date.now();
+}
+
+// 更新並儲存遊戲時長
+function updatePlayTime() {
+    if (sessionStartTime) {
+        const sessionSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+        totalPlayTime += sessionSeconds;
+        sessionStartTime = Date.now(); // 重置session計時
+        
+        // 儲存到 localStorage
+        try {
+            const saved = localStorage.getItem('musicTheoryProgress');
+            const data = saved ? JSON.parse(saved) : {};
+            data.totalPlayTime = totalPlayTime;
+            localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
+        } catch (e) {
+            console.warn('儲存遊戲時長失敗:', e);
+        }
+    }
+}
+
+// 格式化遊戲時長為可讀格式
+function formatPlayTime(seconds) {
+    if (!seconds || seconds < 0) seconds = 0;
+    
+    const hours = Math.floor(seconds / 3600);
+    const minutes = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+        return `${hours}小時${minutes}分`;
+    } else if (minutes > 0) {
+        return `${minutes}分${secs}秒`;
+    } else {
+        return `${secs}秒`;
+    }
+}
+
+// 定期更新遊戲時長顯示（每10秒更新一次）
+let playTimeUpdateInterval = null;
+
+function startPlayTimeTracker() {
+    if (playTimeUpdateInterval) return;
+    
+    playTimeUpdateInterval = setInterval(() => {
+        const display = getDomElement('playTimeDisplay');
+        if (display) {
+            const currentSessionSeconds = sessionStartTime ? Math.floor((Date.now() - sessionStartTime) / 1000) : 0;
+            display.textContent = formatPlayTime(totalPlayTime + currentSessionSeconds);
+        }
+    }, 10000); // 每10秒更新顯示
+}
+
+function stopPlayTimeTracker() {
+    if (playTimeUpdateInterval) {
+        clearInterval(playTimeUpdateInterval);
+        playTimeUpdateInterval = null;
+    }
+    // 更新儲存的時長
+    updatePlayTime();
 }
 
 // 顯示歡迎回來提示
@@ -124,7 +198,8 @@ const saveProgressDebounced = debounce(() => {
             currentLevel: currentLevel,
             questionsAnswered: questionsAnswered,
             correctAnswers: correctAnswers,
-            lastPlayed: new Date().toISOString()
+            lastPlayed: new Date().toISOString(),
+            totalPlayTime: totalPlayTime // 儲存遊戲時長
         };
         localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
     } catch (e) {
@@ -134,6 +209,9 @@ const saveProgressDebounced = debounce(() => {
 
 // 立即儲存進度（用於需要立即保存的場景）
 function saveProgress() {
+    // 先更新遊戲時長
+    updatePlayTime();
+    
     try {
         const data = {
             score: Math.min(score, 999999), // 分數上限保護
@@ -141,7 +219,8 @@ function saveProgress() {
             currentLevel: currentLevel,
             questionsAnswered: questionsAnswered,
             correctAnswers: correctAnswers,
-            lastPlayed: new Date().toISOString()
+            lastPlayed: new Date().toISOString(),
+            totalPlayTime: totalPlayTime // 儲存遊戲時長
         };
         localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
     } catch (e) {
@@ -152,6 +231,7 @@ function saveProgress() {
 // 頁面關閉前自動儲存進度
 window.addEventListener('beforeunload', () => {
     saveProgress();
+    stopPlayTimeTracker(); // 儲存遊戲時長
 });
 
 // 清除儲存的進度
@@ -206,6 +286,9 @@ let currentQuestion = null;
 let currentOptions = []; // 儲存當前題目的選項
 let soundEnabled = true; // 音效開關狀態
 let isAnswering = false; // 防止重複答題
+
+// 初始化遊戲時長追蹤
+initPlayTime();
 
 // 切換音效開關
 function toggleSound() {
@@ -992,6 +1075,22 @@ getDomElement('streakCount').textContent = streak;
 updateAccuracy();
 updateProgress();
 setLevel(currentLevel);
+
+// 初始化遊戲時長顯示
+const playTimeDisplay = document.createElement('span');
+playTimeDisplay.id = 'playTimeDisplay';
+playTimeDisplay.style.marginLeft = '15px';
+playTimeDisplay.style.fontSize = '0.9rem';
+playTimeDisplay.style.opacity = '0.8';
+playTimeDisplay.textContent = formatPlayTime(totalPlayTime);
+// 找到分數顯示區域並添加遊戲時長
+const scoreDisplay = document.querySelector('.score-display');
+if (scoreDisplay) {
+    scoreDisplay.appendChild(playTimeDisplay);
+}
+
+// 啟動遊戲時長計時器
+startPlayTimeTracker();
 
 // 顯示歡迎回來提示（如果有之前的記錄）
 if (savedProgress && savedProgress.lastPlayed) {
