@@ -585,6 +585,90 @@ h1 {
     .piano .key.black {
         height: 60px;
     }
+    
+    /* 確保鋼琴容器可以橫向滾動，避免版面破壞 */
+    .piano {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        padding-bottom: 10px;
+    }
+    
+    /* 隱藏橫向滾動條但保留滾動功能 */
+    .piano::-webkit-scrollbar {
+        height: 4px;
+    }
+    
+    .piano::-webkit-scrollbar-thumb {
+        background: rgba(255, 255, 255, 0.3);
+        border-radius: 2px;
+    }
+}
+
+/* 超小螢幕優化 (如 iPhone SE, 小型 Android 裝置) */
+@media (max-width: 360px) {
+    :root {
+        --white-key-width: 22px;
+        --black-key-width: 15px;
+    }
+    
+    h1 {
+        font-size: 1.5rem;
+    }
+    
+    .level-select {
+        gap: 6px;
+    }
+    
+    .level-btn, .sound-btn, .reset-btn, .help-btn {
+        padding: 8px 12px;
+        font-size: 0.8rem;
+    }
+    
+    .score-display {
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    
+    .option-btn {
+        padding: 10px 12px;
+        font-size: 0.9rem;
+        min-width: 80px;
+    }
+    
+    .piano {
+        height: 120px;
+    }
+    
+    .piano .key {
+        height: 85px;
+        font-size: 0.6rem;
+    }
+    
+    .piano .key.black {
+        height: 50px;
+        font-size: 0.5rem;
+    }
+}
+
+/* 橫向模式優化 - 讓鋼琴鍵盤在橫向時更大 */
+@media (max-height: 500px) and (orientation: landscape) {
+    .piano {
+        height: 130px;
+    }
+    
+    .piano .key {
+        height: 110px;
+    }
+    
+    .piano .key.black {
+        height: 65px;
+    }
+    
+    /* 橫向時增加鋼琴寬度 */
+    :root {
+        --white-key-width: 40px;
+        --black-key-width: 28px;
+    }
 }
 
 /* 無障礙支援 - 減少動畫 */
