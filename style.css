@@ -99,19 +99,40 @@ h1 {
 
 /* 分數顯示 */
 .score-display {
-    font-size: 1.3rem;
+    font-size: 1.1rem;
     margin: 15px 0;
-    padding: 10px 25px;
+    padding: 12px 20px;
     background: rgba(255, 255, 255, 0.1);
     border-radius: 20px;
     display: flex;
-    gap: 20px;
+    flex-wrap: wrap;
+    gap: 15px;
+    justify-content: center;
     align-items: center;
 }
 
-.score-display span:first-child {
+.score-display .stat-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 15px;
+}
+
+.score-display .stat-item span:last-child {
     font-weight: bold;
+    min-width: 30px;
+}
+
+.score-display #score {
     color: #ffd700;
+    font-size: 1.2rem;
+}
+
+.score-display #playTimeDisplay {
+    color: #00bfff;
+    font-size: 0.95rem;
 }
 
 /* 進度條 */

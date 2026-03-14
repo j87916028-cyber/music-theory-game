@@ -1200,17 +1200,10 @@ updateAccuracy();
 updateProgress();
 setLevel(currentLevel);
 
-// 初始化遊戲時長顯示
-const playTimeDisplay = document.createElement('span');
-playTimeDisplay.id = 'playTimeDisplay';
-playTimeDisplay.style.marginLeft = '15px';
-playTimeDisplay.style.fontSize = '0.9rem';
-playTimeDisplay.style.opacity = '0.8';
-playTimeDisplay.textContent = formatPlayTime(totalPlayTime);
-// 找到分數顯示區域並添加遊戲時長
-const scoreDisplay = document.querySelector('.score-display');
-if (scoreDisplay) {
-    scoreDisplay.appendChild(playTimeDisplay);
+// 初始化遊戲時長顯示（使用 HTML 中已存在的元素）
+const playTimeDisplay = getDomElement('playTimeDisplay');
+if (playTimeDisplay) {
+    playTimeDisplay.textContent = formatPlayTime(totalPlayTime);
 }
 
 // 啟動遊戲時長計時器

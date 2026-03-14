@@ -50,7 +50,12 @@
         <button class="help-btn" onclick="showHelp()" title="鍵盤快捷鍵" aria-label="顯示鍵盤快捷鍵說明">❓</button>
     </div>
     
-    <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥 | 答對率: <span id="accuracy">0%</span></div>
+    <div class="score-display">
+        <span class="stat-item" title="總分">🏆 <span id="score">0</span></span>
+        <span class="stat-item" title="連續答對">🔥 <span id="streakCount">0</span></span>
+        <span class="stat-item" title="答對率">📊 <span id="accuracy">0%</span></span>
+        <span class="stat-item" title="學習時長">⏱️ <span id="playTimeDisplay">0秒</span></span>
+    </div>
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
     <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音 | A-J 彈鋼琴</p>
     
