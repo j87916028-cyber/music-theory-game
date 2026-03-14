@@ -644,7 +644,7 @@ function level4Question() {
             // 例如 blackKeyIndex=1 表示在 Do(第0個白鍵) 之後，即 Do♯
             // 正確公式：N * 白鍵寬度 - 黑鍵寬度的一半
             const leftPos = k.blackKeyIndex * whiteKeyWidth - (blackKeyWidth / 2);
-            return `<div class="key black" style="left:${leftPos}px" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})" role="button" aria-label="${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}"></div>`;
+            return `<div class="key black" style="left:${leftPos}px" data-note="${k.note}" title="${k.note} (${k.key.toUpperCase()})" role="button" aria-label="${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0"></div>`;
         } else {
             const isHighlight = activeKeys.includes(k.note);
             return `<div class="key ${isHighlight?'highlight':''}" data-note="${k.note}" role="button" aria-label="${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}" tabindex="0">${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span></div>`;
