@@ -965,12 +965,7 @@
             { name: 'Dm和弦', notes: ['Re','Fa','La'], symbol: 'Dm' }
         ];
 
-        // Level 4 鋼琴鍵盤優化：將重複使用的常量和函數移到模組級別
-        // 避免每次調用 level4Question 時重新創建
-        const chordKeyMap = {
-            'Do': 'Do', 'Re': 'Re', 'Mi': 'Mi', 'Fa': 'Fa', 
-            'Sol': 'Sol', 'La': 'La', 'Si': 'Si'
-        };
+        // Level 4 鋼琴鍵盤音符名稱映射（原 chordKeyMap 冗餘，已移除）
 
         // 從 CSS 變數獲取鍵盤尺寸（快取計算結果）
         function getKeyWidths() {
@@ -1080,8 +1075,8 @@
             currentQuestion = chord.name;
             currentOptions = chords.map(c => c.name); // 儲存選項順序
             
-            // 使用模組級別的 chordKeyMap（無需每次創建新物件）
-            const activeKeys = chord.notes.map(n => chordKeyMap[n]);
+            // 直接使用 chord.notes（冗餘的 chordKeyMap 已移除）
+            const activeKeys = chord.notes;
             
             // 使用模組級別的 getKeyWidths 函數
             const { white: whiteKeyWidth, black: blackKeyWidth } = getKeyWidths();
