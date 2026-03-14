@@ -59,6 +59,15 @@
             transform: scale(1.05);
             box-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
         }
+        /* 鍵盤焦點樣式 - 無障礙訪問 */
+        .level-btn:focus,
+        .option-btn:focus,
+        .sound-btn:focus,
+        .reset-btn:focus,
+        .help-btn:focus {
+            outline: 3px solid #ffd700;
+            outline-offset: 2px;
+        }
         .level-btn.active {
             background: linear-gradient(135deg, #ffd700, #ff8c00);
             color: #000;
@@ -431,9 +440,9 @@
         <button class="level-btn" onclick="setLevel(2)">📖 音名與唱名 (W)</button>
         <button class="level-btn" onclick="setLevel(3)">🎼 節奏練習 (E)</button>
         <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識 (R)</button>
-        <button class="sound-btn active" id="soundToggle" onclick="toggleSound()" title="切換音效">🔊</button>
-        <button class="reset-btn" onclick="resetProgress()" title="重置進度">🗑️</button>
-        <button class="help-btn" onclick="showHelp()" title="鍵盤快捷鍵">❓</button>
+        <button class="sound-btn active" id="soundToggle" onclick="toggleSound()" title="切換音效" aria-label="切換音效">🔊</button>
+        <button class="reset-btn" onclick="resetProgress()" title="重置進度" aria-label="重置遊戲進度">🗑️</button>
+        <button class="help-btn" onclick="showHelp()" title="鍵盤快捷鍵" aria-label="顯示鍵盤快捷鍵說明">❓</button>
     </div>
     
     <div class="score-display">分數: <span id="score">0</span> | 連續答對: <span id="streakCount">0</span>🔥</div>
@@ -441,7 +450,7 @@
     <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音 | A-J 彈鋼琴</p>
     
     <div id="gameArea">
-        <div class="feedback" id="feedback"></div>
+        <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
         <div id="questionArea"></div>
     </div>
     
@@ -759,13 +768,16 @@
             bindPianoEvents();
         }
         
-        // 綁定鋼琴鍵盤事件 - 使用 document 層級的事件委託
-        // 這樣即使 DOM 更換（每次換題目時），事件監聽器仍然有效
+        // 鋼琴事件綁定狀態追蹤 - 修復：只在 Level 4 第一次載入時綁定事件
         let pianoEventsBound = false;
         
         function bindPianoEvents() {
-            // 避免重複綁定事件
-            if (pianoEventsBound) return;
+            // 修復：只有在 currentLevel === 4 時才綁定鋼琴事件
+            // 因為使用 document 層級的事件委託，所以綁定一次就足夠
+            // 避免在 Level 1-3 時過早標記為已綁定，導致 Level 4 時鋼琴事件失效
+            if (currentLevel !== 4) return;
+            
+            if (pianoEventsBound) return; // 避免重複綁定事件監聽器
             pianoEventsBound = true;
             
             // 使用 document 層級的事件委託
