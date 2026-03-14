@@ -624,7 +624,10 @@ const pianoKeys = [
 function level4Question() {
     const chord = chords[Math.floor(Math.random() * chords.length)];
     currentQuestion = chord.name;
-    currentOptions = shuffleArray(chords.map(c => c.name)); // 洗牌選項順序
+    
+    // 洗牌選項順序，確保 currentOptions 與按鈕渲染順序一致
+    const shuffledChords = shuffleArray([...chords]);
+    currentOptions = shuffledChords.map(c => c.name);
     
     // 直接使用 chord.notes
     const activeKeys = chord.notes;
@@ -647,7 +650,7 @@ function level4Question() {
             ${pianoHtml}
         </div>
         <div class="options">
-            ${chords.map((c, i) => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${i+1}. ${c.name}</button>`).join('')}
+            ${shuffledChords.map((c, i) => `<button class="option-btn" onclick="checkAnswer('${c.name}','${chord.name}')">${i+1}. ${c.name}</button>`).join('')}
         </div>
     `;
     document.getElementById('questionArea').innerHTML = html;
