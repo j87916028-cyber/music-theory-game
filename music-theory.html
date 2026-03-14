@@ -421,6 +421,17 @@
         }
         .streak.show { display: block; animation: pulse 0.5s; will-change: transform; }
         @keyframes pulse { 0% { transform: scale(0.5); } 100% { transform: scale(1); } }
+        
+        /* 新記錄達成動畫 */
+        .new-record {
+            animation: recordFlash 0.6s ease-out;
+        }
+        @keyframes recordFlash {
+            0% { transform: scale(1); color: inherit; }
+            50% { transform: scale(1.4); color: #ffd700; text-shadow: 0 0 20px #ffd700; }
+            100% { transform: scale(1); color: inherit; }
+        }
+        
         .welcome-back {
             position: fixed;
             top: 20px;
@@ -458,7 +469,11 @@
     <div class="score-display">
         <span title="總得分">🏆 <span id="score">0</span></span>
         <span style="margin: 0 10px;">|</span>
+        <span title="最高分">⭐ <span id="highScore">0</span></span>
+        <span style="margin: 0 10px;">|</span>
         <span title="連續答對">🔥 <span id="streakCount">0</span></span>
+        <span style="margin: 0 10px;">|</span>
+        <span title="最佳連擊">💪 <span id="bestStreak">0</span></span>
         <span style="margin: 0 10px;">|</span>
         <span title="答題正確率">🎯 <span id="accuracy">0</span>%</span>
     </div>
@@ -522,6 +537,8 @@
                     return {
                         score: Math.min(Math.max(parseInt(data.score) || 0, 0), 999999),
                         streak: Math.min(Math.max(parseInt(data.streak) || 0, 0), 999),
+                        highScore: Math.min(Math.max(parseInt(data.highScore) || 0, 0), 999999),
+                        bestStreak: Math.min(Math.max(parseInt(data.bestStreak) || 0, 0), 999),
                         currentLevel: Math.min(Math.max(parseInt(data.currentLevel) || 1, 1), 4),
                         questionsAnswered: Math.max(parseInt(data.questionsAnswered) || 0, 0),
                         correctAnswers: Math.max(parseInt(data.correctAnswers) || 0, 0),
@@ -585,6 +602,8 @@
                 const data = {
                     score: Math.min(score, 999999), // 分數上限保護
                     streak: Math.min(streak, 999),
+                    highScore: Math.min(Math.max(highScore, 0), 999999),
+                    bestStreak: Math.min(Math.max(bestStreak, 0), 999),
                     currentLevel: currentLevel,
                     questionsAnswered: questionsAnswered,
                     correctAnswers: correctAnswers,
@@ -602,6 +621,8 @@
                 const data = {
                     score: Math.min(score, 999999), // 分數上限保護
                     streak: Math.min(streak, 999),
+                    highScore: Math.min(Math.max(highScore, 0), 999999),
+                    bestStreak: Math.min(Math.max(bestStreak, 0), 999),
                     currentLevel: currentLevel,
                     questionsAnswered: questionsAnswered,
                     correctAnswers: correctAnswers,
@@ -623,10 +644,14 @@
             localStorage.removeItem('musicTheoryProgress');
             score = 0;
             streak = 0;
+            highScore = 0;
+            bestStreak = 0;
             currentLevel = 1;
             questionsAnswered = 0;
             correctAnswers = 0;
             document.getElementById('accuracy').textContent = 0;
+            document.getElementById('highScore').textContent = 0;
+            document.getElementById('bestStreak').textContent = 0;
             updateUI();
             setLevel(1);
         }
@@ -634,7 +659,9 @@
         // 更新 UI 顯示
         function updateUI() {
             document.getElementById('score').textContent = score;
+            document.getElementById('highScore').textContent = highScore;
             document.getElementById('streakCount').textContent = streak;
+            document.getElementById('bestStreak').textContent = bestStreak;
             // 計算並顯示正確率
             const accuracy = questionsAnswered > 0 ? Math.round((correctAnswers / questionsAnswered) * 100) : 0;
             document.getElementById('accuracy').textContent = accuracy;
@@ -645,6 +672,8 @@
         let savedProgress = loadProgress();
         let score = savedProgress ? savedProgress.score : 0;
         let streak = savedProgress ? savedProgress.streak : 0;
+        let highScore = savedProgress ? savedProgress.highScore : 0;
+        let bestStreak = savedProgress ? savedProgress.bestStreak : 0;
         let currentLevel = savedProgress ? savedProgress.currentLevel : 1;
         let questionsAnswered = savedProgress ? savedProgress.questionsAnswered : 0;
         let correctAnswers = savedProgress ? savedProgress.correctAnswers : 0;
@@ -1217,6 +1246,28 @@
                 score += pointsEarned;
                 streak++;
                 correctAnswers++;
+                
+                // 檢查並更新最高分記錄
+                if (score > highScore) {
+                    highScore = score;
+                    document.getElementById('highScore').textContent = highScore;
+                    // 播放新記錄動畫
+                    const hsEl = document.getElementById('highScore');
+                    hsEl.classList.remove('new-record');
+                    void hsEl.offsetWidth; // 觸發重繪
+                    hsEl.classList.add('new-record');
+                }
+                
+                // 檢查並更新最佳連擊記錄
+                if (streak > bestStreak) {
+                    bestStreak = streak;
+                    document.getElementById('bestStreak').textContent = bestStreak;
+                    // 播放新記錄動畫
+                    const bsEl = document.getElementById('bestStreak');
+                    bsEl.classList.remove('new-record');
+                    void bsEl.offsetWidth; // 觸發重繪
+                    bsEl.classList.add('new-record');
+                }
                 
                 // 顯示浮動分數提示
                 showFloatingScore(pointsEarned);
