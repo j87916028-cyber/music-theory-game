@@ -669,11 +669,13 @@
                     checkAnswer(option, correctAnswer);
                 }
             }
-            // Q/W/E/R 選擇關卡
-            if (e.key.toLowerCase() === 'q') setLevel(1);
-            if (e.key.toLowerCase() === 'w') setLevel(2);
-            if (e.key.toLowerCase() === 'e') setLevel(3);
-            if (e.key.toLowerCase() === 'r') setLevel(4);
+            // Q/W/E/R 選擇關卡（Level 4 除外，避免與鋼琴鍵盤快捷鍵衝突）
+            if (currentLevel !== 4) {
+                if (e.key.toLowerCase() === 'q') setLevel(1);
+                if (e.key.toLowerCase() === 'w') setLevel(2);
+                if (e.key.toLowerCase() === 'e') setLevel(3);
+                if (e.key.toLowerCase() === 'r') setLevel(4);
+            }
             // 空白鍵播放聲音
             if (e.key === ' ' && currentQuestion) {
                 e.preventDefault();
