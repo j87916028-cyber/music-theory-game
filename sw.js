@@ -5,7 +5,9 @@ const ASSETS_TO_CACHE = [
     './index.html',
     './music-theory.html',
     './game.js',
-    './style.css'
+    './style.css',
+    // 快取 Google Fonts 以支援離線顯示
+    'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap'
 ];
 
 // 安裝事件 - 快取靜態資源
@@ -38,9 +40,53 @@ self.addEventListener('activate', (event) => {
 
 // 請求事件 - 優先使用快取，失敗時回退網路
 self.addEventListener('fetch', (event) => {
+    const url = new URL(event.request.url);
+
+    // 處理 Google Fonts 的特殊快取策略
+    if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
+        event.respondWith(
+            caches.open(CACHE_NAME).then((cache) => {
+                return cache.match(event.request).then((response) => {
+                    if (response) {
+                        return response;
+                    }
+                    return fetch(event.request).then((networkResponse) => {
+                        // 快取字體資源以便離線使用
+                        if (networkResponse && networkResponse.status === 200) {
+                            cache.put(event.request, networkResponse.clone());
+                        }
+                        return networkResponse;
+                    });
+                });
+            })
+        );
+        return;
+    }
+
     // 跳過非 GET 請求
     if (event.request.method !== 'GET') return;
 
+    // 處理導航請求（HTML 頁面）- 使用網路優先策略
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .then((response) => {
+                    // 成功取得後快取結果
+                    const responseClone = response.clone();
+                    caches.open(CACHE_NAME).then((cache) => {
+                        cache.put(event.request, responseClone);
+                    });
+                    return response;
+                })
+                .catch(() => {
+                    // 離線時回退到快取的首頁
+                    return caches.match('./music-theory.html');
+                })
+        );
+        return;
+    }
+
+    // 處理其他資源 - 使用快取優先策略
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
@@ -51,7 +97,7 @@ self.addEventListener('fetch', (event) => {
                 return fetch(event.request)
                     .then((response) => {
                         // 不快取 opaque response 或錯誤回應
-                        if (!response || response.status !== 200 || response.type !== 'basic') {
+                        if (!response || response.status !== 200) {
                             return response;
                         }
 
