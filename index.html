@@ -209,7 +209,22 @@
         let gameScore = 0, gameCombo = 0, currentMode = '', currentQuestion = null, questionsAnswered = 0, correctThisRound = 0, perfectChecked = false;
         
         function calcLevel(xp) { let level = 1, needXP = 50; while (xp >= needXP) { xp -= needXP; level++; needXP = Math.floor(needXP * 1.5); } return { level, currentXP: xp, needXP }; }
-        function saveData() { localStorage.setItem('musicXP', playerData.xp); localStorage.setItem('musicCoins', playerData.coins); localStorage.setItem('musicStreak', playerData.dayStreak); localStorage.setItem('musicLastLogin', playerData.lastLogin); localStorage.setItem('musicPlayed', playerData.totalPlayed); localStorage.setItem('musicAchievements', JSON.stringify(playerData.achievements)); localStorage.setItem('musicInstruments', JSON.stringify(playerData.instruments)); localStorage.setItem('musicEquipped', playerData.equippedInstrument); localStorage.setItem('musicDailyQuests', JSON.stringify(playerData.dailyQuests)); }
+        function saveData() {
+            if (!storageAvailable) return;
+            try {
+                localStorage.setItem('musicXP', playerData.xp);
+                localStorage.setItem('musicCoins', playerData.coins);
+                localStorage.setItem('musicStreak', playerData.dayStreak);
+                localStorage.setItem('musicLastLogin', playerData.lastLogin);
+                localStorage.setItem('musicPlayed', playerData.totalPlayed);
+                localStorage.setItem('musicAchievements', JSON.stringify(playerData.achievements));
+                localStorage.setItem('musicInstruments', JSON.stringify(playerData.instruments));
+                localStorage.setItem('musicEquipped', playerData.equippedInstrument);
+                localStorage.setItem('musicDailyQuests', JSON.stringify(playerData.dailyQuests));
+            } catch(e) {
+                console.warn('儲存資料失敗:', e);
+            }
+        }
         
         function updateUI() {
             const { level, currentXP, needXP } = calcLevel(playerData.xp);
@@ -517,7 +532,7 @@ function t(key) { return translations[currentLang]?.[key] || translations['zh-TW
 function toggleLang() {
     let idx = langOrder.indexOf(currentLang);
     currentLang = langOrder[(idx + 1) % langOrder.length];
-    localStorage.setItem('musicLang', currentLang);
+    try { localStorage.setItem('musicLang', currentLang); } catch(e) { console.warn('儲存語言設定失敗:', e); }
     document.getElementById('langLabel').textContent = langNames[currentLang];
     updateAllTexts();
 }
@@ -796,7 +811,7 @@ function weeklyQuest() {
     if (questionsAnswered >= 20) {
         // 挑戰完成
         const weekNum = getWeekNumber();
-        localStorage.setItem('weeklyChallenge', weekNum);
+        try { localStorage.setItem('weeklyChallenge', weekNum); } catch(e) { console.warn('儲存週挑戰失敗:', e); }
         const reward = 200 + gameScore;
         playerData.coins += reward;
         playerData.xp += 100;
@@ -893,9 +908,9 @@ function showSettings() {
 
 let soundOn = true, bgmOn = false, vibrateOn = true;
 
-function toggleSound(val) { soundOn = val; localStorage.setItem('soundOn', val); }
-function toggleBGM(val) { bgmOn = val; localStorage.setItem('bgmOn', val); }
-function toggleVibrate(val) { vibrateOn = val; localStorage.setItem('vibrateOn', val); }
+function toggleSound(val) { soundOn = val; try { localStorage.setItem('soundOn', val); } catch(e) { console.warn('儲存設定失敗:', e); } }
+function toggleBGM(val) { bgmOn = val; try { localStorage.setItem('bgmOn', val); } catch(e) { console.warn('儲存設定失敗:', e); } }
+function toggleVibrate(val) { vibrateOn = val; try { localStorage.setItem('vibrateOn', val); } catch(e) { console.warn('儲存設定失敗:', e); } }
 function adjustBrightness(val) { document.body.style.filter = 'brightness(' + (val/100) + ')'; }
 
 function resetProgress() {
@@ -907,9 +922,14 @@ function resetProgress() {
 
 // 載入設置
 function loadSettings() {
-    soundOn = localStorage.getItem('soundOn') !== 'false';
-    bgmOn = localStorage.getItem('bgmOn') === 'true';
-    vibrateOn = localStorage.getItem('vibrateOn') !== 'false';
+    if (!storageAvailable) return;
+    try {
+        soundOn = localStorage.getItem('soundOn') !== 'false';
+        bgmOn = localStorage.getItem('bgmOn') === 'true';
+        vibrateOn = localStorage.getItem('vibrateOn') !== 'false';
+    } catch(e) {
+        console.warn('載入設定失敗:', e);
+    }
 }
 
 // 添加設置按鈕
@@ -1050,7 +1070,7 @@ const progressData = JSON.parse(localStorage.getItem('musicProgress') || '{"ear"
 function updateProgress(mode, correct) {
     if (!progressData[mode]) progressData[mode] = 0;
     if (correct) progressData[mode]++;
-    localStorage.setItem('musicProgress', JSON.stringify(progressData));
+    try { localStorage.setItem('musicProgress', JSON.stringify(progressData)); } catch(e) { console.warn('儲存進度失敗:', e); }
 }
 
 // 顯示學習統計
@@ -1142,9 +1162,9 @@ checkAnswer = function(answer, correct) {
     else if (currentMode === 'scale') updateProgress('scale', isCorrect);
     
     // 最高連擊
-    const maxCombo = parseInt(localStorage.getItem('musicMaxCombo') || '0');
+    const maxCombo = parseInt(localStorage.getItem('musicMaxCombo') || '0', 10);
     if (gameCombo > maxCombo) {
-        localStorage.setItem('musicMaxCombo', gameCombo);
+        try { localStorage.setItem('musicMaxCombo', gameCombo); } catch(e) { console.warn('儲存最大連擊失敗:', e); }
     }
 };
 
@@ -1217,7 +1237,7 @@ function showWelcome() {
         }, 500);
     }
     
-    localStorage.setItem('lastVisit', now);
+    try { localStorage.setItem('lastVisit', now); } catch(e) { console.warn('儲存最後訪問時間失敗:', e); }
 }
 
 // 添加動畫
@@ -1490,7 +1510,7 @@ function showAdvancedPiano() {
 
 function switchInstrument(inst) {
     currentInstrument = inst;
-    localStorage.setItem('pianoInstrument', inst);
+    try { localStorage.setItem('pianoInstrument', inst); } catch(e) { console.warn('儲存樂器設定失敗:', e); }
     showAdvancedPiano();
 }
 
@@ -1815,7 +1835,7 @@ let currentTheme = localStorage.getItem('musicTheme') || 'dark';
 function applyTheme(themeName) {
     const theme = themes[themeName];
     currentTheme = themeName;
-    localStorage.setItem('musicTheme', themeName);
+    try { localStorage.setItem('musicTheme', themeName); } catch(e) { console.warn('儲存主題設定失敗:', e); }
     
     document.body.style.background = theme.bg;
     if (theme.text) {
@@ -2030,8 +2050,10 @@ function updatePracticeStreak() {
             newStreak = 1;
         }
         
-        localStorage.setItem('practiceStreak', newStreak);
-        localStorage.setItem('lastPracticeDate', today);
+        try {
+            localStorage.setItem('practiceStreak', newStreak);
+            localStorage.setItem('lastPracticeDate', today);
+        } catch(e) { console.warn('儲存練習連勝失敗:', e); }
         
         // 顯示連勝獎勵
         if (newStreak > 1) {
