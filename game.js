@@ -497,6 +497,7 @@ function bindPianoEvents() {
     // 綁定事件監聽器
     document.addEventListener('touchstart', pianoEventHandlers.touchstart, { passive: false });
     document.addEventListener('touchend', pianoEventHandlers.touchend, { passive: false });
+    document.addEventListener('touchcancel', pianoEventHandlers.touchcancel, { passive: false });
     document.addEventListener('mousedown', pianoEventHandlers.mousedown);
     document.addEventListener('mouseup', pianoEventHandlers.mouseup);
     document.addEventListener('mouseleave', pianoEventHandlers.mouseleave);
@@ -508,6 +509,7 @@ function cleanupPianoEvents() {
     
     document.removeEventListener('touchstart', pianoEventHandlers.touchstart);
     document.removeEventListener('touchend', pianoEventHandlers.touchend);
+    document.removeEventListener('touchcancel', pianoEventHandlers.touchcancel);
     document.removeEventListener('mousedown', pianoEventHandlers.mousedown);
     document.removeEventListener('mouseup', pianoEventHandlers.mouseup);
     document.removeEventListener('mouseleave', pianoEventHandlers.mouseleave);
@@ -516,6 +518,7 @@ function cleanupPianoEvents() {
     pianoEventsBound = false;
     pianoEventHandlers.touchstart = null;
     pianoEventHandlers.touchend = null;
+    pianoEventHandlers.touchcancel = null;
     pianoEventHandlers.mousedown = null;
     pianoEventHandlers.mouseup = null;
     pianoEventHandlers.mouseleave = null;
