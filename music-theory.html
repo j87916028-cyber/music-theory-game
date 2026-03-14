@@ -227,13 +227,6 @@
             border-color: #f44336 !important;
             opacity: 0.5;
         }
-        /* 鍵盤選擇時的視覺焦點 */
-        .option-btn.keyboard-focus {
-            background: rgba(255,215,0,0.4);
-            border-color: #ffd700;
-            box-shadow: 0 0 20px rgba(255,215,0,0.5);
-            transform: scale(1.05);
-        }
         .score-display {
             font-size: 1.5rem;
             margin-bottom: 20px;
@@ -260,6 +253,22 @@
         }
         .feedback.correct { color: #4caf50; animation: pop 0.3s; }
         .feedback.wrong { color: #f44336; animation: shake 0.3s; }
+        
+        /* 浮動分數動畫 */
+        .floating-score {
+            position: fixed;
+            font-size: 2rem;
+            font-weight: bold;
+            color: #ffd700;
+            text-shadow: 0 0 10px rgba(255, 215, 0, 0.8), 2px 2px 4px rgba(0,0,0,0.5);
+            pointer-events: none;
+            z-index: 1000;
+            animation: floatUp 1s ease-out forwards;
+        }
+        @keyframes floatUp {
+            0% { opacity: 1; transform: translateY(0) scale(1); }
+            100% { opacity: 0; transform: translateY(-80px) scale(1.3); }
+        }
         @keyframes pop { 0% { transform: scale(0); } 100% { transform: scale(1); } }
         @keyframes shake { 0%, 100% { transform: translateX(0); } 25% { transform: translateX(-10px); } 75% { transform: translateX(10px); } }
         
@@ -270,6 +279,23 @@
         @keyframes fadeIn {
             from { opacity: 0; transform: translateY(10px); }
             to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 鍵盤選擇時的視覺焦點 - 增強可見度 */
+        .option-btn.keyboard-focus {
+            background: rgba(255,215,0,0.5) !important;
+            border-color: #ffd700 !important;
+            box-shadow: 0 0 25px rgba(255,215,0,0.8), 0 0 50px rgba(255,215,0,0.4) !important;
+            transform: scale(1.08);
+            outline: none;
+        }
+        /* 鍵盤焦點脈動動畫 */
+        .option-btn.keyboard-focus {
+            animation: keyboardPulse 0.6s ease-in-out infinite;
+        }
+        @keyframes keyboardPulse {
+            0%, 100% { box-shadow: 0 0 25px rgba(255,215,0,0.8), 0 0 50px rgba(255,215,0,0.4); }
+            50% { box-shadow: 0 0 35px rgba(255,215,0,1), 0 0 70px rgba(255,215,0,0.6); }
         }
         .staff {
             font-size: 6rem;
@@ -876,6 +902,31 @@
             }
         }
         
+        // 顯示浮動分數動畫
+        function showFloatingScore(points) {
+            const scoreEl = document.createElement('div');
+            scoreEl.className = 'floating-score';
+            scoreEl.textContent = `+${points}`;
+            
+            // 定位到分數顯示區域附近
+            const scoreDisplay = document.querySelector('.score-display');
+            if (scoreDisplay) {
+                const rect = scoreDisplay.getBoundingClientRect();
+                scoreEl.style.left = (rect.left + rect.width / 2) + 'px';
+                scoreEl.style.top = (rect.bottom + 10) + 'px';
+            } else {
+                scoreEl.style.left = '50%';
+                scoreEl.style.top = '40%';
+            }
+            
+            document.body.appendChild(scoreEl);
+            
+            // 動畫結束後移除元素
+            setTimeout(() => {
+                scoreEl.remove();
+            }, 1000);
+        }
+        
         // 播放答錯時的音效
         function playWrongSound() {
             if (!soundEnabled) return;
@@ -1046,9 +1097,13 @@
             });
             
             if (isCorrect) {
-                score += 10 + streak * 2;
+                const pointsEarned = 10 + streak * 2;
+                score += pointsEarned;
                 streak++;
                 correctAnswers++;
+                
+                // 顯示浮動分數提示
+                showFloatingScore(pointsEarned);
                 
                 // 顯示連擊
                 if (streak >= 3) {
