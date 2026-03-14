@@ -81,7 +81,7 @@ h1 {
     will-change: transform;
 }
 
-.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover {
+.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover, .history-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-color);
     box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
@@ -95,6 +95,107 @@ h1 {
 
 .sound-btn.muted {
     opacity: 0.6;
+}
+
+/* 歷史記錄按鈕 */
+.history-btn {
+    padding: 12px 20px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 12px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
+}
+
+.history-btn:hover {
+    transform: translateY(-3px);
+    border-color: #9b59b6;
+    box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3);
+}
+
+/* 答題歷史列表樣式 */
+.history-list {
+    max-height: 400px;
+    overflow-y: auto;
+    margin-bottom: 15px;
+}
+
+.history-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px;
+    margin-bottom: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 10px;
+    border-left: 4px solid;
+}
+
+.history-item.correct {
+    border-left-color: var(--success-color);
+}
+
+.history-item.wrong {
+    border-left-color: var(--error-color);
+}
+
+.history-icon {
+    font-size: 1.5rem;
+    flex-shrink: 0;
+}
+
+.history-content {
+    flex: 1;
+    min-width: 0;
+}
+
+.history-level {
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-bottom: 4px;
+}
+
+.history-question {
+    font-size: 1rem;
+    margin-bottom: 4px;
+    word-break: break-word;
+}
+
+.history-answers {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.history-time {
+    font-size: 0.75rem;
+    color: rgba(255, 255, 255, 0.5);
+    margin-top: 4px;
+}
+
+.history-clear-btn {
+    width: 100%;
+    padding: 12px;
+    font-size: 1rem;
+    background: rgba(244, 67, 54, 0.3);
+    border: 2px solid var(--error-color);
+    border-radius: 10px;
+    color: var(--text-color);
+    cursor: pointer;
+    transition: background 0.3s ease;
+    margin-top: 10px;
+}
+
+.history-clear-btn:hover {
+    background: rgba(244, 67, 54, 0.5);
+}
+
+/* 歷史 Modal 容器 */
+.history-container {
+    max-height: 60vh;
+    overflow-y: auto;
 }
 
 /* 分數顯示 */
@@ -695,6 +796,7 @@ button:focus-visible, .key:focus-visible {
 .sound-btn:focus-visible,
 .reset-btn:focus-visible,
 .help-btn:focus-visible,
+.history-btn:focus-visible,
 .option-btn:focus-visible,
 .key:focus-visible {
     outline: 3px solid #ffd700;
@@ -712,12 +814,13 @@ button:focus-visible, .key:focus-visible {
     .level-btn:active,
     .sound-btn:active,
     .reset-btn:active,
-    .help-btn:active {
+    .help-btn:active,
+    .history-btn:active {
         transform: scale(0.95);
     }
     
     /* 觸控設備禁用長按選單 */
-    .option-btn, .level-btn, .key {
+    .option-btn, .level-btn, .history-btn, .key {
         -webkit-touch-callout: none;
         -webkit-user-select: none;
         user-select: none;

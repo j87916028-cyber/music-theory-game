@@ -349,6 +349,134 @@ let currentOptions = []; // 儲存當前題目的選項
 let soundEnabled = true; // 音效開關狀態
 let isAnswering = false; // 防止重複答題
 
+// ========== 答題歷史記錄功能 ==========
+const MAX_HISTORY = 20; // 最多保存20條記錄
+let answerHistory = []; // 答題歷史陣列
+
+// 儲存答題歷史到 localStorage
+function saveAnswerHistory() {
+    try {
+        localStorage.setItem('musicTheoryAnswerHistory', JSON.stringify(answerHistory));
+    } catch (e) {
+        console.warn('儲存答題歷史失敗:', e);
+    }
+}
+
+// 載入答題歷史
+function loadAnswerHistory() {
+    const saved = localStorage.getItem('musicTheoryAnswerHistory');
+    if (saved) {
+        try {
+            answerHistory = JSON.parse(saved);
+        } catch (e) {
+            console.error('載入答題歷史失敗:', e);
+            answerHistory = [];
+        }
+    }
+}
+
+// 添加答題記錄
+function addToHistory(question, userAnswer, correctAnswer, isCorrect, level) {
+    const record = {
+        question: question,
+        userAnswer: userAnswer,
+        correctAnswer: correctAnswer,
+        isCorrect: isCorrect,
+        level: level,
+        timestamp: new Date().toISOString()
+    };
+    answerHistory.unshift(record); // 新記錄添加到開頭
+    if (answerHistory.length > MAX_HISTORY) {
+        answerHistory = answerHistory.slice(0, MAX_HISTORY); // 保持最多20條
+    }
+    saveAnswerHistory();
+}
+
+// 顯示答題歷史 Modal
+function showAnswerHistory() {
+    loadAnswerHistory(); // 確保載入最新歷史
+    
+    const historyBtn = document.getElementById('historyBtn');
+    if (!historyBtn) return;
+    
+    let html = '';
+    
+    if (answerHistory.length === 0) {
+        html = '<p style="text-align:center;padding:20px;">還沒有答題記錄喔～</p>';
+    } else {
+        // 按關卡分組顯示
+        const levelNames = { 1: '🌱 認識音符', 2: '📖 音名與唱名', 3: '🎼 節奏練習', 4: '🎹 和弦認識' };
+        
+        html = '<div class="history-list">';
+        
+        answerHistory.forEach((record, index) => {
+            const levelName = levelNames[record.level] || `關卡${record.level}`;
+            const icon = record.isCorrect ? '✅' : '❌';
+            const time = new Date(record.timestamp).toLocaleTimeString('zh-TW', { hour: '2-digit', minute: '2-digit' });
+            
+            html += `
+                <div class="history-item ${record.isCorrect ? 'correct' : 'wrong'}">
+                    <div class="history-icon">${icon}</div>
+                    <div class="history-content">
+                        <div class="history-level">${levelName}</div>
+                        <div class="history-question">題目：${record.question}</div>
+                        <div class="history-answers">
+                            你的答案：${record.userAnswer} 
+                            ${!record.isCorrect ? `→ 正確答案：${record.correctAnswer}` : ''}
+                        </div>
+                        <div class="history-time">${time}</div>
+                    </div>
+                </div>
+            `;
+        });
+        
+        html += '</div>';
+        
+        // 添加清除歷史按鈕
+        html += '<button class="history-clear-btn" onclick="clearAnswerHistory()">🗑️ 清除歷史記錄</button>';
+    }
+    
+    // 創建或更新 Modal 內容
+    let modal = document.getElementById('historyModal');
+    if (!modal) {
+        // 創建 Modal
+        modal = document.createElement('div');
+        modal.id = 'historyModal';
+        modal.className = 'modal-overlay';
+        modal.innerHTML = `
+            <div class="modal">
+                <h2>📜 答題歷史</h2>
+                <div class="history-container"></div>
+                <button class="modal-close" onclick="closeAnswerHistory()">關閉</button>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+    
+    modal.querySelector('.history-container').innerHTML = html;
+    modal.classList.add('show');
+}
+
+// 關閉答題歷史 Modal
+function closeAnswerHistory() {
+    const modal = document.getElementById('historyModal');
+    if (modal) {
+        modal.classList.remove('show');
+    }
+}
+
+// 清除答題歷史
+function clearAnswerHistory() {
+    if (confirm('確定要清除所有答題歷史記錄嗎？')) {
+        answerHistory = [];
+        saveAnswerHistory();
+        showAnswerHistory(); // 重新顯示
+    }
+}
+
+// 初始化時載入歷史記錄
+loadAnswerHistory();
+
 // 初始化遊戲時長追蹤
 initPlayTime();
 
@@ -1149,6 +1277,9 @@ function checkAnswer(answer, correct) {
     
     const isCorrect = String(answer) === String(correct);
     questionsAnswered++;
+    
+    // 記錄答題歷史
+    addToHistory(currentQuestion, answer, correct, isCorrect, currentLevel);
     
     const feedback = getDomElement('feedback');
     feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
