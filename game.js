@@ -267,9 +267,12 @@ document.addEventListener('keydown', (e) => {
             // 找到當前和弦並播放
             const chord = chords.find(c => c.name === currentQuestion);
             if (chord) playChord(chord.notes.join(','));
+        } else if (currentLevel === 3) {
+            // 找到當前節奏並播放
+            const rhythm = rhythms.find(r => r.name === currentQuestion);
+            if (rhythm) playRhythm(rhythm);
         } else {
-            const note = currentLevel === 3 ? 'Do' : currentQuestion;
-            playNote(note);
+            playNote(currentQuestion);
         }
     }
     // Escape 鍵：Modal 開啟時關閉 Modal，否則重新開始當前關卡
@@ -514,11 +517,43 @@ function level2Question() {
 
 // 🎼 Level 3: 節奏練習
 const rhythms = [
-    { name: '四分音符', beats: 1, symbol: '♩' },
-    { name: '二分音符', beats: 2, symbol: '𝅗𝅥' },
-    { name: '全音符', beats: 4, symbol: '𝅝' },
-    { name: '八分音符', beats: 0.5, symbol: '♪' }
+    { name: '四分音符', beats: 1, symbol: '♩', duration: 0.5 },
+    { name: '二分音符', beats: 2, symbol: '𝅗𝅥', duration: 1.0 },
+    { name: '全音符', beats: 4, symbol: '𝅝', duration: 2.0 },
+    { name: '八分音符', beats: 0.5, symbol: '♪', duration: 0.25 }
 ];
+
+// 播放節奏音效
+function playRhythm(rhythm) {
+    if (!soundEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    
+    const duration = rhythm.duration || 0.5; // 使用 duration 控制節奏長度
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 440; // 使用較高頻率的正弦波
+    osc.type = 'sine';
+    
+    // 根據節奏長度調整音量包絡
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.02);
+    gain.gain.setValueAtTime(0.3, now + duration - 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+    
+    osc.start(now);
+    osc.stop(now + duration);
+    
+    // 修復記憶體洩漏
+    osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+    };
+}
 
 function level3Question() {
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
@@ -533,11 +568,20 @@ function level3Question() {
         <p class="hint">這個音符有幾拍？ (按 1-4 選答案)</p>
         <div class="note-display">${rhythm.symbol}</div>
         <p style="font-size:1.5rem;margin:20px 0;">${rhythm.name}</p>
+        <button onclick="playRhythmByName('${rhythm.name}')" style="font-size:3rem;background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
         <div class="options">
             ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')">${i+1}. ${n} 拍</button>`).join('')}
         </div>
     `;
     document.getElementById('questionArea').innerHTML = html;
+}
+
+// 根據名稱播放節奏（用於 HTML onclick）
+function playRhythmByName(name) {
+    const rhythm = rhythms.find(r => r.name === name);
+    if (rhythm) {
+        playRhythm(rhythm);
+    }
 }
 
 // 🎹 Level 4: 和弦認識
@@ -567,14 +611,15 @@ function playAnswerFeedback(isCorrect) {
             if (chord) {
                 playChord(chord.notes.join(','));
             }
-        } else {
-            // Level 1-3: 播放正確音符
-            let correctNote = currentQuestion;
-            if (currentLevel === 3) {
-                // Level 3: 節奏題 - 找出對應的音符名稱
-                const rhythm = rhythms.find(r => r.name === currentQuestion);
-                if (rhythm) correctNote = notes[0]; // 播放 Do 作為回饋
+        } else if (currentLevel === 3) {
+            // Level 3: 節奏題 - 播放正確答案的節奏
+            const rhythm = rhythms.find(r => r.name === currentQuestion);
+            if (rhythm) {
+                playRhythm(rhythm);
             }
+        } else {
+            // Level 1-2: 播放正確音符
+            let correctNote = currentQuestion;
             playNote(correctNote);
         }
     } else {
