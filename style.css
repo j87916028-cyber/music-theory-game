@@ -211,13 +211,14 @@ h1 {
 }
 
 /* 鋼琴鍵盤 - 使用 CSS Grid 實現更精確的黑鍵定位 */
+/* 使用 14-column grid: 每個白鍵佔 2 格，黑鍵佔 1 格放在中間 */
 .piano {
     position: relative;
     height: 150px;
     margin: 20px auto;
-    /* 使用 7 個白鍵的 grid 佈局，黑鍵使用 grid-column 定位 */
+    /* 14 columns: Do(2) Do♯(1) Re(2) Re♯(1) Mi(2) Fa(2) Fa♯(1) Sol(2) Sol♯(1) La(2) La♯(1) Si(2) */
     display: grid;
-    grid-template-columns: repeat(7, var(--white-key-width));
+    grid-template-columns: repeat(14, calc(var(--white-key-width) / 2));
     grid-template-rows: 1fr;
     justify-content: center;
 }
@@ -241,6 +242,11 @@ h1 {
     user-select: none;
 }
 
+/* 白鍵佔 2 格位置 */
+.piano .key:not(.black) {
+    grid-column: span 2;
+}
+
 .piano .key:hover {
     background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%);
 }
@@ -260,7 +266,9 @@ h1 {
     outline: none;
 }
 
-/* 黑鍵使用 grid 定位，放置在相應的白鍵之間 */
+/* 黑鍵定位 - 使用 grid-column 精確定位到白鍵之間 */
+/* 白鍵: Do=col1-2, Re=col3-4, Mi=col5-6, Fa=col7-8, Sol=col9-10, La=col11-12, Si=col13-14 */
+/* 黑鍵在中間: Do♯=col2, Re♯=col4, Fa♯=col8, Sol♯=col10, La♯=col12 */
 .piano .key.black {
     position: relative;
     width: var(--black-key-width);
@@ -272,15 +280,13 @@ h1 {
     font-size: 0.6rem;
     grid-row: 1;
     justify-self: center;
-    margin-top: -90px; /* 將黑鍵推到上方 */
 }
 
-/* 黑鍵定位到正確的 grid 位置 - 在相應白鍵之間 */
-.piano .key[data-note="Do♯"]   { grid-column: 1; }
-.piano .key[data-note="Re♯"]   { grid-column: 2; }
-.piano .key[data-note="Fa♯"]   { grid-column: 4; }
-.piano .key[data-note="Sol♯"]   { grid-column: 5; }
-.piano .key[data-note="La♯"]    { grid-column: 6; }
+.piano .key[data-note="Do♯"]   { grid-column: 2; }
+.piano .key[data-note="Re♯"]   { grid-column: 4; }
+.piano .key[data-note="Fa♯"]   { grid-column: 8; }
+.piano .key[data-note="Sol♯"]  { grid-column: 10; }
+.piano .key[data-note="La♯"]   { grid-column: 12; }
 
 .piano .key.black:hover {
     background: linear-gradient(to bottom, #444 0%, #222 100%);
