@@ -328,6 +328,10 @@ document.addEventListener('keyup', (e) => {
 
 function playNote(note) {
     if (!soundEnabled) return;
+    if (!note || typeof noteFreqs[note] === 'undefined') {
+        console.warn('Invalid note:', note);
+        return;
+    }
     const ctx = getAudioContext();
     if (!ctx) return;
     const osc = ctx.createOscillator();
@@ -650,6 +654,11 @@ function level4Question() {
 }
 
 function playPianoKey(note) {
+    // 檢查音符是否存在
+    if (!note || typeof pianoNoteFreqs[note] === 'undefined') {
+        console.warn('Invalid piano note:', note);
+        return;
+    }
     // 使用模組層面的 pianoNoteFreqs 物件（避免每次創建新物件）
     playPianoNote(pianoNoteFreqs[note] || 261.63);
 }
@@ -678,6 +687,11 @@ function playChord(notesStr) {
     
     // 同時創建多個振盪器，每個音符一個
     notes.forEach((noteName, i) => {
+        // 檢查音符是否存在
+        if (!noteName || typeof noteFreqs[noteName] === 'undefined') {
+            console.warn('Invalid chord note:', noteName);
+            return;
+        }
         const osc = ctx.createOscillator();
         const gain = ctx.createGain();
         
