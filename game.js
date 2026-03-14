@@ -351,6 +351,11 @@ function playNote(note) {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
     osc.start();
     osc.stop(ctx.currentTime + 0.5);
+    // 修復記憶體洩漏：節點停止後斷開連接
+    osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+    };
 }
 
 function setLevel(level) {
@@ -607,6 +612,11 @@ function playWrongSound() {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
     osc.start();
     osc.stop(ctx.currentTime + 0.3);
+    // 修復記憶體洩漏：節點停止後斷開連接
+    osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+    };
 }
 
 // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
@@ -729,6 +739,11 @@ function playPianoNote(freq) {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
     osc.start();
     osc.stop(ctx.currentTime + 0.5);
+    // 修復記憶體洩漏：節點停止後斷開連接
+    osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+    };
 }
 
 // 真正同時播放和弦（而非依次彈奏）
@@ -760,6 +775,11 @@ function playChord(notesStr) {
         
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + 0.8);
+        // 修復記憶體洩漏：節點停止後斷開連接
+        osc.onended = () => {
+            osc.disconnect();
+            gain.disconnect();
+        };
     });
 }
 
