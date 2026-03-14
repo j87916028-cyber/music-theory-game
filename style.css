@@ -826,3 +826,107 @@ button:focus-visible, .key:focus-visible {
         user-select: none;
     }
 }
+
+/* PWA 安裝提示樣式 */
+.install-prompt {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    z-index: 1000;
+    animation: slideUp 0.5s ease;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+    }
+}
+
+.install-prompt .install-content {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding: 15px 20px;
+    border-radius: 15px;
+    border: 2px solid rgba(255, 215, 0, 0.5);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.install-prompt .install-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+}
+
+.install-prompt .install-text {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.install-prompt .install-text strong {
+    color: #ffd700;
+    font-size: 1rem;
+}
+
+.install-prompt .install-text small {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.8rem;
+}
+
+.install-prompt .install-buttons {
+    display: flex;
+    gap: 10px;
+    margin-left: 10px;
+}
+
+.install-prompt .install-btn {
+    padding: 10px 20px;
+    background: linear-gradient(135deg, #4caf50, #45a049);
+    border: none;
+    border-radius: 8px;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.install-prompt .install-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(76, 175, 80, 0.4);
+}
+
+.install-prompt .dismiss-btn {
+    padding: 10px 15px;
+    background: rgba(255, 255, 255, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    border-radius: 8px;
+    color: rgba(255, 255, 255, 0.7);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.install-prompt .dismiss-btn:hover {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* 響應式設計 */
+@media (max-width: 500px) {
+    .install-prompt .install-content {
+        flex-direction: column;
+        text-align: center;
+        padding: 15px;
+        max-width: 90vw;
+    }
+    
+    .install-prompt .install-buttons {
+        margin-left: 0;
+        margin-top: 10px;
+    }
+}

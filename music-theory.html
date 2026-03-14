@@ -68,17 +68,112 @@
     <div class="streak" id="streakPopup"></div>
     <div class="welcome-back" id="welcomeBack"></div>
     
+    <!-- PWA 安裝提示 -->
+    <div class="install-prompt" id="installPrompt" style="display: none;">
+        <div class="install-content">
+            <span class="install-icon">📲</span>
+            <div class="install-text">
+                <strong>安裝音樂小學堂</strong>
+                <small>可以離線使用，像 App 一樣方便！</small>
+            </div>
+            <div class="install-buttons">
+                <button class="install-btn" id="installBtn">安裝</button>
+                <button class="dismiss-btn" id="dismissBtn">稍後</button>
+            </div>
+        </div>
+    </div>
+    
     <script src="game.js"></script>
+    
+    <!-- PWA 安裝提示邏輯 -->
+    <script>
+    (function() {
+        'use strict';
+        
+        var deferredPrompt = null;
+        
+        // 檢查是否已經安裝或選擇忽略
+        function checkInstallStatus() {
+            var isInstalled = window.matchMedia('(display-mode: standalone)').matches || 
+                              window.navigator.standalone === true;
+            var dismissedTime = localStorage.getItem('musicTheoryInstallDismissed');
+            var isDismissed = dismissedTime && parseInt(dismissedTime) > Date.now();
+            
+            return isInstalled || isDismissed;
+        }
+        
+        if (!checkInstallStatus()) {
+            // 監聽安裝提示事件
+            window.addEventListener('beforeinstallprompt', function(e) {
+                // 阻止瀏覽器默認提示
+                e.preventDefault();
+                // 保存事件以便後續使用
+                deferredPrompt = e;
+                
+                // 顯示自定義安裝提示（延遲顯示，避免影響初始體驗）
+                setTimeout(function() {
+                    var promptEl = document.getElementById('installPrompt');
+                    if (promptEl) {
+                        promptEl.style.display = 'block';
+                    }
+                }, 5000);
+            });
+        }
+        
+        // 安裝按鈕點擊處理
+        document.getElementById('installBtn').addEventListener('click', function() {
+            if (!deferredPrompt) return;
+            
+            // 顯示安裝提示
+            deferredPrompt.prompt();
+            
+            // 等待用戶回應
+            deferredPrompt.userChoice.then(function(choiceResult) {
+                // 隱藏提示
+                var promptEl = document.getElementById('installPrompt');
+                if (promptEl) {
+                    promptEl.style.display = 'none';
+                }
+                
+                // 清除事件
+                deferredPrompt = null;
+                
+                console.log('PWA 安裝結果:', choiceResult.outcome);
+            });
+        });
+        
+        // 稍後按鈕處理
+        document.getElementById('dismissBtn').addEventListener('click', function() {
+            var promptEl = document.getElementById('installPrompt');
+            if (promptEl) {
+                promptEl.style.display = 'none';
+            }
+            // 記住用戶選擇，7天內不再顯示
+            var expiry = new Date();
+            expiry.setDate(expiry.getDate() + 7);
+            localStorage.setItem('musicTheoryInstallDismissed', expiry.getTime().toString());
+        });
+        
+        // 監聽安裝成功事件
+        window.addEventListener('appinstalled', function() {
+            var promptEl = document.getElementById('installPrompt');
+            if (promptEl) {
+                promptEl.style.display = 'none';
+            }
+            console.log('PWA 安裝成功！');
+        });
+    })();
+    </script>
     
     <!-- Service Worker 註冊 -->
     <script>
         if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
+            window.addEventListener('load', function() {
                 navigator.serviceWorker.register('./sw.js')
-                    .then((registration) => {
+                    .then(function(registration) {
                         console.log('Service Worker 註冊成功:', registration.scope);
                     })
-                    .catch((error) => {
+                    .catch(function(error) {
                         console.warn('Service Worker 註冊失敗:', error);
                     });
             });
