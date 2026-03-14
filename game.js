@@ -1068,6 +1068,13 @@ function checkAnswer(answer, correct) {
             popup.textContent = `🔥 ${streak}連擊！`;
             popup.classList.add('show');
             setTimeout(() => popup.classList.remove('show'), 1000);
+        } else if (streak === 2) {
+            // 即將達成連擊！給予視覺提示
+            const popup = getDomElement('streakPopup');
+            popup.textContent = `💫 再答對一題就是連擊！`;
+            popup.classList.add('show');
+            popup.style.background = 'rgba(255, 215, 0, 0.3)';
+            setTimeout(() => popup.classList.remove('show'), 1500);
         }
     } else {
         streak = 0;
