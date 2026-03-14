@@ -243,15 +243,22 @@ document.addEventListener('keydown', (e) => {
     }
     // Q/W/E/R 選擇關卡（Level 4 除外，避免與鋼琴鍵盤快捷鍵衝突）
     // 另外提供 1-4 數字鍵可以在所有關卡使用，切換更直覺
-    if (e.key === '1') setLevel(1);
-    if (e.key === '2') setLevel(2);
-    if (e.key === '3') setLevel(3);
-    if (e.key === '4') setLevel(4);
-    if (currentLevel !== 4) {
-        if (e.key.toLowerCase() === 'q') setLevel(1);
-        if (e.key.toLowerCase() === 'w') setLevel(2);
-        if (e.key.toLowerCase() === 'e') setLevel(3);
-        if (e.key.toLowerCase() === 'r') setLevel(4);
+    // 修復：只有在未答題時才能切換關卡，避免與答題快捷鍵衝突
+    if (!isAnswering) {
+        if (e.key === '1') setLevel(1);
+        if (e.key === '2') setLevel(2);
+        if (e.key === '3') setLevel(3);
+        if (e.key === '4') setLevel(4);
+        if (currentLevel !== 4) {
+            if (e.key.toLowerCase() === 'q') setLevel(1);
+            if (e.key.toLowerCase() === 'w') setLevel(2);
+            if (e.key.toLowerCase() === 'e') setLevel(3);
+            if (e.key.toLowerCase() === 'r') setLevel(4);
+        }
+    }
+    // N 鍵跳過當前題目（只在未答題時有效）
+    if (e.key.toLowerCase() === 'n' && !isAnswering) {
+        nextQuestion();
     }
     // 空白鍵播放聲音
     if (e.key === ' ' && currentQuestion) {
