@@ -343,7 +343,13 @@ document.addEventListener('keydown', (e) => {
                 // currentOptions 儲存的是音符名稱（如 "四分音符"），currentQuestion 也是名稱
                 // 無需額外轉換，直接比對字串
             }
-            checkAnswer(option, correctAnswer);
+            
+            // 延遲一點時間再答題，讓用戶能看到選擇的選項（視覺反饋）
+            // 同時播放按鍵音效提供聽覺反饋
+            playKeyPressSound();
+            setTimeout(() => {
+                checkAnswer(option, correctAnswer);
+            }, 150);
         }
     }
     // Q/W/E/R 選擇關卡（Level 4 除外，避免與鋼琴鍵盤快捷鍵衝突）
@@ -460,6 +466,27 @@ function playNote(note) {
     osc.start();
     osc.stop(ctx.currentTime + 0.5);
     // 修復記憶體洩漏：節點停止後斷開連接
+    osc.onended = () => {
+        osc.disconnect();
+        gain.disconnect();
+    };
+}
+
+// 按鍵音效 - 數字鍵按下時的輕脆提示音
+function playKeyPressSound() {
+    if (!soundEnabled) return;
+    const ctx = getAudioContext();
+    if (!ctx) return;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 800; // 較高的頻率，聽起來像輕脆的點擊聲
+    osc.type = 'sine';
+    gain.gain.setValueAtTime(0.1, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
+    osc.start();
+    osc.stop(ctx.currentTime + 0.08);
     osc.onended = () => {
         osc.disconnect();
         gain.disconnect();

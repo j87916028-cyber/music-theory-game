@@ -199,6 +199,8 @@ h1 {
 .option-btn.keyboard-focus {
     outline: 3px solid #ffd700;
     outline-offset: 2px;
+    background: rgba(255, 215, 0, 0.2) !important;
+    transform: scale(1.05);
 }
 
 .option-btn.correct {
