@@ -536,7 +536,10 @@ function level1Question() {
     
     const html = `
         <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？ (按 1-7 選答案)</p>
-        <button onclick="playNote('${correctNote}')" style="font-size:3rem;background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
+        <div class="play-buttons" style="display:flex;gap:15px;justify-content:center;align-items:center;margin:15px 0;">
+            <button onclick="playNote('${correctNote}')" style="font-size:3rem;background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
+            <button onclick="playNote('${correctNote}')" style="font-size:1.2rem;background:rgba(255,255,255,0.2);border:none;border-radius:15px;padding:10px 20px;cursor:pointer;">🔄 再聽一次</button>
+        </div>
         <div class="options">
             ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${i+1}. ${n}</button>`).join('')}
         </div>
