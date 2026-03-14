@@ -176,6 +176,18 @@ function showWelcomeBack(lastPlayed) {
     }, 5000);
 }
 
+// 顯示首次遊戲歡迎提示
+function showFirstTimeWelcome() {
+    const welcomeEl = document.getElementById('welcomeBack');
+    welcomeEl.innerHTML = `🎉 歡迎來到音樂小學堂！<br><small>點擊 🔊 播放音符，選擇正確答案開始學習～</small>`;
+    welcomeEl.classList.add('show');
+    
+    // 6秒後自動隱藏（給新用戶多一點時間閱讀）
+    setTimeout(() => {
+        welcomeEl.classList.remove('show');
+    }, 6000);
+}
+
 // Debounce 函數 - 避免頻繁寫入 localStorage
 function debounce(func, wait) {
     let timeout;
@@ -1129,6 +1141,9 @@ startPlayTimeTracker();
 // 顯示歡迎回來提示（如果有之前的記錄）
 if (savedProgress && savedProgress.lastPlayed) {
     showWelcomeBack(savedProgress.lastPlayed);
+} else {
+    // 首次遊戲，顯示歡迎提示
+    showFirstTimeWelcome();
 }
 
 // 顯示幫助 Modal
