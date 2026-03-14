@@ -550,6 +550,26 @@
             }
             return null;
         }
+        
+        // 遷移舊資料到新的 perLevelStats 結構（向後兼容性）
+        function migrateOldData() {
+            const saved = localStorage.getItem('musicTheoryProgress');
+            if (saved && !localStorage.getItem('musicTheoryPerLevelStats')) {
+                try {
+                    const data = JSON.parse(saved);
+                    const currentLevel = Math.min(Math.max(parseInt(data.currentLevel) || 1, 1), 4);
+                    // 將舊資料遷移到 perLevelStats
+                    perLevelStats[currentLevel] = {
+                        answered: Math.max(parseInt(data.questionsAnswered) || 0, 0),
+                        correct: Math.max(parseInt(data.correctAnswers) || 0, 0)
+                    };
+                    localStorage.setItem('musicTheoryPerLevelStats', JSON.stringify(perLevelStats));
+                } catch (e) {
+                    console.error('資料遷移失敗:', e);
+                }
+            }
+        }
+        migrateOldData();
 
         // 顯示歡迎回來提示
         function showWelcomeBack(lastPlayed) {
@@ -618,6 +638,12 @@
         // 立即儲存進度（用於需要立即保存的場景）
         function saveProgress() {
             try {
+                // 更新當前關卡的統計數據
+                perLevelStats[currentLevel] = {
+                    answered: questionsAnswered,
+                    correct: correctAnswers
+                };
+                
                 const data = {
                     score: Math.min(score, 999999), // 分數上限保護
                     streak: Math.min(streak, 999),
@@ -629,6 +655,8 @@
                     lastPlayed: new Date().toISOString()
                 };
                 localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
+                // 儲存每個關卡的獨立統計
+                localStorage.setItem('musicTheoryPerLevelStats', JSON.stringify(perLevelStats));
             } catch (e) {
                 console.warn('儲存進度失敗:', e);
             }
@@ -642,6 +670,7 @@
         // 清除儲存的進度
         function resetProgress() {
             localStorage.removeItem('musicTheoryProgress');
+            localStorage.removeItem('musicTheoryPerLevelStats');
             score = 0;
             streak = 0;
             highScore = 0;
@@ -649,6 +678,12 @@
             currentLevel = 1;
             questionsAnswered = 0;
             correctAnswers = 0;
+            perLevelStats = {
+                1: { answered: 0, correct: 0 },
+                2: { answered: 0, correct: 0 },
+                3: { answered: 0, correct: 0 },
+                4: { answered: 0, correct: 0 }
+            };
             document.getElementById('accuracy').textContent = 0;
             document.getElementById('highScore').textContent = 0;
             document.getElementById('bestStreak').textContent = 0;
@@ -841,14 +876,44 @@
             };
         }
         
+        // 每個關卡獨立的統計數據
+        let perLevelStats = {
+            1: { answered: 0, correct: 0 },
+            2: { answered: 0, correct: 0 },
+            3: { answered: 0, correct: 0 },
+            4: { answered: 0, correct: 0 }
+        };
+        
+        // 載入每個關卡的統計數據
+        function loadPerLevelStats() {
+            const saved = localStorage.getItem('musicTheoryPerLevelStats');
+            if (saved) {
+                try {
+                    perLevelStats = JSON.parse(saved);
+                    // 確保所有關卡鍵存在
+                    for (let i = 1; i <= 4; i++) {
+                        if (!perLevelStats[i]) {
+                            perLevelStats[i] = { answered: 0, correct: 0 };
+                        }
+                    }
+                } catch (e) {
+                    console.error('載入關卡統計失敗:', e);
+                }
+            }
+        }
+        loadPerLevelStats();
+        
         function setLevel(level) {
             currentLevel = level;
             document.querySelectorAll('.level-btn').forEach((btn, i) => {
                 btn.classList.toggle('active', i + 1 === level);
             });
-            questionsAnswered = 0;
-            correctAnswers = 0;
+            // 載入該關卡的統計數據
+            questionsAnswered = perLevelStats[level].answered;
+            correctAnswers = perLevelStats[level].correct;
+            streak = 0; // 連勝只重置當前關卡
             updateProgress();
+            updateUI();
             saveProgress();
             nextQuestion();
         }
