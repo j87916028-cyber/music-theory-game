@@ -170,7 +170,29 @@ function resetProgress() {
 function updateUI() {
     getDomElement('score').textContent = score;
     getDomElement('streakCount').textContent = streak;
+    updateAccuracy();
     updateProgress();
+}
+
+// 更新答對率顯示
+function updateAccuracy() {
+    const accuracyEl = getDomElement('accuracy');
+    if (questionsAnswered > 0) {
+        const accuracy = Math.round((correctAnswers / questionsAnswered) * 100);
+        accuracyEl.textContent = accuracy + '%';
+        
+        // 根據答對率顯示不同顏色
+        if (accuracy >= 80) {
+            accuracyEl.style.color = '#4caf50'; // 綠色
+        } else if (accuracy >= 50) {
+            accuracyEl.style.color = '#ffd700'; // 黃色
+        } else {
+            accuracyEl.style.color = '#ff6b6b'; // 紅色
+        }
+    } else {
+        accuracyEl.textContent = '0%';
+        accuracyEl.style.color = '';
+    }
 }
 
 // 初始化進度
@@ -961,6 +983,7 @@ function checkAnswer(answer, correct) {
 // 初始化 - 恢復儲存的進度
 getDomElement('score').textContent = score;
 getDomElement('streakCount').textContent = streak;
+updateAccuracy();
 updateProgress();
 setLevel(currentLevel);
 
