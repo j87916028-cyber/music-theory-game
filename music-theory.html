@@ -869,11 +869,11 @@
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
             osc.start();
             osc.stop(ctx.currentTime + 0.5);
-            // 斷開連接以避免記憶體洩漏
-            osc.onended = () => {
+            // 及時斷開連接以避免記憶體洩漏（使用 setTimeout 確保音頻播放完畢）
+            setTimeout(() => {
                 osc.disconnect();
                 gain.disconnect();
-            };
+            }, 600);
         }
         
         // 每個關卡獨立的統計數據
@@ -1170,11 +1170,11 @@
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
             osc.start();
             osc.stop(ctx.currentTime + 0.3);
-            // 斷開連接以避免記憶體洩漏
-            osc.onended = () => {
+            // 及時斷開連接以避免記憶體洩漏
+            setTimeout(() => {
                 osc.disconnect();
                 gain.disconnect();
-            };
+            }, 400);
         }
 
         // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
@@ -1251,11 +1251,11 @@
             gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
             osc.start();
             osc.stop(ctx.currentTime + 0.5);
-            // 斷開連接以避免記憶體洩漏
-            osc.onended = () => {
+            // 及時斷開連接以避免記憶體洩漏
+            setTimeout(() => {
                 osc.disconnect();
                 gain.disconnect();
-            };
+            }, 600);
         }
         
         // 真正同時播放和弦（而非依次彈奏）
@@ -1282,11 +1282,11 @@
                 
                 osc.start(ctx.currentTime);
                 osc.stop(ctx.currentTime + 0.8);
-                // 斷開連接以避免記憶體洩漏
-                osc.onended = () => {
+                // 及時斷開連接以避免記憶體洩漏
+                setTimeout(() => {
                     osc.disconnect();
                     gain.disconnect();
-                };
+                }, 900);
             });
         }
         
