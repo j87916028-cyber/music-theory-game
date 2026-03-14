@@ -610,7 +610,7 @@ function nextQuestion() {
     });
     
     // 使用 CSS class 觸发动畫（效能更好，不會移除事件監聽器）
-    const questionArea = document.getElementById('questionArea');
+    const questionArea = getDomElement('questionArea');
     questionArea.classList.remove('fade-in');
     // 強制重繪以重新觸發動畫
     void questionArea.offsetWidth;
@@ -749,7 +749,7 @@ function level1Question() {
             ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${i+1}. ${n}</button>`).join('')}
         </div>
     `;
-    document.getElementById('questionArea').innerHTML = html;
+    getDomElement('questionArea').innerHTML = html;
 }
 
 // 📖 Level 2: 音名與唱名
@@ -782,7 +782,7 @@ function level2Question() {
             ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')">${i+1}. ${n}</button>`).join('')}
         </div>
     `;
-    document.getElementById('questionArea').innerHTML = html;
+    getDomElement('questionArea').innerHTML = html;
 }
 
 // 🎼 Level 3: 節奏練習
@@ -843,7 +843,7 @@ function level3Question() {
             ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')">${i+1}. ${n} 拍</button>`).join('')}
         </div>
     `;
-    document.getElementById('questionArea').innerHTML = html;
+    getDomElement('questionArea').innerHTML = html;
 }
 
 // 根據名稱播放節奏（用於 HTML onclick）
@@ -1013,7 +1013,7 @@ function level4Question() {
     });
     
     // 使用 DOM 元素构建问题区域（DocumentFragment 減少迼回流）
-    const questionArea = document.getElementById('questionArea');
+    const questionArea = getDomElement('questionArea');
     questionArea.innerHTML = '';
     
     // 添加提示文字
