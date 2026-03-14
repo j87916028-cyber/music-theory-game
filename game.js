@@ -381,10 +381,13 @@ function nextQuestion() {
     document.querySelectorAll('.option-btn.keyboard-focus').forEach(btn => {
         btn.classList.remove('keyboard-focus');
     });
-    // 重新創建 questionArea 以觸發動畫
+    
+    // 使用 CSS class 觸发动畫（效能更好，不會移除事件監聽器）
     const questionArea = document.getElementById('questionArea');
-    const newArea = questionArea.cloneNode(false);
-    questionArea.parentNode.replaceChild(newArea, questionArea);
+    questionArea.classList.remove('fade-in');
+    // 強制重繪以重新觸發動畫
+    void questionArea.offsetWidth;
+    questionArea.classList.add('fade-in');
     
     switch(currentLevel) {
         case 1: level1Question(); break;

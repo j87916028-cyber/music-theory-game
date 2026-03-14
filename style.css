@@ -152,6 +152,11 @@ h1 {
     to { opacity: 1; transform: translateY(0); }
 }
 
+/* 使用 CSS class 觸发动畫（取代 DOM clone） */
+.fade-in {
+    animation: fadeIn 0.3s ease-out;
+}
+
 /* 選項按鈕 */
 .options {
     display: flex;
