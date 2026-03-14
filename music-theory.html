@@ -704,6 +704,15 @@
                     playNote(note);
                 }
             }
+            // Escape 鍵重新開始當前關卡
+            if (e.key === 'Escape') {
+                e.preventDefault();
+                questionsAnswered = 0;
+                correctAnswers = 0;
+                streak = 0;
+                updateProgress();
+                nextQuestion();
+            }
             // 鋼琴鍵盤快捷鍵 (Level 4)
             if (currentLevel === 4 && currentQuestion) {
                 const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
@@ -1243,6 +1252,7 @@
                 <li><span class="key-hint">1-7</span> 選擇答案（Level 1 選項）</li>
                 <li><span class="key-hint">1-4</span> 選擇答案（Level 2-4 選項）</li>
                 <li><span class="key-hint">空白</span> 播放當前音符/和弦</li>
+                <li><span class="key-hint">Esc</span> 重新開始當前關卡</li>
             </ul>
             
             <h3>🎮 關卡切換</h3>
