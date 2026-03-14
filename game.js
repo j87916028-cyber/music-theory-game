@@ -580,10 +580,16 @@ document.addEventListener('keydown', (e) => {
     // Escape 鍵：Modal 開啟時關閉 Modal，否則重新開始當前關卡
     if (e.key === 'Escape') {
         e.preventDefault();
-        const modal = getDomElement('helpModal');
-        if (modal.classList.contains('show')) {
+        const helpModal = getDomElement('helpModal');
+        const historyModal = document.getElementById('historyModal');
+        
+        // 檢查並關閉所有開啟的 Modal
+        if (helpModal && helpModal.classList.contains('show')) {
             closeHelp();
+        } else if (historyModal && historyModal.classList.contains('show')) {
+            closeAnswerHistory();
         } else {
+            // 沒有 Modal 開啟時，重新開始當前關卡
             questionsAnswered = 0;
             correctAnswers = 0;
             streak = 0;
@@ -1409,6 +1415,14 @@ function closeHelp() {
 document.getElementById('helpModal').addEventListener('click', (e) => {
     if (e.target.classList.contains('modal-overlay')) {
         closeHelp();
+    }
+});
+
+// 歷史記錄 Modal 點擊背景關閉
+document.addEventListener('click', (e) => {
+    const historyModal = document.getElementById('historyModal');
+    if (historyModal && e.target === historyModal) {
+        closeAnswerHistory();
     }
 });
 
