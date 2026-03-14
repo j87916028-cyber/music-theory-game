@@ -476,6 +476,17 @@
         const noteNames = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
         const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
         
+        // 鋼琴完整音符頻率（包含黑白鍵）- 模組層面定義避免重複創建
+        const pianoNoteFreqs = {
+            'Do': 261.63, 'Do♯': 277.18,
+            'Re': 293.66, 'Re♯': 311.13,
+            'Mi': 329.63,
+            'Fa': 349.23, 'Fa♯': 369.99,
+            'Sol': 392.00, 'Sol♯': 415.30,
+            'La': 440.00, 'La♯': 466.16,
+            'Si': 493.88
+        };
+        
         // 從 localStorage 載入儲存的進度
         function loadProgress() {
             const saved = localStorage.getItem('musicTheoryProgress');
@@ -1056,17 +1067,8 @@
         }
 
         function playPianoKey(note) {
-            // 映射鋼琴音符到頻率
-            const noteFreqMap = {
-                'Do': 261.63, 'Do♯': 277.18,
-                'Re': 293.66, 'Re♯': 311.13,
-                'Mi': 329.63,
-                'Fa': 349.23, 'Fa♯': 369.99,
-                'Sol': 392.00, 'Sol♯': 415.30,
-                'La': 440.00, 'La♯': 466.16,
-                'Si': 493.88
-            };
-            playPianoNote(noteFreqMap[note] || 261.63);
+            // 使用模組層面的 pianoNoteFreqs 物件（避免每次創建新物件）
+            playPianoNote(pianoNoteFreqs[note] || 261.63);
         }
 
         function playPianoNote(freq) {
