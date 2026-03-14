@@ -188,6 +188,56 @@ function showFirstTimeWelcome() {
     }, 6000);
 }
 
+// 每日簽到獎勵功能
+function checkDailyLogin() {
+    const today = new Date().toDateString(); // 取得今天的日期（不含時間）
+    const lastLoginDate = localStorage.getItem('musicTheoryLastLogin');
+    const loginRewardShown = localStorage.getItem('musicTheoryLoginReward');
+    
+    // 如果今天還沒領過簽到獎勵
+    if (lastLoginDate !== today) {
+        // 檢查是否是連續登入（前一天有登入過）
+        const yesterday = new Date();
+        yesterday.setDate(yesterday.getDate() - 1);
+        const yesterdayStr = yesterday.toDateString();
+        
+        let bonusPoints = 5; // 基礎獎勵
+        let rewardMessage = `🎁 每日簽到獎勵：+${bonusPoints} 分`;
+        
+        // 檢查是否是連續登入（增加獎勵）
+        if (lastLoginDate === yesterdayStr) {
+            // 計算連續登入天數
+            let streakDays = parseInt(localStorage.getItem('musicTheoryLoginStreak') || '0') + 1;
+            bonusPoints = 5 + Math.min(streakDays * 2, 15); // 最多額外 +15 分
+            rewardMessage = `🔥 連續登入 ${streakDays} 天！獎勵：+${bonusPoints} 分`;
+            localStorage.setItem('musicTheoryLoginStreak', streakDays.toString());
+        } else {
+            // 重置連續登入計數
+            localStorage.setItem('musicTheoryLoginStreak', '1');
+        }
+        
+        // 發放獎勵
+        score += bonusPoints;
+        saveProgress();
+        updateUI();
+        
+        // 顯示簽到獎勵提示
+        setTimeout(() => {
+            const welcomeEl = document.getElementById('welcomeBack');
+            welcomeEl.innerHTML = `${rewardMessage}<br><small>天天登入，獎勵翻倍！</small>`;
+            welcomeEl.classList.add('show');
+            welcomeEl.style.background = 'rgba(255, 215, 0, 0.9)'; // 金色背景
+            
+            setTimeout(() => {
+                welcomeEl.classList.remove('show');
+            }, 4000);
+        }, 1000);
+        
+        // 記錄今天已領取
+        localStorage.setItem('musicTheoryLastLogin', today);
+    }
+}
+
 // Debounce 函數 - 避免頻繁寫入 localStorage
 function debounce(func, wait) {
     let timeout;
@@ -1146,6 +1196,9 @@ if (savedProgress && savedProgress.lastPlayed) {
     // 首次遊戲，顯示歡迎提示
     showFirstTimeWelcome();
 }
+
+// 檢查每日簽到獎勵
+checkDailyLogin();
 
 // 顯示幫助 Modal
 function showHelp() {
