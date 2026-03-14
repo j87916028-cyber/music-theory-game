@@ -510,6 +510,16 @@ document.addEventListener('keyup', (e) => {
 
 // 鋼琴鍵盤的鍵盤彈奏事件（Enter/Space）— 已合併到主 keydown 監聽器
 
+// 鋼琴音色模擬：使用多個泛音讓聲音更真實
+// 泛音配置：頻率倍數 / 相對音量
+const pianoHarmonics = [
+    { ratio: 1, gain: 1.0 },    // 基頻
+    { ratio: 2, gain: 0.5 },    // 第二泛音 (八度)
+    { ratio: 3, gain: 0.25 },  // 第三泛音
+    { ratio: 4, gain: 0.125 }, // 第四泛音
+    { ratio: 5, gain: 0.0625 }  // 第五泛音
+];
+
 function playNote(note) {
     if (!soundEnabled) return;
     if (!note || typeof noteFreqs[note] === 'undefined') {
@@ -518,21 +528,38 @@ function playNote(note) {
     }
     const ctx = getAudioContext();
     if (!ctx) return;
-    const osc = ctx.createOscillator();
-    const gain = ctx.createGain();
-    osc.connect(gain);
-    gain.connect(ctx.destination);
-    osc.frequency.value = noteFreqs[note];
-    osc.type = 'sine';
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
-    osc.start();
-    osc.stop(ctx.currentTime + 0.5);
-    // 修復記憶體洩漏：節點停止後斷開連接
-    osc.onended = () => {
-        osc.disconnect();
-        gain.disconnect();
-    };
+    
+    const baseFreq = noteFreqs[note];
+    const masterGain = ctx.createGain();
+    masterGain.connect(ctx.destination);
+    masterGain.gain.setValueAtTime(0.3, ctx.currentTime);
+    masterGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.8);
+    
+    // 使用多個振盪器模擬鋼琴泛音
+    pianoHarmonics.forEach((harmonic, index) => {
+        const osc = ctx.createOscillator();
+        const oscGain = ctx.createGain();
+        
+        osc.connect(oscGain);
+        oscGain.connect(masterGain);
+        
+        osc.frequency.value = baseFreq * harmonic.ratio;
+        osc.type = index === 0 ? 'triangle' : 'sine'; // 基頻用三角波更有穿透力
+        oscGain.gain.setValueAtTime(harmonic.gain, ctx.currentTime);
+        
+        osc.start();
+        osc.stop(ctx.currentTime + 0.8);
+        
+        osc.onended = () => {
+            osc.disconnect();
+            oscGain.disconnect();
+        };
+    });
+    
+    // 確保 masterGain 也會被清理
+    setTimeout(() => {
+        masterGain.disconnect();
+    }, 1000);
 }
 
 // 按鍵音效 - 數字鍵按下時的輕脆提示音
