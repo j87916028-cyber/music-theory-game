@@ -49,7 +49,16 @@
         .main-container { width: 100%; max-width: 600px; background: rgba(255,255,255,0.05); border-radius: 25px; padding: 20px; margin: 15px 0; }
         .mode-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-bottom: 20px; }
         .mode-card { background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05)); border: 2px solid rgba(255,255,255,0.2); border-radius: 20px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.3s; will-change: transform; }
-        .mode-card:hover { transform: translateY(-5px); border-color: #ffd700; box-shadow: 0 10px 30px rgba(255,215,0,0.3); }
+        /* button.mode-card 用於可訪問性改進：使用 button 元素替代 div */
+        button.mode-card {
+            display: block;
+            width: 100%;
+            font-family: inherit;
+            color: inherit;
+        }
+        button.mode-card:hover { transform: translateY(-5px); border-color: #ffd700; box-shadow: 0 10px 30px rgba(255,215,0,0.3); }
+        button.mode-card:focus { outline: 2px solid #ffd700; outline-offset: 2px; }
+        button.mode-card:active { transform: translateY(-2px); }
         .mode-card.locked { opacity: 0.5; filter: grayscale(1); }
         .mode-card .icon { font-size: 3rem; margin-bottom: 10px; }
         .mode-card .name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
@@ -122,22 +131,22 @@
             </div>
             <div id="tabPlay" class="tab-content">
                 <div class="mode-grid">
-                    <div class="mode-card" onclick="startGame('ear')"><div class="icon">👂</div><div class="name">聽力大師</div><div class="desc">聽聲音猜音符</div></div>
-                    <div class="mode-card" onclick="startGame('note')"><div class="icon">🎵</div><div class="name">音符認識</div><div class="desc">認識音名與唱名</div></div>
-                    <div class="mode-card" onclick="startGame('rhythm')"><div class="icon">🥁</div><div class="name">節奏訓練</div><div class="desc">學習各種音符時值</div></div>
-                    <div class="mode-card" onclick="startGame('chord')"><div class="icon">🎹</div><div class="name">和弦教室</div><div class="desc">認識和弦組成</div></div>
-                    <div class="mode-card" onclick="startGame('scale')"><div class="icon">🎼</div><div class="name">音階練習</div><div class="desc">大小調音階</div></div>
-                    <div class="mode-card" id="bossCard" onclick="startGame('boss')"><div class="icon">👑</div><div class="name">BOSS戰</div><div class="desc">挑戰音樂BOSS</div><div class="lock" id="bossLock">🔒 Lv. 5</div></div>
-                    <div class="mode-card" onclick="startGame('weekly')">
+                    <button class="mode-card" type="button" onclick="startGame('ear')"><div class="icon">👂</div><div class="name">聽力大師</div><div class="desc">聽聲音猜音符</div></button>
+                    <button class="mode-card" type="button" onclick="startGame('note')"><div class="icon">🎵</div><div class="name">音符認識</div><div class="desc">認識音名與唱名</div></button>
+                    <button class="mode-card" type="button" onclick="startGame('rhythm')"><div class="icon">🥁</div><div class="name">節奏訓練</div><div class="desc">學習各種音符時值</div></button>
+                    <button class="mode-card" type="button" onclick="startGame('chord')"><div class="icon">🎹</div><div class="name">和弦教室</div><div class="desc">認識和弦組成</div></button>
+                    <button class="mode-card" type="button" onclick="startGame('scale')"><div class="icon">🎼</div><div class="name">音階練習</div><div class="desc">大小調音階</div></button>
+                    <button class="mode-card" id="bossCard" type="button" onclick="startGame('boss')"><div class="icon">👑</div><div class="name">BOSS戰</div><div class="desc">挑戰音樂BOSS</div><div class="lock" id="bossLock">🔒 Lv. 5</div></button>
+                    <button class="mode-card" type="button" onclick="startGame('weekly')">
                         <div class="icon">📊</div>
                         <div class="name">週挑戰</div>
                         <div class="desc">每週限時挑戰</div>
-                    </div>
-                    <div class="mode-card" onclick="startGame('practice')">
+                    </button>
+                    <button class="mode-card" type="button" onclick="startGame('practice')">
                         <div class="icon">🎯</div>
                         <div class="name">練習模式</div>
                         <div class="desc">無壓力練習</div>
-                    </div>
+                    </button>
                 </div>
             </div>
             <div id="tabQuest" class="tab-content" style="display:none"><div id="dailyQuests"></div></div>
@@ -638,7 +647,7 @@ function showPiano() {
 }
 
 // 在首頁添加鋼琴按鈕
-const freePlayCard = '<div class="mode-card" id="freePlayCard" onclick="showPiano()"><div class="icon">🎹</div><div class="name" id="freePlayName">自由彈奏</div><div class="desc" id="freePlayDesc">隨意彈鋼琴</div></div>';
+const freePlayCard = '<button class="mode-card" type="button" id="freePlayCard" onclick="showPiano()"><div class="icon">🎹</div><div class="name" id="freePlayName">自由彈奏</div><div class="desc" id="freePlayDesc">隨意彈鋼琴</div></button>';
 document.querySelector('.mode-grid').insertAdjacentHTML('beforeend', freePlayCard);
 
 // 更新自由彈奏按鈕的翻譯
@@ -689,10 +698,10 @@ function practiceMode() {
     document.getElementById('gameHint').textContent = '🎯 練習模式 - 選一個項目';
     document.getElementById('gameContent').innerHTML = `
         <div class="mode-grid" style="margin-top:20px;">
-            <div class="mode-card" onclick="practiceEar()"><div class="icon">👂</div><div class="name">聽力練習</div></div>
-            <div class="mode-card" onclick="practiceNote()"><div class="icon">🎵</div><div class="name">音符練習</div></div>
-            <div class="mode-card" onclick="practiceRhythm()"><div class="icon">🥁</div><div class="name">節奏練習</div></div>
-            <div class="mode-card" onclick="practiceChord()"><div class="icon">🎹</div><div class="name">和弦練習</div></div>
+            <button class="mode-card" type="button" onclick="practiceEar()"><div class="icon">👂</div><div class="name">聽力練習</div></button>
+            <button class="mode-card" type="button" onclick="practiceNote()"><div class="icon">🎵</div><div class="name">音符練習</div></button>
+            <button class="mode-card" type="button" onclick="practiceRhythm()"><div class="icon">🥁</div><div class="name">節奏練習</div></button>
+            <button class="mode-card" type="button" onclick="practiceChord()"><div class="icon">🎹</div><div class="name">和弦練習</div></button>
         </div>
     `;
 }
@@ -1786,7 +1795,7 @@ rhythmCSS.textContent = '@keyframes beatFall { 0% { bottom: 300px; opacity: 0; }
 document.head.appendChild(rhythmCSS);
 
 // 添加按鈕
-document.querySelector('.mode-grid').innerHTML += '<div class="mode-card" onclick="showRhythmGame()"><div class="icon">🥁</div><div class="name">節奏遊戲</div><div class="desc">敲擊節拍！</div></div>';
+document.querySelector('.mode-grid').innerHTML += '<button class="mode-card" type="button" onclick="showRhythmGame()"><div class="icon">🥁</div><div class="name">節奏遊戲</div><div class="desc">敲擊節拍！</div></button>';
 </script>
 
 <script>
@@ -2175,7 +2184,7 @@ function showQuizResult() {
 }
 
 // 添加按鈕
-document.querySelector('.mode-grid').innerHTML += '<div class="mode-card" onclick="showMusicQuiz()"><div class="icon">📚</div><div class="name">音樂知識</div><div class="desc">測試你的音樂素養</div></div>';
+document.querySelector('.mode-grid').innerHTML += '<button class="mode-card" type="button" onclick="showMusicQuiz()"><div class="icon">📚</div><div class="name">音樂知識</div><div class="desc">測試你的音樂素養</div></button>';
 </script>
 
 <script>
@@ -2272,7 +2281,7 @@ function flipCard(el, note, index) {
 }
 
 // 添加按鈕
-document.querySelector('.mode-grid').innerHTML += '<div class="mode-card" onclick="showMemoryGame()"><div class="icon">🧠</div><div class="name">記憶訓練</div><div class="desc">翻牌配對練習</div></div>';
+document.querySelector('.mode-grid').innerHTML += '<button class="mode-card" type="button" onclick="showMemoryGame()"><div class="icon">🧠</div><div class="name">記憶訓練</div><div class="desc">翻牌配對練習</div></button>';
 </script>
 
 <script>
