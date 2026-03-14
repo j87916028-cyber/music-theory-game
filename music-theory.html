@@ -34,6 +34,21 @@
     
     <script src="game.js"></script>
     
+    <!-- Service Worker 註冊 -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./sw.js')
+                    .then((registration) => {
+                        console.log('Service Worker 註冊成功:', registration.scope);
+                    })
+                    .catch((error) => {
+                        console.warn('Service Worker 註冊失敗:', error);
+                    });
+            });
+        }
+    </script>
+    
     <!-- 幫助 Modal -->
     <div class="modal-overlay" id="helpModal">
         <div class="modal">
