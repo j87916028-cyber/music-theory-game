@@ -310,6 +310,8 @@ h1 {
 
 .piano .key.black.playing {
     background: linear-gradient(to bottom, #666 0%, #333 100%);
+    transform: translateY(3px);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
 
 /* 連擊彈出 */
