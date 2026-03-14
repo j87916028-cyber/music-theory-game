@@ -365,9 +365,10 @@ document.addEventListener('keydown', (e) => {
         }
     }
     // Q/W/E/R 選擇關卡（Level 4 除外，避免與鋼琴鍵盤快捷鍵衝突）
-    // 另外提供 1-4 數字鍵可以在所有關卡使用，切換更直覺
-    // 修復：只有在未答題時才能切換關卡，避免與答題快捷鍵衝突
-    if (!isAnswering) {
+    // 數字鍵 1-4 也可用於關卡切換，但只有在小答題時才允許
+    // 修復：只有當沒有顯示答題選項時才允許切換關卡，避免與答題快捷鍵衝突
+    const hasActiveOptions = currentOptions && currentOptions.length > 0;
+    if (!isAnswering && !hasActiveOptions) {
         if (e.key === '1') setLevel(1);
         if (e.key === '2') setLevel(2);
         if (e.key === '3') setLevel(3);
