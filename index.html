@@ -197,7 +197,7 @@
         
         let playerData = { xp: parseInt(localStorage.getItem('musicXP') || '0'), coins: parseInt(localStorage.getItem('musicCoins') || '0'), level: 1, dayStreak: parseInt(localStorage.getItem('musicStreak') || '0'), lastLogin: localStorage.getItem('musicLastLogin') || '', totalPlayed: parseInt(localStorage.getItem('musicPlayed') || '0'), achievements: JSON.parse(localStorage.getItem('musicAchievements') || '[]'), instruments: JSON.parse(localStorage.getItem('musicInstruments') || '["piano"]'), equippedInstrument: localStorage.getItem('musicEquipped') || 'piano', dailyQuests: JSON.parse(localStorage.getItem('musicDailyQuests') || '{}'},
         
-        let gameScore = 0, gameCombo = 0, currentMode = '', currentQuestion = null, questionsAnswered = 0, correctThisRound = 0;
+        let gameScore = 0, gameCombo = 0, currentMode = '', currentQuestion = null, questionsAnswered = 0, correctThisRound = 0, perfectChecked = false;
         
         function calcLevel(xp) { let level = 1, needXP = 50; while (xp >= needXP) { xp -= needXP; level++; needXP = Math.floor(needXP * 1.5); } return { level, currentXP: xp, needXP }; }
         function saveData() { localStorage.setItem('musicXP', playerData.xp); localStorage.setItem('musicCoins', playerData.coins); localStorage.setItem('musicStreak', playerData.dayStreak); localStorage.setItem('musicLastLogin', playerData.lastLogin); localStorage.setItem('musicPlayed', playerData.totalPlayed); localStorage.setItem('musicAchievements', JSON.stringify(playerData.achievements)); localStorage.setItem('musicInstruments', JSON.stringify(playerData.instruments)); localStorage.setItem('musicEquipped', playerData.equippedInstrument); localStorage.setItem('musicDailyQuests', JSON.stringify(playerData.dailyQuests)); }
@@ -269,7 +269,12 @@
         function checkQuests() {
             playerData.dailyQuests.quests.forEach(q => {
                 if (q.id === 'play10' && q.progress < q.target) { q.progress++; if (q.progress >= q.target) { playerData.coins += q.reward; showFeedback('+' + q.reward + '💰 任務完成！', '#ffd700'); } }
-                if (q.id === 'perfect3' && correctThisRound >= 3 && q.progress < q.target) { q.progress++; if (q.progress >= q.target) { playerData.coins += q.reward; showFeedback('+' + q.reward + '💰 任務完成！', '#ffd700'); } }
+                // 修復：每輪只計算一次「3題全對」，避免重複計算
+                if (q.id === 'perfect3' && correctThisRound >= 3 && q.progress < q.target && !perfectChecked) { 
+                    q.progress++; 
+                    perfectChecked = true; // 標記這輪已計算
+                    if (q.progress >= q.target) { playerData.coins += q.reward; showFeedback('+' + q.reward + '💰 任務完成！', '#ffd700'); } 
+                }
             });
             saveData(); updateQuests();
         }
@@ -302,7 +307,7 @@
         
         function showHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('gameArea').classList.remove('active'); document.getElementById('backBtn').style.display = 'none'; updateUI(); }
         
-        function startGame(mode) { currentMode = mode; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; document.getElementById('homePage').style.display = 'none'; document.getElementById('gameArea').classList.add('active'); document.getElementById('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
+        function startGame(mode) { currentMode = mode; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false; document.getElementById('homePage').style.display = 'none'; document.getElementById('gameArea').classList.add('active'); document.getElementById('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
         
         function updateGameUI() { document.getElementById('gameScore').textContent = gameScore; document.getElementById('gameCombo').textContent = gameCombo; }
         
@@ -424,8 +429,8 @@
             
             questionsAnswered++; playerData.totalPlayed++;
             const isCorrect = String(answer) === String(correct);
-            if (isCorrect) { gameScore += 10 + gameCombo * 2; gameCombo++; correctThisRound++; playerData.coins += 5; playerData.xp += 3; playSound('correct'); showFeedback('✅', '#4caf50'); if (gameCombo >= 5) { playSound('coin'); showFeedback('🔥 ' + gameCombo + ' COMBO!', '#ffd700'); } }
-            else { gameCombo = 0; correctThisRound = 0; playSound('wrong'); showFeedback('❌', '#f44336'); }
+            if (isCorrect) { gameScore += 10 + gameCombo * 2; gameCombo++; correctThisRound++; if (correctThisRound === 1) perfectChecked = false; playerData.coins += 5; playerData.xp += 3; playSound('correct'); showFeedback('✅', '#4caf50'); if (gameCombo >= 5) { playSound('coin'); showFeedback('🔥 ' + gameCombo + ' COMBO!', '#ffd700'); } }
+            else { gameCombo = 0; correctThisRound = 0; perfectChecked = false; playSound('wrong'); showFeedback('❌', '#f44336'); }
             updateGameUI(); checkQuests(); saveData();
             // 延遲後重置冷卻狀態並載入下一題
             setTimeout(() => {
@@ -766,7 +771,7 @@ function weeklyChallenge() {
         document.getElementById('gameContent').innerHTML = '<div style="text-align:center;margin:30px;"><div style="font-size:4rem;">✅</div><div style="font-size:1.5rem;margin:20px;">挑戰完成！</div><button onclick="weeklyChallenge()" style="padding:15px 30px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:10px;font-size:1.2rem;cursor:pointer;">再玩一次</button></div>';
     } else {
         // 開始挑戰 - 20題限時
-        gameScore = 0; gameCombo = 0; questionsAnswered = 0;
+        gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false;
         document.getElementById('gameHint').textContent = '📊 週挑戰！目標：20題全對！';
         weeklyQuest();
     }
