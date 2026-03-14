@@ -681,6 +681,11 @@
                 }
             }
             // Q/W/E/R 選擇關卡（Level 4 除外，避免與鋼琴鍵盤快捷鍵衝突）
+            // 另外提供 1-4 數字鍵可以在所有關卡使用，切換更直覺
+            if (e.key === '1') setLevel(1);
+            if (e.key === '2') setLevel(2);
+            if (e.key === '3') setLevel(3);
+            if (e.key === '4') setLevel(4);
             if (currentLevel !== 4) {
                 if (e.key.toLowerCase() === 'q') setLevel(1);
                 if (e.key.toLowerCase() === 'w') setLevel(2);
@@ -1242,6 +1247,10 @@
             
             <h3>🎮 關卡切換</h3>
             <ul>
+                <li><span class="key-hint">1</span> 切換到 Level 1（音符識別）</li>
+                <li><span class="key-hint">2</span> 切換到 Level 2（音名與唱名）</li>
+                <li><span class="key-hint">3</span> 切換到 Level 3（節奏練習）</li>
+                <li><span class="key-hint">4</span> 切換到 Level 4（和弦認識）</li>
                 <li><span class="key-hint">Q</span> 切換到 Level 1（音符識別）</li>
                 <li><span class="key-hint">W</span> 切換到 Level 2（音名與唱名）</li>
                 <li><span class="key-hint">E</span> 切換到 Level 3（節奏練習）</li>
