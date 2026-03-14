@@ -266,14 +266,19 @@ document.addEventListener('keydown', (e) => {
             playNote(note);
         }
     }
-    // Escape 鍵重新開始當前關卡
+    // Escape 鍵：Modal 開啟時關閉 Modal，否則重新開始當前關卡
     if (e.key === 'Escape') {
         e.preventDefault();
-        questionsAnswered = 0;
-        correctAnswers = 0;
-        streak = 0;
-        updateProgress();
-        nextQuestion();
+        const modal = getDomElement('helpModal');
+        if (modal.classList.contains('show')) {
+            closeHelp();
+        } else {
+            questionsAnswered = 0;
+            correctAnswers = 0;
+            streak = 0;
+            updateProgress();
+            nextQuestion();
+        }
     }
     // 鋼琴鍵盤快捷鍵 (Level 4)
     if (currentLevel === 4 && currentQuestion) {
@@ -286,6 +291,15 @@ document.addEventListener('keydown', (e) => {
             if (keyElement) {
                 keyElement.classList.add('playing');
             }
+        }
+    }
+    // 鋼琴鍵盤的鍵盤彈奏事件（Enter/Space）- 支援 Tab 鍵導航後按 Enter/Space 彈奏
+    if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
+        const focusedKey = document.activeElement;
+        if (focusedKey && focusedKey.classList.contains('key') && focusedKey.dataset.note) {
+            e.preventDefault();
+            focusedKey.classList.add('playing');
+            playPianoKey(focusedKey.dataset.note);
         }
     }
 });
@@ -311,17 +325,7 @@ document.addEventListener('keyup', (e) => {
     }
 });
 
-// 鋼琴鍵盤的鍵盤彈奏事件（Enter/Space）
-document.addEventListener('keydown', (e) => {
-    if ((e.key === 'Enter' || e.key === ' ') && !e.repeat) {
-        const focusedKey = document.activeElement;
-        if (focusedKey && focusedKey.classList.contains('key') && focusedKey.dataset.note) {
-            e.preventDefault();
-            focusedKey.classList.add('playing');
-            playPianoKey(focusedKey.dataset.note);
-        }
-    }
-});
+// 鋼琴鍵盤的鍵盤彈奏事件（Enter/Space）— 已合併到主 keydown 監聽器
 
 function playNote(note) {
     if (!soundEnabled) return;
@@ -817,9 +821,4 @@ document.getElementById('helpModal').addEventListener('click', (e) => {
     }
 });
 
-// ESC 鍵關閉 Modal
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') {
-        closeHelp();
-    }
-});
+// ESC 鍵關閉 Modal — 已合併到主 keydown 監聽器
