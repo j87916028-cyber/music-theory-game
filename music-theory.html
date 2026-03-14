@@ -520,7 +520,37 @@
             }, 5000);
         }
 
-        // 儲存進度到 localStorage
+        // Debounce 函數 - 避免頻繁寫入 localStorage
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+        
+        // 儲存進度到 localStorage（Debounced 版本，延遲 500ms）
+        const saveProgressDebounced = debounce(() => {
+            try {
+                const data = {
+                    score: Math.min(score, 999999), // 分數上限保護
+                    streak: Math.min(streak, 999),
+                    currentLevel: currentLevel,
+                    questionsAnswered: questionsAnswered,
+                    correctAnswers: correctAnswers,
+                    lastPlayed: new Date().toISOString()
+                };
+                localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
+            } catch (e) {
+                console.warn('儲存進度失敗:', e);
+            }
+        }, 500);
+        
+        // 立即儲存進度（用於需要立即保存的場景）
         function saveProgress() {
             try {
                 const data = {
@@ -1120,8 +1150,8 @@
             document.getElementById('streakCount').textContent = streak;
             updateProgress();
             
-            // 儲存進度到 localStorage
-            saveProgress();
+            // 儲存進度到 localStorage（使用 Debounced 版本避免頻繁寫入）
+            saveProgressDebounced();
             
             // 答錯顯示正確答案
             if (!isCorrect) {
