@@ -66,13 +66,15 @@ h1 {
     border-radius: 12px;
     color: var(--text-color);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
 }
 
 .level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-color);
     box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
+    will-change: transform;
 }
 
 .level-btn.active {
@@ -167,7 +169,8 @@ h1 {
     border-radius: 12px;
     color: var(--text-color);
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
+    will-change: transform;
     min-width: 120px;
 }
 
@@ -233,7 +236,8 @@ h1 {
     font-size: 0.7rem;
     color: #333;
     cursor: pointer;
-    transition: all 0.1s ease;
+    transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
+    will-change: transform;
     user-select: none;
 }
 
@@ -324,7 +328,8 @@ h1 {
     font-size: 1rem;
     opacity: 0;
     transform: translateY(-20px);
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    will-change: transform, opacity;
     z-index: 100;
 }
 
@@ -363,7 +368,8 @@ h1 {
     align-items: center;
     opacity: 0;
     visibility: hidden;
-    transition: all 0.3s ease;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+    will-change: opacity;
     z-index: 1000;
 }
 
@@ -432,7 +438,8 @@ h1 {
     border-radius: 12px;
     color: white;
     cursor: pointer;
-    transition: all 0.3s ease;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform;
 }
 
 .modal-close:hover {
