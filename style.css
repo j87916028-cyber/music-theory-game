@@ -577,3 +577,42 @@ button:focus-visible, .key:focus-visible {
     outline: 3px solid #ffd700;
     outline-offset: 2px;
 }
+
+/* 全域焦點樣式 - 提高可訪問性 */
+*:focus {
+    outline: none;
+}
+
+/* 確保所有可聚焦元素都有可見的焦點指示器 */
+.level-btn:focus-visible,
+.sound-btn:focus-visible,
+.reset-btn:focus-visible,
+.help-btn:focus-visible,
+.option-btn:focus-visible,
+.key:focus-visible {
+    outline: 3px solid #ffd700;
+    outline-offset: 2px;
+    box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+}
+
+/* 鋼琴鍵盤焦點樣式 - 與 playing 狀態区分 */
+.piano .key:focus {
+    background: linear-gradient(to bottom, #ffe082 0%, #ffd54f 100%) !important;
+}
+
+/* 改善觸控設備的互動體驗 */
+@media (hover: none) and (pointer: coarse) {
+    .level-btn:active,
+    .sound-btn:active,
+    .reset-btn:active,
+    .help-btn:active {
+        transform: scale(0.95);
+    }
+    
+    /* 觸控設備禁用長按選單 */
+    .option-btn, .level-btn, .key {
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        user-select: none;
+    }
+}
