@@ -604,6 +604,24 @@ document.addEventListener('keydown', (e) => {
     // 防止重複觸發（按住不放）
     if (e.repeat) return;
     
+    // Enter 鍵：當使用 Tab 鍵導航到選項時，按 Enter 確認答案
+    if (e.key === 'Enter' && !isAnswering) {
+        const focusedBtn = document.activeElement;
+        if (focusedBtn && focusedBtn.classList.contains('option-btn') && !document.querySelector('.option-btn.correct')) {
+            e.preventDefault();
+            // 找到 focusedBtn 在所有 option-btn 中的索引
+            const allBtns = Array.from(document.querySelectorAll('.option-btn'));
+            const btnIndex = allBtns.indexOf(focusedBtn);
+            if (btnIndex >= 0 && btnIndex < currentOptions.length) {
+                const selectedAnswer = currentOptions[btnIndex];
+                playKeyPressSound();
+                setTimeout(() => {
+                    checkAnswer(selectedAnswer, currentQuestion);
+                }, 150);
+            }
+        }
+    }
+    
     // 數字鍵 1-4 選擇答案（Level 1 可用 1-7）
     const maxOptions = currentLevel === 1 ? 7 : 4;
     if (e.key >= '1' && e.key <= String(maxOptions)) {
