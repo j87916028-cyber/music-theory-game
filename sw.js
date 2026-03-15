@@ -109,7 +109,10 @@ self.addEventListener('fetch', (event) => {
                         fallbackPage = './music-theory.html';
                     }
                     
-                    return caches.match(fallbackPage);
+                    return caches.match(fallbackPage).then((fallbackResponse) => {
+                        // 如果沒有找到對應的快取頁面，回退到 index.html
+                        return fallbackResponse || caches.match('./index.html');
+                    });
                 })
         );
         return;
@@ -142,7 +145,10 @@ self.addEventListener('fetch', (event) => {
                     .catch(() => {
                         // 離線時回退到首頁
                         if (event.request.destination === 'document') {
-                            return caches.match('./music-theory.html');
+                            return caches.match('./music-theory.html').then((response) => {
+                                // 如果沒有找到 music-theory.html，回退到 index.html
+                                return response || caches.match('./index.html');
+                            });
                         }
                     });
             })
