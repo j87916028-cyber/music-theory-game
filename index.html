@@ -552,6 +552,12 @@
         // 鍵盤支持 - 按數字鍵 1-4 或方向鍵選擇答案
         let selectedOptionIndex = 0;
         document.addEventListener('keydown', function(e) {
+            // H 鍵顯示幫助說明
+            if (e.key.toLowerCase() === 'h') {
+                e.preventDefault();
+                showHelpDialog();
+                return;
+            }
             if (!getDomElement('gameArea').classList.contains('active')) return;
             const buttons = document.querySelectorAll('.option-btn');
             if (buttons.length === 0) return;
