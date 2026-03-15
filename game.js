@@ -993,7 +993,10 @@ function playKeyPressSound() {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
     osc.start();
     osc.stop(ctx.currentTime + 0.08);
+    // 使用統一的清理函數，確保音頻節點完全斷開連接（防止記憶體洩漏）
     osc.onended = () => cleanupAudioNodes(osc, gain);
+    // 額外保護：設定超時後強制清理（以防 onended 回調未觸發）
+    setTimeout(() => cleanupAudioNodes(osc, gain), 100);
 }
 
 function setLevel(level, resetStats = true) {
@@ -1237,8 +1240,10 @@ function playRhythm(rhythm) {
     osc.start(now);
     osc.stop(now + duration);
     
-    // 使用統一的清理函數
+    // 使用統一的清理函數，確保音頻節點完全斷開連接（防止記憶體洩漏）
     osc.onended = () => cleanupAudioNodes(osc, gain);
+    // 額外保護：設定超時後強制清理（以防 onended 回調未觸發）
+    setTimeout(() => cleanupAudioNodes(osc, gain), duration * 1000 + 100);
 }
 
 function level3Question() {
@@ -1503,8 +1508,10 @@ function playPianoNote(freq) {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
     osc.start();
     osc.stop(ctx.currentTime + 0.5);
-    // 使用統一的清理函數
+    // 使用統一的清理函數，確保音頻節點完全斷開連接（防止記憶體洩漏）
     osc.onended = () => cleanupAudioNodes(osc, gain);
+    // 額外保護：設定超時後強制清理（以防 onended 回調未觸發）
+    setTimeout(() => cleanupAudioNodes(osc, gain), 600);
 }
 
 // 震動回饋函數 - 支援觸控裝置
@@ -1567,8 +1574,10 @@ function playChord(notesStr) {
         
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + 0.8);
-        // 使用統一的清理函數
+        // 使用統一的清理函數，確保音頻節點完全斷開連接（防止記憶體洩漏）
         osc.onended = () => cleanupAudioNodes(osc, gain);
+        // 額外保護：設定超時後強制清理（以防 onended 回調未觸發）
+        setTimeout(() => cleanupAudioNodes(osc, gain), 900);
     });
 }
 
