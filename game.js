@@ -342,6 +342,21 @@ function updateAccuracy() {
 // 初始化進度
 let savedProgress = loadProgress();
 let score = savedProgress ? savedProgress.score : 0;
+
+// 確保 feedback 元素有正確的無障礙屬性
+function initAccessibility() {
+    const feedbackEl = getDomElement('feedback');
+    if (feedbackEl && !feedbackEl.getAttribute('aria-live')) {
+        feedbackEl.setAttribute('role', 'status');
+        feedbackEl.setAttribute('aria-live', 'polite');
+    }
+}
+// 頁面載入後初始化無障礙屬性
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAccessibility);
+} else {
+    initAccessibility();
+}
 let streak = savedProgress ? savedProgress.streak : 0;
 let currentLevel = savedProgress ? savedProgress.currentLevel : 1;
 let questionsAnswered = savedProgress ? savedProgress.questionsAnswered : 0;
@@ -1188,6 +1203,15 @@ function playPianoKey(note) {
     triggerHapticFeedback('light');
     // 使用模組層面的 pianoNoteFreqs 物件（避免每次創建新物件）
     playPianoNote(pianoNoteFreqs[note] || 261.63);
+    
+    // 更新鋼琴按鍵的 aria-pressed 狀態
+    const keyElement = document.querySelector(`.key[data-note="${note}"]`);
+    if (keyElement) {
+        keyElement.setAttribute('aria-pressed', 'true');
+        setTimeout(() => {
+            keyElement.removeAttribute('aria-pressed');
+        }, 300);
+    }
 }
 
 function playPianoNote(freq) {
@@ -1291,6 +1315,12 @@ function checkAnswer(answer, correct) {
     
     const feedback = getDomElement('feedback');
     feedback.className = 'feedback ' + (isCorrect ? 'correct' : 'wrong');
+    
+    // 為螢幕閱讀器提供更清晰的朗讀內容
+    const screenReaderText = isCorrect 
+        ? `答對了！加 ${pointsEarned} 分`
+        : `錯了，正確答案是 ${correct}`;
+    feedback.setAttribute('aria-label', screenReaderText);
     feedback.textContent = isCorrect ? '✅ 答對了！' : '❌ 錯了～';
     
     // 標記答案按鈕（答對顯示綠色，答錯顯示紅色+綠色標記正確答案）
@@ -1362,6 +1392,7 @@ function checkAnswer(answer, correct) {
     if (!isCorrect) {
         setTimeout(() => {
             feedback.textContent += ` 正確答案是：${correct}`;
+            feedback.setAttribute('aria-label', `錯了，正確答案是 ${correct}`);
         }, 500);
     }
 
