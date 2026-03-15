@@ -1365,7 +1365,7 @@ function level4Question() {
     
     // 建立選項按鈕片段
     const optionsContainer = document.createDocumentFragment();
-    shuffledChords.forEach((c, i) => {
+    optionChords.forEach((c, i) => {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.textContent = `${i + 1}. ${c.name}`;
