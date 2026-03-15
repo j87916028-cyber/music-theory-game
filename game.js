@@ -1419,6 +1419,8 @@ function level4Question() {
             keyEl.setAttribute('aria-label', `${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}${isHighlight ? '，和弦音符' : ''}`);
             keyEl.setAttribute('aria-pressed', isHighlight ? 'true' : 'false');
             keyEl.setAttribute('tabindex', '0');
+            // 為黑鍵添加鍵盤快捷鍵標籤（使提示更明顯）
+            keyEl.innerHTML = `<span class="piano-key-label">${k.key.toUpperCase()}</span>`;
         } else {
             keyEl.className = `key${isHighlight ? ' highlight' : ''}`;
             keyEl.dataset.note = k.note;
