@@ -150,6 +150,8 @@ self.addEventListener('fetch', (event) => {
                                 return response || caches.match('./index.html');
                             });
                         }
+                        // 對於非 document 請求，返回空回應而非 undefined
+                        return new Response('', { status: 200, statusText: 'OK' });
                     });
             })
     );
