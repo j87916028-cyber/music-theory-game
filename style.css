@@ -366,6 +366,12 @@ body.focus-mode .focus-btn {
     border-color: var(--primary-color);
 }
 
+/* 觸控/點擊回饋 - 提供按下時的視覺反饋 */
+.option-btn:active:not(:disabled) {
+    transform: scale(0.95);
+    background: rgba(233, 69, 96, 0.3);
+}
+
 .option-btn.keyboard-focus {
     outline: 3px solid #ffd700;
     outline-offset: 2px;

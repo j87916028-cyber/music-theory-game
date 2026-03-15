@@ -1,5 +1,8 @@
 // 音樂小學堂 - Service Worker 快取離線支援
-const CACHE_NAME = 'music-theory-game-v7';
+// 自動版本號：基於部署時間戳，每次更新自動遞增
+const CACHE_VERSION = 'v' + Math.floor(Date.now() / 86400000); // 每天自動更新版本
+const CACHE_NAME = 'music-theory-game-' + CACHE_VERSION;
+
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -18,6 +21,7 @@ self.addEventListener('install', (event) => {
         caches.open(CACHE_NAME)
             .then((cache) => {
                 // Service Worker: 快取靜態資源
+                console.log('Service Worker: 快取資源，版本', CACHE_NAME);
                 return cache.addAll(ASSETS_TO_CACHE);
             })
             .then(() => self.skipWaiting())
