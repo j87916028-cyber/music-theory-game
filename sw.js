@@ -1,181 +1,174 @@
 // 音樂小學堂 - Service Worker 快取離線支援
-// 自動版本號：基於部署時間戳，每次更新自動遞增
-const CACHE_VERSION = 'v' + Math.floor(Date.now() / 86400000); // 每天自動更新版本
+// 使用固定的版本號，只有在應用更新時才需要手動更新
+const CACHE_VERSION = 'v2.0.0'; // 版本號：改用固定版本，手動更新時才遞增
 const CACHE_NAME = 'music-theory-game-' + CACHE_VERSION;
 
-const ASSETS_TO_CACHE = [
+// 預設快取的靜態資源
+const STATIC_ASSETS = [
     './',
     './index.html',
     './music-theory.html',
     './music-master.html',
     './game.js',
     './style.css',
-    './manifest.json',
-    // 快取 Google Fonts 以支援離線顯示
+    './manifest.json'
+];
+
+// 需要離線快取的外部資源
+const EXTERNAL_ASSETS = [
     'https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;700&display=swap'
 ];
+
+// 合併所有需要快取的資源
+const ASSETS_TO_CACHE = [...STATIC_ASSETS, ...EXTERNAL_ASSETS];
 
 // 安裝事件 - 快取靜態資源
 self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                // Service Worker: 快取靜態資源
-                console.log('Service Worker: 快取資源，版本', CACHE_NAME);
-                return cache.addAll(ASSETS_TO_CACHE);
+                // 使用 Promise.allSettled 確保即使部分資源失敗也繼續
+                const cachePromises = ASSETS_TO_CACHE.map(url => {
+                    return cache.add(url).catch(err => {
+                        console.warn('快取資源失敗:', url, err);
+                        // 不阻止安裝過程
+                    });
+                });
+                return Promise.allSettled(cachePromises);
             })
-            .then(() => self.skipWaiting())
+            .then(() => {
+                console.log('Service Worker: 快取完成，版本', CACHE_NAME);
+                return self.skipWaiting();
+            })
             .catch((err) => {
-                console.warn('Service Worker: 快取失敗', err);
+                console.warn('Service Worker: 安裝失敗', err);
             })
     );
 });
 
-// 啟用事件 - 清理舊快取
+// 啟用事件 - 清理舊快取（保留舊版本作為離線回退）
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
+            // 保留當前版本和最近兩個舊版本，確保升級過程中的離線相容性
+            const currentBase = CACHE_NAME.split('-').slice(0, -1).join('-');
+            const versionsToKeep = [
+                CACHE_NAME,
+                CACHE_NAME.replace(CACHE_VERSION, 'v' + parseFloat(CACHE_VERSION) - 0.1),
+                CACHE_NAME.replace(CACHE_VERSION, 'v' + parseFloat(CACHE_VERSION) - 0.2)
+            ].filter(v => v !== CACHE_NAME);
+
             return Promise.all(
                 cacheNames
-                    .filter((name) => name !== CACHE_NAME)
-                    .map((name) => caches.delete(name))
+                    .filter(name => name.startsWith('music-theory-game-') && 
+                                   name !== CACHE_NAME && 
+                                   !versionsToKeep.includes(name))
+                    .map(name => {
+                        console.log('清理舊快取:', name);
+                        return caches.delete(name);
+                    })
             );
-        }).then(() => self.clients.claim())
+        }).then(() => {
+            console.log('Service Worker: 激活成功');
+            return self.clients.claim();
+        })
     );
 });
 
-// 請求事件 - 優先使用快取，失敗時回退網路
+// 請求事件 - 智慧型快取策略
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // 處理 Google Fonts 的特殊快取策略 - Stale-while-revalidate
+    // 處理 Google Fonts - Stale-while-revalidate 策略
     if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
         event.respondWith(
             caches.open(CACHE_NAME).then((cache) => {
                 return cache.match(event.request).then((cachedResponse) => {
                     const fetchPromise = fetch(event.request).then((networkResponse) => {
-                        // 快取字體資源以便離線使用
                         if (networkResponse && networkResponse.status === 200) {
                             cache.put(event.request, networkResponse.clone());
                         }
                         return networkResponse;
-                    }).catch(() => {
-                        // 網路失敗時，如果沒有快取就回傳失敗
-                        if (!cachedResponse) {
-                            console.warn('字體載入失敗且無快取:', event.request.url);
-                            // 回傳一個空 Response 避免 undefined 錯誤
-                            return new Response('', { 
-                                status: 200, 
-                                statusText: 'OK',
-                                headers: { 'Content-Type': 'text/css' }
-                            });
-                        }
-                        return cachedResponse;
-                    });
+                    }).catch(() => cachedResponse || new Response('', { 
+                        status: 200, 
+                        statusText: 'OK',
+                        headers: { 'Content-Type': 'text/css' }
+                    }));
 
-                    // 如果有快取，先返回快取，同時在背景更新快取
-                    // 這就是 stale-while-revalidate 策略
-                    if (cachedResponse) {
-                        // 觸發背景更新（不阻塞回應）
-                        fetchPromise.then(() => {
-                            // 字體快取已更新
-                        }).catch(() => {});
-                        return cachedResponse;
-                    }
-
-                    // 沒有快取時等待網路回應
-                    return fetchPromise;
+                    return cachedResponse || fetchPromise;
                 });
             })
         );
         return;
     }
 
-    // 處理非 GET 請求 - 直接傳遞到網路
+    // 非 GET 請求直接傳遞到網路
     if (event.request.method !== 'GET') {
         event.respondWith(fetch(event.request));
         return;
     }
 
-    // 處理導航請求（HTML 頁面）- 使用網路優先策略
+    // 導航請求（HTML 頁面）- 網路優先，有離線回退
     if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request)
                 .then((response) => {
-                    // 成功取得後快取結果
+                    // 成功後快取結果
                     const responseClone = response.clone();
                     caches.open(CACHE_NAME).then((cache) => {
                         cache.put(event.request, responseClone);
                     });
                     return response;
                 })
-                .catch(() => {
-                    // 離線時回退到對應的頁面（根據請求 URL）
-                    const requestUrl = event.request.url;
-                    let fallbackPage = './music-theory.html'; // 預設回退頁面
-                    
-                    if (requestUrl.includes('index.html') || requestUrl.endsWith('/')) {
-                        fallbackPage = './index.html';
-                    } else if (requestUrl.includes('music-master.html')) {
-                        fallbackPage = './music-master.html';
-                    } else if (requestUrl.includes('music-theory.html')) {
-                        fallbackPage = './music-theory.html';
-                    }
-                    
-                    return caches.match(fallbackPage).then((fallbackResponse) => {
-                        // 如果沒有找到對應的快取頁面，回退到 index.html
-                        if (fallbackResponse) {
-                            return fallbackResponse;
-                        }
-                        // 嘗試回退到 index.html
-                        return caches.match('./index.html').then((indexResponse) => {
-                            // 確保一定返回一個 Response，避免 undefined
-                            return indexResponse || new Response('Offline - Page not cached', { 
-                                status: 503, 
-                                statusText: 'Service Unavailable' 
-                            });
-                        });
-                    });
-                })
+                .catch(() => caches.match(event.request).then(cached => cached || fallbackToCachedPage(event.request.url)))
         );
         return;
     }
 
-    // 處理其他資源 - 使用快取優先策略
+    // 靜態資源 - 快取優先，後續更新
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
                 if (cachedResponse) {
+                    // 背景更新快取
+                    fetch(event.request).then((response) => {
+                        if (response && response.status === 200) {
+                            caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
+                        }
+                    }).catch(() => {});
                     return cachedResponse;
                 }
 
                 return fetch(event.request)
                     .then((response) => {
-                        // 不快取 opaque response 或錯誤回應
                         if (!response || response.status !== 200) {
                             return response;
                         }
-
-                        // 複製回應以進行快取
                         const responseToCache = response.clone();
-                        caches.open(CACHE_NAME)
-                            .then((cache) => {
-                                cache.put(event.request, responseToCache);
-                            });
-
+                        caches.open(CACHE_NAME).then(cache => cache.put(event.request, responseToCache));
                         return response;
                     })
                     .catch(() => {
-                        // 離線時回退到首頁
-                        if (event.request.destination === 'document') {
-                            return caches.match('./music-theory.html').then((response) => {
-                                // 如果沒有找到 music-theory.html，回退到 index.html
-                                return response || caches.match('./index.html');
-                            });
-                        }
-                        // 對於非 document 請求，返回空回應而非 undefined
+                        // 離線時的非 document 請求回退
                         return new Response('', { status: 200, statusText: 'OK' });
                     });
             })
     );
 });
+
+// 智慧型回退頁面選擇
+function fallbackToCachedPage(requestUrl) {
+    let fallbackPage = './index.html';
+    
+    if (requestUrl.includes('music-master.html')) {
+        fallbackPage = './music-master.html';
+    } else if (requestUrl.includes('music-theory.html')) {
+        fallbackPage = './music-theory.html';
+    } else if (requestUrl.includes('index.html') || requestUrl.endsWith('/')) {
+        fallbackPage = './index.html';
+    }
+    
+    return caches.match(fallbackPage).then(response => 
+        response || new Response('Offline', { status: 503, statusText: 'Service Unavailable' })
+    );
+}
