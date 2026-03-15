@@ -871,7 +871,27 @@ h1 {
 @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
         animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+    
+    /* 明確禁用特定動畫元素 */
+    .streak.show,
+    .floating-score,
+    .welcome-back.show,
+    .modal-overlay.show .modal {
+        animation: none !important;
+    }
+    
+    /* 移除過渡效果，改為立即顯示 */
+    .welcome-back,
+    .welcome-back.show,
+    .modal-overlay,
+    .modal-overlay.show {
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
     }
 }
 
