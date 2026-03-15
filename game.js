@@ -1024,9 +1024,9 @@ function nextQuestion() {
     if (isPaused) return;
     
     getDomElement('feedback').textContent = '';
-    // 清除鍵盤焦點樣式
-    document.querySelectorAll('.option-btn.keyboard-focus').forEach(btn => {
-        btn.classList.remove('keyboard-focus');
+    // 清除所有選項按鈕的狀態樣式（鍵盤焦點、對錯標記）
+    document.querySelectorAll('.option-btn').forEach(btn => {
+        btn.classList.remove('keyboard-focus', 'correct', 'wrong');
     });
     
     // 使用 CSS class 觸发动畫（效能更好，不會移除事件監聽器）
@@ -1672,21 +1672,21 @@ function checkAnswer(answer, correct) {
     // 儲存進度到 localStorage（使用 Debounced 版本避免頻繁寫入）
     saveProgressDebounced();
     
-    // 答錯顯示正確答案
+    // 答錯顯示正確答案（同步顯示，讓用戶立即看到）
     if (!isCorrect) {
-        setTimeout(() => {
-            feedback.textContent += ` 正確答案是：${correct}`;
-            feedback.setAttribute('aria-label', `錯了，正確答案是 ${correct}`);
-        }, 500);
+        feedback.textContent += ` 正確答案是：${correct}`;
+        feedback.setAttribute('aria-label', `錯了，正確答案是 ${correct}`);
     }
 
-    // 播放答題結果的音效反饋
-    setTimeout(() => playAnswerFeedback(isCorrect), 300);
+    // 播放答題結果的音效反饋（立即播放，提供即時聽覺反饋）
+    playAnswerFeedback(isCorrect);
     
+    // 優化時序：縮短等待時間，讓用戶更快進入下一題
+    // 同時保留足夠時間顯示動畫和反饋
     setTimeout(() => {
         isAnswering = false; // 重置答題鎖定
         nextQuestion();
-    }, 1500);
+    }, 1200);
 }
 
 // 初始化 - 恢復儲存的進度（不重置統計資料）
