@@ -4,10 +4,32 @@
 // 緩存常用 DOM 元素，避免重複查詢
 const domCache = {};
 function getDomElement(id) {
-    if (!domCache[id]) {
-        domCache[id] = document.getElementById(id);
+    // 參數驗證：確保傳入有效的 id
+    if (!id || typeof id !== 'string') {
+        console.warn('getDomElement: 無效的 id 參數', id);
+        return null;
     }
-    return domCache[id];
+    
+    // 先檢查緩存
+    if (domCache[id]) {
+        // 驗證緩存的元素是否仍然存在於 DOM 中
+        if (document.body.contains(domCache[id])) {
+            return domCache[id];
+        } else {
+            // 元素已從 DOM 中移除，清除緩存
+            delete domCache[id];
+        }
+    }
+    
+    // 查詢 DOM 並緩存結果
+    const element = document.getElementById(id);
+    if (element) {
+        domCache[id] = element;
+    } else {
+        // 元素不存在時記錄警告（只在開發時顯示）
+        // console.warn('getDomElement: 元素不存在 -', id);
+    }
+    return element;
 }
 
 // 音頻上下文 - 延遲初始化，確保在用戶互動後才創建
