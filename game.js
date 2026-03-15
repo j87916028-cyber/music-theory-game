@@ -1319,6 +1319,9 @@ function checkAnswer(answer, correct) {
     const isCorrect = String(answer) === String(correct);
     questionsAnswered++;
     
+    // 先計算得分（需要在使用前先計算）
+    const pointsEarned = isCorrect ? 10 + streak * 2 : 0;
+    
     // 記錄答題歷史
     addToHistory(currentQuestion, answer, correct, isCorrect, currentLevel);
     
@@ -1357,7 +1360,6 @@ function checkAnswer(answer, correct) {
     });
     
     if (isCorrect) {
-        const pointsEarned = 10 + streak * 2;
         score += pointsEarned;
         streak++;
         correctAnswers++;
