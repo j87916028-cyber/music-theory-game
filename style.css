@@ -438,6 +438,13 @@ h1 {
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
 
+/* 黑鍵 highlight 樣式 - 和弦音符提示 */
+.piano .key.black.highlight {
+    background: linear-gradient(to bottom, #ffd700 0%, #ffb700 100%);
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+    z-index: 3;
+}
+
 /* 連擊彈出 */
 .streak {
     position: fixed;

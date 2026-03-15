@@ -1134,21 +1134,24 @@ function level4Question() {
     
     pianoKeys.forEach(k => {
         const keyEl = document.createElement('div');
+        const isHighlight = activeKeys.includes(k.note);
         
         if (k.isBlack) {
             // 使用 CSS Grid 定位（黑鍵由 grid-column 控制）
-            keyEl.className = 'key black';
+            // 同步套用 highlight 樣式（為未來擴充做準備）
+            keyEl.className = `key black${isHighlight ? ' highlight' : ''}`;
             keyEl.dataset.note = k.note;
-            keyEl.title = `${k.note} (${k.key.toUpperCase()})`;
+            keyEl.title = `${k.note} (${k.key.toUpperCase()})${isHighlight ? ' - 和弦音符' : ''}`;
             keyEl.setAttribute('role', 'button');
-            keyEl.setAttribute('aria-label', `${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}`);
+            keyEl.setAttribute('aria-label', `${k.note} 的黑鍵，按鍵 ${k.key.toUpperCase()}${isHighlight ? '，和弦音符' : ''}`);
+            keyEl.setAttribute('aria-pressed', isHighlight ? 'true' : 'false');
             keyEl.setAttribute('tabindex', '0');
         } else {
-            const isHighlight = activeKeys.includes(k.note);
-            keyEl.className = `key ${isHighlight ? 'highlight' : ''}`;
+            keyEl.className = `key${isHighlight ? ' highlight' : ''}`;
             keyEl.dataset.note = k.note;
             keyEl.setAttribute('role', 'button');
-            keyEl.setAttribute('aria-label', `${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}`);
+            keyEl.setAttribute('aria-label', `${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}${isHighlight ? '，和弦音符' : ''}`);
+            keyEl.setAttribute('aria-pressed', isHighlight ? 'true' : 'false');
             keyEl.setAttribute('tabindex', '0');
             keyEl.innerHTML = `${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span>`;
         }
