@@ -252,19 +252,48 @@ function checkDailyLogin() {
 }
 
 // Debounce 函數 - 避免頻繁寫入 localStorage
-function debounce(func, wait) {
+// 支援 leading 和 trailing 選項，預設兩者都啟用以確保資料不丟失
+function debounce(func, wait, options = { leading: true, trailing: true }) {
     let timeout;
+    let lastArgs = null;
+    let lastThis = null;
+    let result;
+    let lastCallTime;
+    
+    const leading = options.leading;
+    const trailing = options.trailing;
+    
     return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
+        const now = Date.now();
+        lastArgs = args;
+        lastThis = this;
+        
+        // 如果是第一次呼叫且啟用 leading
+        if (leading && !timeout) {
+            result = func.apply(this, args);
+        }
+        
+        // 清除之前的計時器
+        if (timeout) clearTimeout(timeout);
+        
+        // 設定新的計時器
+        if (trailing) {
+            timeout = setTimeout(() => {
+                timeout = null;
+                // 只有當有新的呼叫時才執行 trailing
+                if (lastArgs && now - lastCallTime >= wait) {
+                    result = func.apply(lastThis, lastArgs);
+                }
+            }, wait);
+        }
+        
+        lastCallTime = now;
+        return result;
     };
 }
 
 // 儲存進度到 localStorage（Debounced 版本，延遲 500ms）
+// 使用 leading + trailing 確保：1) 快速答題時立即儲存第一筆 2) 短暫停頓後儲存最後一筆
 const saveProgressDebounced = debounce(() => {
     try {
         const data = {
@@ -280,7 +309,7 @@ const saveProgressDebounced = debounce(() => {
     } catch (e) {
         console.warn('儲存進度失敗:', e);
     }
-}, 500);
+}, 500, { leading: true, trailing: true });
 
 // 立即儲存進度（用於需要立即保存的場景）
 function saveProgress() {
