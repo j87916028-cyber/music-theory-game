@@ -627,6 +627,9 @@ function showAnswerHistory() {
     // 可訪問性：儲存當前聚焦的元素，關閉時恢復
     lastFocusedElement = document.activeElement;
     
+    // 可訪問性：啟用焦點陷阱，防止 Tab 離開 Modal
+    trapFocus(modal);
+    
     // 可訪問性：聚焦到關閉按鈕，方便鍵盤導航
     setTimeout(() => {
         const closeBtn = modal.querySelector('.modal-close');
@@ -640,6 +643,8 @@ function closeAnswerHistory() {
     if (modal) {
         modal.classList.remove('show');
     }
+    // 可訪問性：解除焦點陷阱
+    untrapFocus();
     // 可訪問性：關閉後恢復焦點到原本的元素
     if (lastFocusedElement && lastFocusedElement.focus) {
         setTimeout(() => lastFocusedElement.focus(), 50);
@@ -661,6 +666,55 @@ loadAnswerHistory();
 
 // 初始化遊戲時長追蹤
 initPlayTime();
+
+// ========== Modal Focus Trap (無障礙Accessibility) ==========
+// 用於追蹤當前活躍的 focus trap
+let currentFocusTrap = null;
+
+// 焦点陷阱處理函數
+function handleFocusTrap(e, modal) {
+    if (!modal || !modal.classList.contains('show')) return;
+    
+    const focusableSelectors = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
+    const focusableElements = modal.querySelectorAll(focusableSelectors);
+    const firstElement = focusableElements[0];
+    const lastElement = focusableElements[focusableElements.length - 1];
+    
+    // 如果按下 Shift + Tab 且當前在第一個元素，跳到最後一個
+    if (e.shiftKey && document.activeElement === firstElement) {
+        e.preventDefault();
+        lastElement.focus();
+    }
+    // 如果按下 Tab 且當前在最後一個元素，跳到第一個
+    else if (!e.shiftKey && document.activeElement === lastElement) {
+        e.preventDefault();
+        firstElement.focus();
+    }
+}
+
+// 啟用焦點陷阱
+function trapFocus(modal) {
+    // 避免重複綁定
+    if (currentFocusTrap && currentFocusTrap.modal === modal) return;
+    
+    // 先清除之前的陷阱
+    untrapFocus();
+    
+    currentFocusTrap = {
+        modal: modal,
+        handler: (e) => handleFocusTrap(e, modal)
+    };
+    
+    document.addEventListener('keydown', currentFocusTrap.handler);
+}
+
+// 解除焦點陷阱
+function untrapFocus() {
+    if (currentFocusTrap) {
+        document.removeEventListener('keydown', currentFocusTrap.handler);
+        currentFocusTrap = null;
+    }
+}
 
 // 切換音效開關
 function toggleSound() {
@@ -1722,12 +1776,16 @@ checkDailyLogin();
 function showHelp() {
     const modal = getDomElement('helpModal');
     modal.classList.add('show');
+    // 可訪問性：啟用焦點陷阱，防止 Tab 離開 Modal
+    trapFocus(modal);
 }
 
 // 關閉幫助 Modal
 function closeHelp() {
     const modal = getDomElement('helpModal');
     if (modal) {
+        // 可訪問性：解除焦點陷阱
+        untrapFocus();
         // 支援兩種關閉方式：class='show' 或 直接移除元素
         if (modal.classList.contains('show')) {
             modal.classList.remove('show');
