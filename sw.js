@@ -1,9 +1,10 @@
 // 音樂小學堂 - Service Worker 快取離線支援
-const CACHE_NAME = 'music-theory-game-v3';
+const CACHE_NAME = 'music-theory-game-v4';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
     './music-theory.html',
+    './music-master.html',
     './game.js',
     './style.css',
     './manifest.json',
@@ -80,8 +81,19 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 })
                 .catch(() => {
-                    // 離線時回退到快取的首頁
-                    return caches.match('./music-theory.html');
+                    // 離線時回退到對應的頁面（根據請求 URL）
+                    const requestUrl = event.request.url;
+                    let fallbackPage = './music-theory.html'; // 預設回退頁面
+                    
+                    if (requestUrl.includes('index.html') || requestUrl.endsWith('/')) {
+                        fallbackPage = './index.html';
+                    } else if (requestUrl.includes('music-master.html')) {
+                        fallbackPage = './music-master.html';
+                    } else if (requestUrl.includes('music-theory.html')) {
+                        fallbackPage = './music-theory.html';
+                    }
+                    
+                    return caches.match(fallbackPage);
                 })
         );
         return;
