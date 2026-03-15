@@ -120,13 +120,60 @@ function updatePlayTime() {
     }
 }
 
+// 檢查是否為 localStorage 配額超限錯誤
+function isQuotaExceededError(error) {
+    return (
+        error instanceof DOMException &&
+        // Firefox, Chrome, Safari
+        (error.code === 22 ||
+            // Firefox
+            error.code === 1014 ||
+            // Chrome, Opera
+            error.name === 'QuotaExceededError' ||
+            error.name === 'NS_ERROR_DOM_QUOTA_REACHED')
+    );
+}
+
+// 安全地儲存資料到 localStorage（處理配額超限）
+function safeLocalStorageSet(key, value) {
+    try {
+        localStorage.setItem(key, JSON.stringify(value));
+        return true;
+    } catch (e) {
+        if (isQuotaExceededError(e)) {
+            console.warn('localStorage 儲存空間已滿，嘗試清理舊資料...');
+            // 嘗試清理一些非必要的資料
+            try {
+                // 清理答題歷史（保留最近5筆）
+                const history = localStorage.getItem('musicTheoryAnswerHistory');
+                if (history) {
+                    const parsed = JSON.parse(history);
+                    if (parsed.length > 5) {
+                        localStorage.setItem('musicTheoryAnswerHistory', JSON.stringify(parsed.slice(0, 5)));
+                    }
+                }
+                // 再次嘗試儲存
+                localStorage.setItem(key, JSON.stringify(value));
+                return true;
+            } catch (cleanupError) {
+                console.error('清理後仍然儲存失敗:', cleanupError);
+                return false;
+            }
+        }
+        console.warn('localStorage 儲存失敗:', e);
+        return false;
+    }
+}
+
 // 只儲存遊戲時長到 localStorage（不累加，由 saveProgress 呼叫）
 function savePlayTimeToStorage() {
     try {
         const saved = localStorage.getItem('musicTheoryProgress');
         const data = saved ? JSON.parse(saved) : {};
         data.totalPlayTime = totalPlayTime;
-        localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
+        if (!safeLocalStorageSet('musicTheoryProgress', data)) {
+            console.warn('遊戲時長儲存失敗');
+        }
     } catch (e) {
         console.warn('儲存遊戲時長失敗:', e);
     }
@@ -245,10 +292,10 @@ function checkDailyLogin() {
             let streakDays = parseInt(localStorage.getItem('musicTheoryLoginStreak') || '0') + 1;
             bonusPoints = 5 + Math.min(streakDays * 2, 15); // 最多額外 +15 分
             rewardMessage = `🔥 連續登入 ${streakDays} 天！獎勵：+${bonusPoints} 分`;
-            localStorage.setItem('musicTheoryLoginStreak', streakDays.toString());
+            safeLocalStorageSet('musicTheoryLoginStreak', streakDays);
         } else {
             // 重置連續登入計數
-            localStorage.setItem('musicTheoryLoginStreak', '1');
+            safeLocalStorageSet('musicTheoryLoginStreak', 1);
         }
         
         // 發放獎勵
@@ -269,7 +316,7 @@ function checkDailyLogin() {
         }, 1000);
         
         // 記錄今天已領取
-        localStorage.setItem('musicTheoryLastLogin', today);
+        safeLocalStorageSet('musicTheoryLastLogin', today);
     }
 }
 
@@ -318,19 +365,17 @@ function debounce(func, wait, options = { leading: true, trailing: true }) {
 // 儲存進度到 localStorage（Debounced 版本，延遲 500ms）
 // 使用 leading + trailing 確保：1) 快速答題時立即儲存第一筆 2) 短暫停頓後儲存最後一筆
 const saveProgressDebounced = debounce(() => {
-    try {
-        const data = {
-            score: Math.min(score, 999999), // 分數上限保護
-            streak: Math.min(streak, 999),
-            currentLevel: currentLevel,
-            questionsAnswered: questionsAnswered,
-            correctAnswers: correctAnswers,
-            lastPlayed: new Date().toISOString(),
-            totalPlayTime: totalPlayTime // 儲存遊戲時長
-        };
-        localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
-    } catch (e) {
-        console.warn('儲存進度失敗:', e);
+    const data = {
+        score: Math.min(score, 999999), // 分數上限保護
+        streak: Math.min(streak, 999),
+        currentLevel: currentLevel,
+        questionsAnswered: questionsAnswered,
+        correctAnswers: correctAnswers,
+        lastPlayed: new Date().toISOString(),
+        totalPlayTime: totalPlayTime // 儲存遊戲時長
+    };
+    if (!safeLocalStorageSet('musicTheoryProgress', data)) {
+        console.warn('儲存進度失敗');
     }
 }, 500, { leading: true, trailing: true });
 
@@ -339,19 +384,17 @@ function saveProgress() {
     // 只儲存遊戲時長，不重新計算（避免重複計時）
     savePlayTimeToStorage();
     
-    try {
-        const data = {
-            score: Math.min(score, 999999), // 分數上限保護
-            streak: Math.min(streak, 999),
-            currentLevel: currentLevel,
-            questionsAnswered: questionsAnswered,
-            correctAnswers: correctAnswers,
-            lastPlayed: new Date().toISOString(),
-            totalPlayTime: totalPlayTime // 儲存遊戲時長
-        };
-        localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
-    } catch (e) {
-        console.warn('儲存進度失敗:', e);
+    const data = {
+        score: Math.min(score, 999999), // 分數上限保護
+        streak: Math.min(streak, 999),
+        currentLevel: currentLevel,
+        questionsAnswered: questionsAnswered,
+        correctAnswers: correctAnswers,
+        lastPlayed: new Date().toISOString(),
+        totalPlayTime: totalPlayTime // 儲存遊戲時長
+    };
+    if (!safeLocalStorageSet('musicTheoryProgress', data)) {
+        console.warn('儲存進度失敗');
     }
 }
 
@@ -443,10 +486,8 @@ let answerHistory = []; // 答題歷史陣列
 
 // 儲存答題歷史到 localStorage
 function saveAnswerHistory() {
-    try {
-        localStorage.setItem('musicTheoryAnswerHistory', JSON.stringify(answerHistory));
-    } catch (e) {
-        console.warn('儲存答題歷史失敗:', e);
+    if (!safeLocalStorageSet('musicTheoryAnswerHistory', answerHistory)) {
+        console.warn('儲存答題歷史失敗');
     }
 }
 
@@ -584,7 +625,7 @@ function toggleSound() {
     btn.textContent = soundEnabled ? '🔊' : '🔇';
     btn.classList.toggle('muted', !soundEnabled);
     // 儲存音效設定
-    localStorage.setItem('musicTheorySound', soundEnabled ? 'on' : 'off');
+    safeLocalStorageSet('musicTheorySound', soundEnabled ? 'on' : 'off');
 }
 
 // 載入音效設定
