@@ -1168,7 +1168,7 @@ function level1Question() {
             <button class="replay-btn" onclick="playNote('${correctNote}')">🔄 再聽一次</button>
         </div>
         <div class="options">
-            ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${i+1}. ${n}</button>`).join('')}
+            ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')" aria-label="選項 ${i+1}: ${n}">${i+1}. ${n}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1201,7 +1201,7 @@ function level2Question() {
         <div class="note-display">${note}</div>
         <button class="replay-btn" onclick="playNote('${note}')">🔊 再聽一次</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')">${i+1}. ${n}</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')" aria-label="選項 ${i+1}: ${n}">${i+1}. ${n}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1261,7 +1261,7 @@ function level3Question() {
         <p class="rhythm-display">${rhythm.name}</p>
         <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')">${i+1}. ${n} 拍</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')" aria-label="選項 ${i+1}: ${n} 拍">${i+1}. ${n} 拍</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1438,6 +1438,7 @@ function level4Question() {
         const btn = document.createElement('button');
         btn.className = 'option-btn';
         btn.textContent = `${i + 1}. ${c.name}`;
+        btn.setAttribute('aria-label', `選項 ${i + 1}: ${c.name}`);
         btn.onclick = () => checkAnswer(c.name, chord.name);
         optionsContainer.appendChild(btn);
     });
