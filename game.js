@@ -1016,11 +1016,12 @@ let pianoEventsBound = false;
 
 // 儲存事件處理器以便清理（防止記憶體洩漏）
 const pianoEventHandlers = {
-    touchstart: null,
-    touchend: null,
-    mousedown: null,
-    mouseup: null,
-    mouseleave: null
+    touchstart: function() {},
+    touchend: function() {},
+    touchcancel: function() {},
+    mousedown: function() {},
+    mouseup: function() {},
+    mouseleave: function() {}
 };
 
 function bindPianoEvents() {
@@ -1100,14 +1101,15 @@ function cleanupPianoEvents() {
     document.removeEventListener('mouseup', pianoEventHandlers.mouseup);
     document.removeEventListener('mouseleave', pianoEventHandlers.mouseleave);
     
-    // 重置狀態
+    // 重置狀態，但保留 handler 物件結構以便後續重新綁定
+    // 這樣下次呼叫 bindPianoEvents() 時可以正常重新賦值函數
     pianoEventsBound = false;
-    pianoEventHandlers.touchstart = null;
-    pianoEventHandlers.touchend = null;
-    pianoEventHandlers.touchcancel = null;
-    pianoEventHandlers.mousedown = null;
-    pianoEventHandlers.mouseup = null;
-    pianoEventHandlers.mouseleave = null;
+    pianoEventHandlers.touchstart = function() {};
+    pianoEventHandlers.touchend = function() {};
+    pianoEventHandlers.touchcancel = function() {};
+    pianoEventHandlers.mousedown = function() {};
+    pianoEventHandlers.mouseup = function() {};
+    pianoEventHandlers.mouseleave = function() {};
 }
 
 // 頁面卸載時清理事件監聽器（防止記憶體洩漏）
