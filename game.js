@@ -311,12 +311,20 @@ window.addEventListener('beforeunload', () => {
 
 // 清除儲存的進度
 function resetProgress() {
+    // 清除所有相關的 localStorage 數據，確保完全重置
     localStorage.removeItem('musicTheoryProgress');
+    localStorage.removeItem('musicTheoryAnswerHistory');
+    localStorage.removeItem('musicTheoryLoginStreak');
+    localStorage.removeItem('musicTheoryLastLogin');
+    localStorage.removeItem('musicTheoryLoginReward');
+    
     score = 0;
     streak = 0;
     currentLevel = 1;
     questionsAnswered = 0;
     correctAnswers = 0;
+    answerHistory = []; // 清除記憶體中的答題歷史
+    
     updateUI();
     setLevel(1);
 }
