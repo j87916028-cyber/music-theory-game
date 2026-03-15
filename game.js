@@ -1704,7 +1704,7 @@ function checkAnswer(answer, correct) {
         ? `答對了！加 ${pointsEarned} 分`
         : `錯了，正確答案是 ${correct}`;
     feedback.setAttribute('aria-label', screenReaderText);
-    feedback.textContent = isCorrect ? '✅ 答對了！' : '❌ 錯了～';
+    feedback.textContent = isCorrect ? `✅ 答對了！ +${pointsEarned} 分` : '❌ 錯了～';
     
     // 標記答案按鈕（答對顯示綠色，答錯顯示紅色+綠色標記正確答案）
     // 改用按鈕索引匹配 currentOptions，避免文字格式問題
