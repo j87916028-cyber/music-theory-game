@@ -131,14 +131,12 @@ h1 {
     color: var(--text-color);
     cursor: pointer;
     transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    will-change: transform;
 }
 
 .level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-color);
     box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
-    will-change: transform;
 }
 
 .history-btn:hover {
@@ -348,7 +346,6 @@ h1 {
     color: var(--text-color);
     cursor: pointer;
     transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
-    will-change: transform;
     min-width: 120px;
 }
 
@@ -418,7 +415,6 @@ h1 {
     color: #333;
     cursor: pointer;
     transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
-    will-change: transform;
     user-select: none;
 }
 
@@ -525,7 +521,6 @@ h1 {
     opacity: 0;
     transform: translateY(-20px);
     transition: opacity 0.3s ease, transform 0.3s ease;
-    will-change: transform, opacity;
     z-index: 100;
 }
 
@@ -565,7 +560,6 @@ h1 {
     opacity: 0;
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
-    will-change: opacity;
     z-index: 1000;
 }
 
@@ -705,7 +699,6 @@ h1 {
     color: white;
     cursor: pointer;
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    will-change: transform;
 }
 
 .modal-close:hover {
