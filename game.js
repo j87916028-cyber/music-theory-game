@@ -1109,10 +1109,14 @@ const pianoEventHandlers = {
     touchstart: function() {},
     touchend: function() {},
     touchcancel: function() {},
+    touchmove: function() {},
     mousedown: function() {},
     mouseup: function() {},
     mouseleave: function() {}
 };
+
+// 追蹤 active touch points（防止多指觸控時的按鍵卡住）
+const activeTouches = new Map();
 
 function bindPianoEvents() {
     // 使用 document 層級的事件委託，所以綁定一次就足夠
@@ -1126,27 +1130,54 @@ function bindPianoEvents() {
     
     // 儲存處理器以便清理（使用具名函數以便 removeEventListener）
     pianoEventHandlers.touchstart = function(e) {
-        const key = e.target.closest('.key');
-        if (key && key.dataset.note && key.closest('.piano')) {
-            e.preventDefault();
-            key.classList.add('playing');
-            playPianoKey(key.dataset.note);
+        // 處理每個 touch point，支援多指同時觸控
+        for (const touch of e.changedTouches) {
+            const key = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.key');
+            if (key && key.dataset.note && key.closest('.piano')) {
+                e.preventDefault();
+                key.classList.add('playing');
+                // 追蹤這個 touch point 對應的音符
+                activeTouches.set(touch.identifier, { key, note: key.dataset.note });
+                playPianoKey(key.dataset.note);
+            }
+        }
+    };
+    
+    pianoEventHandlers.touchmove = function(e) {
+        // 支援手指在琴鍵上滑動時即時切換音符
+        for (const touch of e.changedTouches) {
+            const tracked = activeTouches.get(touch.identifier);
+            if (tracked) {
+                const key = document.elementFromPoint(touch.clientX, touch.clientY)?.closest('.key');
+                if (key && key.dataset.note && key.closest('.piano') && key !== tracked.key) {
+                    // 離開舊按鍵
+                    tracked.key.classList.remove('playing');
+                    // 進入新按鍵
+                    key.classList.add('playing');
+                    activeTouches.set(touch.identifier, { key, note: key.dataset.note });
+                    playPianoKey(key.dataset.note);
+                }
+            }
         }
     };
     
     pianoEventHandlers.touchend = function(e) {
-        const key = e.target.closest('.key');
-        if (key && key.closest('.piano')) {
-            e.preventDefault();
-            key.classList.remove('playing');
+        // 處理每個結束的 touch point
+        for (const touch of e.changedTouches) {
+            const tracked = activeTouches.get(touch.identifier);
+            if (tracked && tracked.key) {
+                tracked.key.classList.remove('playing');
+                activeTouches.delete(touch.identifier);
+            }
         }
     };
     
-    // 處理觸控取消（防呆）- 也需要清理
+    // 處理觸控取消（防呆）- 清理所有正在進行的觸控
     pianoEventHandlers.touchcancel = function(e) {
         document.querySelectorAll('.piano .key.playing').forEach(key => {
             key.classList.remove('playing');
         });
+        activeTouches.clear();
     };
     
     pianoEventHandlers.mousedown = function(e) {
@@ -1175,6 +1206,7 @@ function bindPianoEvents() {
     document.addEventListener('touchstart', pianoEventHandlers.touchstart, { passive: false });
     document.addEventListener('touchend', pianoEventHandlers.touchend, { passive: false });
     document.addEventListener('touchcancel', pianoEventHandlers.touchcancel, { passive: false });
+    document.addEventListener('touchmove', pianoEventHandlers.touchmove, { passive: false });
     document.addEventListener('mousedown', pianoEventHandlers.mousedown);
     document.addEventListener('mouseup', pianoEventHandlers.mouseup);
     document.addEventListener('mouseleave', pianoEventHandlers.mouseleave);
@@ -1187,6 +1219,7 @@ function cleanupPianoEvents() {
     document.removeEventListener('touchstart', pianoEventHandlers.touchstart);
     document.removeEventListener('touchend', pianoEventHandlers.touchend);
     document.removeEventListener('touchcancel', pianoEventHandlers.touchcancel);
+    document.removeEventListener('touchmove', pianoEventHandlers.touchmove);
     document.removeEventListener('mousedown', pianoEventHandlers.mousedown);
     document.removeEventListener('mouseup', pianoEventHandlers.mouseup);
     document.removeEventListener('mouseleave', pianoEventHandlers.mouseleave);
@@ -1194,9 +1227,11 @@ function cleanupPianoEvents() {
     // 重置狀態，但保留 handler 物件結構以便後續重新綁定
     // 這樣下次呼叫 bindPianoEvents() 時可以正常重新賦值函數
     pianoEventsBound = false;
+    activeTouches.clear();
     pianoEventHandlers.touchstart = function() {};
     pianoEventHandlers.touchend = function() {};
     pianoEventHandlers.touchcancel = function() {};
+    pianoEventHandlers.touchmove = function() {};
     pianoEventHandlers.mousedown = function() {};
     pianoEventHandlers.mouseup = function() {};
     pianoEventHandlers.mouseleave = function() {};

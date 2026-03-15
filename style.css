@@ -120,6 +120,7 @@ h1 {
     gap: 10px;
     justify-content: center;
     margin: 20px 0;
+    contain: content; /* 優化渲染效能 */
 }
 
 .level-btn, .sound-btn, .reset-btn, .help-btn, .history-btn, .focus-btn {
