@@ -50,18 +50,35 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
     event.waitUntil(
         caches.keys().then((cacheNames) => {
-            // 保留當前版本和最近兩個舊版本，確保升級過程中的離線相容性
-            const currentBase = CACHE_NAME.split('-').slice(0, -1).join('-');
-            const versionsToKeep = [
-                CACHE_NAME,
-                CACHE_NAME.replace(CACHE_VERSION, 'v' + parseFloat(CACHE_VERSION) - 0.1),
-                CACHE_NAME.replace(CACHE_VERSION, 'v' + parseFloat(CACHE_VERSION) - 0.2)
-            ].filter(v => v !== CACHE_NAME);
+            // 解析版本號以計算要保留的舊版本
+            const versionMatch = CACHE_VERSION.match(/v(\d+)\.(\d+)\.(\d+)/);
+            const versionsToKeep = [CACHE_NAME];
+            
+            if (versionMatch) {
+                // 計算並保留最近兩個舊版本
+                for (let i = 1; i <= 2; i++) {
+                    let major = parseInt(versionMatch[1]);
+                    let minor = parseInt(versionMatch[2]);
+                    let patch = parseInt(versionMatch[3]) - i;
+                    
+                    // 處理借位
+                    if (patch < 0) {
+                        patch = 99;
+                        minor--;
+                    }
+                    if (minor < 0) {
+                        minor = 99;
+                        major--;
+                    }
+                    if (major >= 0) {
+                        versionsToKeep.push(`music-theory-game-v${major}.${minor}.${patch}`);
+                    }
+                }
+            }
 
             return Promise.all(
                 cacheNames
                     .filter(name => name.startsWith('music-theory-game-') && 
-                                   name !== CACHE_NAME && 
                                    !versionsToKeep.includes(name))
                     .map(name => {
                         console.log('清理舊快取:', name);
