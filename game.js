@@ -413,6 +413,28 @@ window.addEventListener('beforeunload', () => {
     stopPlayTimeTracker(); // 儲存遊戲時長
 });
 
+// 處理可見性變更：切換分頁時自動暫停遊戲
+document.addEventListener('visibilitychange', () => {
+    if (document.hidden) {
+        // 分頁隱藏時自動暫停遊戲（如果正在進行中）
+        if (!isPaused && currentQuestion && currentLevel) {
+            togglePause();
+            // 標記為由系統自動暫停區分的標記
+            isPausedByVisibility = true;
+        }
+        // 暫停遊戲時長追蹤
+        stopPlayTimeTracker();
+    } else {
+        // 分頁恢復顯示時，如果是由可見性變更自動暫停的，則自動恢復遊戲
+        if (isPausedByVisibility) {
+            isPausedByVisibility = false;
+            togglePause();
+            // 恢復遊戲時長追蹤
+            startPlayTimeTracker();
+        }
+    }
+});
+
 // 清除儲存的進度
 function resetProgress() {
     // 清除所有相關的 localStorage 數據，確保完全重置
@@ -489,6 +511,7 @@ let currentOptions = []; // 儲存當前題目的選項
 let soundEnabled = true; // 音效開關狀態
 let isAnswering = false; // 防止重複答題
 let isPaused = false; // 遊戲暫停狀態
+let isPausedByVisibility = false; // 標記是否由可見性變更自動暫停
 
 // ========== 答題歷史記錄功能 ==========
 const MAX_HISTORY = 20; // 最多保存20條記錄
