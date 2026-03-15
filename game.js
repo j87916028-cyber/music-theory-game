@@ -77,8 +77,10 @@ let totalPlayTime = 0; // 總遊戲時長（秒）
 
 // 初始化遊戲時長（在 loadProgress 後調用）
 function initPlayTime() {
-    if (savedProgress && savedProgress.totalPlayTime) {
-        totalPlayTime = savedProgress.totalPlayTime;
+    // 載入保存的遊戲時長（確保在 savedProgress 變數聲明之前也能正常工作）
+    const progress = loadProgress();
+    if (progress && progress.totalPlayTime) {
+        totalPlayTime = progress.totalPlayTime;
     }
     // 設置當前session開始時間
     sessionStartTime = Date.now();
