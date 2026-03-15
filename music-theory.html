@@ -170,11 +170,96 @@
                 navigator.serviceWorker.register('./sw.js')
                     .then(function(registration) {
                         // Service Worker 註冊成功
+                        console.log('Service Worker 註冊成功');
+
+                        // 監聽更新可用事件
+                        registration.addEventListener('updatefound', function() {
+                            const newWorker = registration.installing;
+                            if (newWorker) {
+                                newWorker.addEventListener('statechange', function() {
+                                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                                        // 有新版本可用且當前頁面由舊版 SW 控制
+                                        showUpdateNotification();
+                                    }
+                                });
+                            }
+                        });
                     })
                     .catch(function(error) {
                         console.warn('Service Worker 註冊失敗:', error);
                     });
             });
+
+            // 監聽 SW 控制器變化（當新 SW 激活時）
+            let refreshing = false;
+            navigator.serviceWorker.addEventListener('controllerchange', function() {
+                if (!refreshing) {
+                    refreshing = true;
+                    // 自動刷新頁面以使用新 SW
+                    window.location.reload();
+                }
+            });
+        }
+
+        // 顯示更新通知
+        function showUpdateNotification() {
+            // 檢查是否已顯示過通知
+            if (sessionStorage.getItem('updateNotified')) return;
+            sessionStorage.setItem('updateNotified', 'true');
+
+            // 創建通知橫幅
+            const banner = document.createElement('div');
+            banner.id = 'updateBanner';
+            banner.innerHTML = `
+                <span>🎉 新版本已準備就緒！</span>
+                <button onclick="window.location.reload()" class="update-btn">重新整理</button>
+                <button onclick="this.parentElement.remove()" class="dismiss-btn">✕</button>
+            `;
+            banner.style.cssText = `
+                position: fixed;
+                bottom: 20px;
+                left: 50%;
+                transform: translateX(-50%);
+                background: linear-gradient(135deg, #4caf50, #2e7d32);
+                color: white;
+                padding: 12px 20px;
+                border-radius: 25px;
+                display: flex;
+                align-items: center;
+                gap: 15px;
+                box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+                z-index: 10000;
+                font-size: 14px;
+                animation: slideUp 0.3s ease;
+            `;
+
+            // 添加按鈕樣式
+            const style = document.createElement('style');
+            style.textContent = `
+                @keyframes slideUp {
+                    from { opacity: 0; transform: translateX(-50%) translateY(20px); }
+                    to { opacity: 1; transform: translateX(-50%) translateY(0); }
+                }
+                .update-btn {
+                    background: white;
+                    color: #2e7d32;
+                    border: none;
+                    padding: 8px 16px;
+                    border-radius: 15px;
+                    cursor: pointer;
+                    font-weight: bold;
+                }
+                .dismiss-btn {
+                    background: transparent;
+                    border: none;
+                    color: white;
+                    cursor: pointer;
+                    font-size: 16px;
+                    opacity: 0.8;
+                }
+            `;
+            document.head.appendChild(style);
+            document.body.appendChild(banner);
         }
     </script>
     
