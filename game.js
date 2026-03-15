@@ -1076,7 +1076,10 @@ const chords = [
     { name: 'C大和弦', notes: ['Do','Mi','Sol'], symbol: 'C' },
     { name: 'G大和弦', notes: ['Sol','Si','Re'], symbol: 'G' },
     { name: 'F大和弦', notes: ['Fa','La','Do'], symbol: 'F' },
-    { name: 'Dm和弦', notes: ['Re','Fa','La'], symbol: 'Dm' }
+    { name: 'Dm和弦', notes: ['Re','Fa','La'], symbol: 'Dm' },
+    { name: 'Am和弦', notes: ['La','Do','Mi'], symbol: 'Am' },
+    { name: 'Em和弦', notes: ['Mi','Sol','Si'], symbol: 'Em' },
+    { name: 'G7和弦', notes: ['Sol','Si','Re','Fa'], symbol: 'G7' }
 ];
 
 // Fisher-Yates 洗牌算法 (公平隨機)
@@ -1188,9 +1191,12 @@ function level4Question() {
     const chord = chords[Math.floor(Math.random() * chords.length)];
     currentQuestion = chord.name;
     
-    // 洗牌選項順序，確保 currentOptions 與按鈕渲染順序一致
-    const shuffledChords = shuffleArray([...chords]);
-    currentOptions = shuffledChords.map(c => c.name);
+    // 從所有和弦中隨機選擇 4 個作為選項（包含正確答案）
+    // 先過濾掉正確答案，再隨機選 3 個，最後加入正確答案並洗牌
+    const otherChords = chords.filter(c => c.name !== chord.name);
+    const shuffledOthers = shuffleArray(otherChords).slice(0, 3);
+    const optionChords = shuffleArray([chord, ...shuffledOthers]);
+    currentOptions = optionChords.map(c => c.name);
     
     // 直接使用 chord.notes
     const activeKeys = chord.notes;
