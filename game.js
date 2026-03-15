@@ -1482,3 +1482,45 @@ document.addEventListener('click', (e) => {
 });
 
 // ESC 鍵關閉 Modal — 已合併到主 keydown 監聽器
+
+// ========== 全域錯誤處理 (提升穩定性) ==========
+// 捕獲未預期的 JavaScript 錯誤，防止遊戲崩潰
+window.addEventListener('error', (event) => {
+    console.error('遊戲發生未預期的錯誤:', event.error);
+    
+    // 顯示友善的錯誤提示給用戶
+    const feedback = getDomElement('feedback');
+    if (feedback) {
+        feedback.className = 'feedback wrong';
+        feedback.textContent = '⚠️ 發生了一些問題，請重新整理頁面';
+        feedback.setAttribute('aria-label', '發生錯誤，請重新整理頁面');
+    }
+    
+    // 嘗試保存玩家進度
+    try {
+        saveProgress();
+    } catch (e) {
+        console.warn('錯誤發生時儲存進度失敗:', e);
+    }
+    
+    // 阻止預設錯誤處理（避免顯示惱人的瀏覽器錯誤訊息）
+    event.preventDefault();
+});
+
+// 捕獲未處理的 Promise 拒絕 (async/await 錯誤)
+window.addEventListener('unhandledrejection', (event) => {
+    console.error('未處理的非同步錯誤:', event.reason);
+    
+    // 顯示提示但不中斷遊戲流程
+    const feedback = getDomElement('feedback');
+    if (feedback && !feedback.textContent) {
+        feedback.className = 'feedback wrong';
+        feedback.textContent = '⚠️ 載入中...';
+        setTimeout(() => {
+            feedback.textContent = '';
+            feedback.className = '';
+        }, 2000);
+    }
+    
+    event.preventDefault();
+});
