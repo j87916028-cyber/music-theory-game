@@ -377,11 +377,11 @@
             currentQuestion = note;
             const correct = mode ? noteNames[note] : note;
             setTimeout(() => playNote(note), 100);
-            document.getElementById('gameHint').textContent = mode ? '這個音符的音名是？' : '這個音符的唱名是？';
+            getDomElement('gameHint').textContent = mode ? '這個音符的音名是？' : '這個音符的唱名是？';
             let opts = [correct]; const all = mode ? ['C','D','E','F','G','A','B'] : notes;
             while (opts.length < 4) { const o = all[Math.floor(Math.random() * all.length)]; if (!opts.includes(o)) opts.push(o); }
             opts = shuffleArray(opts);
-            document.getElementById('gameContent').innerHTML = '<div class="note-display">' + note + '</div><button onclick="playNote(\'' + note + '\')" style="font-size:1.5rem;background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:10px 20px;cursor:pointer;margin:10px;">🔊 再聽</button><div class="options-grid">' + opts.map((n, i) => '<button class="option-btn" onclick="checkAnswer(\'' + n + '\',\'' + correct + '\')" aria-label="選項 ' + (i+1) + ': ' + n + '">' + n + '</button>').join('') + '</div>';
+            getDomElement('gameContent').innerHTML = '<div class="note-display">' + note + '</div><button onclick="playNote(\'' + note + '\')" style="font-size:1.5rem;background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:10px 20px;cursor:pointer;margin:10px;">🔊 再聽</button><div class="options-grid">' + opts.map((n, i) => '<button class="option-btn" onclick="checkAnswer(\'' + n + '\',\'' + correct + '\')" aria-label="選項 ' + (i+1) + ': ' + n + '">' + n + '</button>').join('') + '</div>';
         }
         
         // Fisher-Yates 洗牌算法
@@ -397,19 +397,19 @@
         function rhythmTraining() {
             const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
             currentQuestion = rhythm.name;
-            document.getElementById('gameHint').textContent = '這個音符有幾拍？';
+            getDomElement('gameHint').textContent = '這個音符有幾拍？';
             // 洗牌選項，讓使用者學習而不是記憶位置
             const beatOptions = shuffleArray([0.5, 1, 2, 4]);
-            document.getElementById('gameContent').innerHTML = '<div class="note-display">' + rhythm.symbol + '</div><div class="options-grid">' + beatOptions.map((n, i) => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + rhythm.beats + ')" aria-label="選項 ' + (i+1) + ': ' + n + ' 拍">' + n + ' 拍</button>').join('') + '</div>';
+            getDomElement('gameContent').innerHTML = '<div class="note-display">' + rhythm.symbol + '</div><div class="options-grid">' + beatOptions.map((n, i) => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + rhythm.beats + ')" aria-label="選項 ' + (i+1) + ': ' + n + ' 拍">' + n + ' 拍</button>').join('') + '</div>';
         }
         
         function chordTraining() {
             const chord = chords[Math.floor(Math.random() * chords.length)];
             currentQuestion = chord.name;
-            document.getElementById('gameHint').textContent = '🎧 聽和弦，選名稱';
+            getDomElement('gameHint').textContent = '🎧 聽和弦，選名稱';
             // 洗牌和弦選項
             const shuffledChords = shuffleArray(chords);
-            document.getElementById('gameContent').innerHTML = '<button onclick="playChord(\'' + chord.notes.join(',') + '\')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button><div class="options-grid">' + shuffledChords.map((c, i) => '<button class="option-btn" onclick="checkAnswer(\'' + c.name + '\',\'' + chord.name + '\')" aria-label="選項 ' + (i+1) + ': ' + c.name + '">' + c.name + '</button>').join('') + '</div>';
+            getDomElement('gameContent').innerHTML = '<button onclick="playChord(\'' + chord.notes.join(',') + '\')" style="font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button><div class="options-grid">' + shuffledChords.map((c, i) => '<button class="option-btn" onclick="checkAnswer(\'' + c.name + '\',\'' + chord.name + '\')" aria-label="選項 ' + (i+1) + ': ' + c.name + '">' + c.name + '</button>').join('') + '</div>';
             setTimeout(() => playChord(chord.notes), 300);
         }
         
@@ -440,19 +440,19 @@
         function scaleTraining() {
             const scale = scales[Math.floor(Math.random() * scales.length)];
             currentQuestion = scale.name;
-            document.getElementById('gameHint').textContent = '🎧 聽音階，選名稱';
+            getDomElement('gameHint').textContent = '🎧 聽音階，選名稱';
             // 洗牌音階選項
             const shuffledScales = shuffleArray(scales);
-            document.getElementById('gameContent').innerHTML = '<button onclick="playScale(\'' + scale.notes.join(',') + '\')" style="font-size:3rem;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button><div class="options-grid">' + shuffledScales.map((s, i) => '<button class="option-btn" onclick="checkAnswer(\'' + s.name + '\',\'' + scale.name + '\')" aria-label="選項 ' + (i+1) + ': ' + s.name + '">' + s.name + '</button>').join('') + '</div>';
+            getDomElement('gameContent').innerHTML = '<button onclick="playScale(\'' + scale.notes.join(',') + '\')" style="font-size:3rem;background:linear-gradient(135deg,#4caf50,#8bc34a);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button><div class="options-grid">' + shuffledScales.map((s, i) => '<button class="option-btn" onclick="checkAnswer(\'' + s.name + '\',\'' + scale.name + '\')" aria-label="選項 ' + (i+1) + ': ' + s.name + '">' + s.name + '</button>').join('') + '</div>';
             setTimeout(() => playScale(scale.notes), 300);
         }
         
         function playScale(notesStr) { notesStr.split(',').forEach((n, i) => { setTimeout(() => playNote(n), i * 300); }); }
         
         function bossBattle() {
-            const bosses = [{ name: '節奏怪獸', q: () => { const r = rhythms[Math.floor(Math.random() * rhythms.length)]; currentQuestion = r.name; document.getElementById('gameHint').textContent = '👑 BOSS挑戰！這是什麼音符？'; const beatOptions = shuffleArray([0.5,1,2,4]); return { display: '<div class="note-display">' + r.symbol + '</div>', options: beatOptions.map((n, i) => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + r.beats + ')" aria-label="選項 ' + (i+1) + ': ' + n + ' 拍">' + n + ' 拍</button>').join('') }; } }];
+            const bosses = [{ name: '節奏怪獸', q: () => { const r = rhythms[Math.floor(Math.random() * rhythms.length)]; currentQuestion = r.name; getDomElement('gameHint').textContent = '👑 BOSS挑戰！這是什麼音符？'; const beatOptions = shuffleArray([0.5,1,2,4]); return { display: '<div class="note-display">' + r.symbol + '</div>', options: beatOptions.map((n, i) => '<button class="option-btn" onclick="checkAnswer(' + n + ',' + r.beats + ')" aria-label="選項 ' + (i+1) + ': ' + n + ' 拍">' + n + ' 拍</button>').join('') }; } }];
             const boss = bosses[0]; const q = boss.q();
-            document.getElementById('gameContent').innerHTML = q.display + '<div class="options-grid">' + q.options + '</div>';
+            getDomElement('gameContent').innerHTML = q.display + '<div class="options-grid">' + q.options + '</div>';
         }
         
         // 答案冷卻機制 - 防止重複點擊導致分數計算錯誤
@@ -486,7 +486,7 @@
         // 鍵盤支持 - 按數字鍵 1-4 或方向鍵選擇答案
         let selectedOptionIndex = 0;
         document.addEventListener('keydown', function(e) {
-            if (!document.getElementById('gameArea').classList.contains('active')) return;
+            if (!getDomElement('gameArea').classList.contains('active')) return;
             const buttons = document.querySelectorAll('.option-btn');
             if (buttons.length === 0) return;
             
@@ -551,12 +551,12 @@ function toggleLang() {
     let idx = langOrder.indexOf(currentLang);
     currentLang = langOrder[(idx + 1) % langOrder.length];
     try { localStorage.setItem('musicLang', currentLang); } catch(e) { console.warn('儲存語言設定失敗:', e); }
-    document.getElementById('langLabel').textContent = langNames[currentLang];
+    getDomElement('langLabel').textContent = langNames[currentLang];
     updateAllTexts();
 }
 
 function updateAllTexts() {
-    document.getElementById('langLabel').textContent = langNames[currentLang];
+    getDomElement('langLabel').textContent = langNames[currentLang];
     if(document.querySelector('h1')) document.querySelector('h1').textContent = t('home');
     document.querySelectorAll('.tab-btn')[0].textContent = '🎮 ' + t('play');
     document.querySelectorAll('.tab-btn')[1].textContent = '📋 ' + t('quest');
@@ -583,11 +583,11 @@ function updateAllTexts() {
     if (instrumentHeader) instrumentHeader.textContent = '🎹 ' + t('instrumentTheme');
     // 更新自由彈奏按鈕
     updateFreePlayText();
-    if(document.getElementById('gameHint')) updateGameTexts();
+    if(getDomElement('gameHint')) updateGameTexts();
 }
 
 function updateGameTexts() {
-    const hint = document.getElementById('gameHint');
+    const hint = getDomElement('gameHint');
     if(!hint) return;
     if(hint.textContent.includes('聽聲音')) hint.textContent = t('listen');
     else if(hint.textContent.includes('音名')) hint.textContent = t('noteName');
@@ -603,7 +603,7 @@ function updateGameTexts() {
 }
 
 // Initialize
-document.getElementById('langLabel').textContent = langNames[currentLang];
+getDomElement('langLabel').textContent = langNames[currentLang];
 updateAllTexts();
 </script>
 
@@ -728,8 +728,8 @@ document.head.appendChild(extraStyle);
 <script>
 // 練習模式 - 無壓力
 function practiceMode() {
-    document.getElementById('gameHint').textContent = '🎯 練習模式 - 選一個項目';
-    document.getElementById('gameContent').innerHTML = `
+    getDomElement('gameHint').textContent = '🎯 練習模式 - 選一個項目';
+    getDomElement('gameContent').innerHTML = `
         <div class="mode-grid" style="margin-top:20px;">
             <button class="mode-card" type="button" onclick="practiceEar()"><div class="icon">👂</div><div class="name">聽力練習</div></button>
             <button class="mode-card" type="button" onclick="practiceNote()"><div class="icon">🎵</div><div class="name">音符練習</div></button>
@@ -742,10 +742,10 @@ function practiceMode() {
 function practiceEar() {
     const correct = notes[Math.floor(Math.random() * notes.length)];
     playNote(correct);
-    document.getElementById('gameHint').textContent = '👂 這是什麼音符？';
+    getDomElement('gameHint').textContent = '👂 這是什麼音符？';
     // 洗牌選項，讓使用者學習而不是記憶位置
     const shuffledNotes = shuffleArray([...notes]);
-    document.getElementById('gameContent').innerHTML = '<button onclick="practiceEar()" style="font-size:2rem;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + shuffledNotes.map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+    getDomElement('gameContent').innerHTML = '<button onclick="practiceEar()" style="font-size:2rem;background:rgba(255,255,255,0.2);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + shuffledNotes.map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
     // 自動聚焦第一個選項
     setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
@@ -754,21 +754,21 @@ function practiceNote() {
     const note = notes[Math.floor(Math.random() * notes.length)];
     const mode = Math.random() > 0.5;
     const correct = mode ? noteNames[note] : note;
-    document.getElementById('gameHint').textContent = mode ? '這個音符的音名是？' : '這個音符的唱名是？';
+    getDomElement('gameHint').textContent = mode ? '這個音符的音名是？' : '這個音符的唱名是？';
     // 洗牌選項
     const noteOptions = mode ? ['C','D','E','F','G','A','B'] : [...notes];
     const shuffledOptions = shuffleArray(noteOptions);
-    document.getElementById('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + note + '</div><div class="options-grid">' + shuffledOptions.map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+    getDomElement('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + note + '</div><div class="options-grid">' + shuffledOptions.map(n => '<button class="option-btn" onclick="practiceAnswer(this,\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
     // 自動聚焦第一個選項
     setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
 
 function practiceRhythm() {
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
-    document.getElementById('gameHint').textContent = '這個音符有幾拍？';
+    getDomElement('gameHint').textContent = '這個音符有幾拍？';
     // 洗牌選項
     const beatOptions = shuffleArray([0.5, 1, 2, 4]);
-    document.getElementById('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + rhythm.symbol + '</div><div class="options-grid">' + beatOptions.map(n => '<button class="option-btn" onclick="practiceAnswer(this,' + n + ',' + rhythm.beats + ')">' + n + ' 拍</button>').join('') + '</div>';
+    getDomElement('gameContent').innerHTML = '<div class="note-display" style="font-size:5rem;">' + rhythm.symbol + '</div><div class="options-grid">' + beatOptions.map(n => '<button class="option-btn" onclick="practiceAnswer(this,' + n + ',' + rhythm.beats + ')">' + n + ' 拍</button>').join('') + '</div>';
     // 自動聚焦第一個選項
     setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
@@ -776,10 +776,10 @@ function practiceRhythm() {
 function practiceChord() {
     const chord = chords[Math.floor(Math.random() * chords.length)];
     playChord(chord.notes);
-    document.getElementById('gameHint').textContent = '這是什麼和弦？';
+    getDomElement('gameHint').textContent = '這是什麼和弦？';
     // 洗牌和弦選項
     const shuffledChords = shuffleArray([...chords]);
-    document.getElementById('gameContent').innerHTML = '<button onclick="practiceChord()" style="font-size:2rem;background:rgba(155,89,182,0.3);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + shuffledChords.map(c => '<button class="option-btn" onclick="practiceAnswer(this,\'' + c.name + '\',\'' + chord.name + '\')">' + c.name + '</button>').join('') + '</div>';
+    getDomElement('gameContent').innerHTML = '<button onclick="practiceChord()" style="font-size:2rem;background:rgba(155,89,182,0.3);border:none;border-radius:50%;width:80px;height:80px;cursor:pointer;margin:20px;">🔊</button><div class="options-grid">' + shuffledChords.map(c => '<button class="option-btn" onclick="practiceAnswer(this,\'' + c.name + '\',\'' + chord.name + '\')">' + c.name + '</button>').join('') + '</div>';
     // 自動聚焦第一個選項
     setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
@@ -790,12 +790,12 @@ function weeklyChallenge() {
     const saved = parseInt(localStorage.getItem('weeklyChallenge') || '0');
     
     if (saved >= weekNum) {
-        document.getElementById('gameHint').textContent = '📊 本週挑戰已完成！';
-        document.getElementById('gameContent').innerHTML = '<div style="text-align:center;margin:30px;"><div style="font-size:4rem;">✅</div><div style="font-size:1.5rem;margin:20px;">挑戰完成！</div><button onclick="weeklyChallenge()" style="padding:15px 30px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:10px;font-size:1.2rem;cursor:pointer;">再玩一次</button></div>';
+        getDomElement('gameHint').textContent = '📊 本週挑戰已完成！';
+        getDomElement('gameContent').innerHTML = '<div style="text-align:center;margin:30px;"><div style="font-size:4rem;">✅</div><div style="font-size:1.5rem;margin:20px;">挑戰完成！</div><button onclick="weeklyChallenge()" style="padding:15px 30px;background:linear-gradient(135deg,#ffd700,#ff8c00);border:none;border-radius:10px;font-size:1.2rem;cursor:pointer;">再玩一次</button></div>';
     } else {
         // 開始挑戰 - 20題限時
         gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false;
-        document.getElementById('gameHint').textContent = '📊 週挑戰！目標：20題全對！';
+        getDomElement('gameHint').textContent = '📊 週挑戰！目標：20題全對！';
         weeklyQuest();
     }
 }
@@ -816,8 +816,8 @@ function weeklyQuest() {
         playerData.xp += 100;
         saveData();
         
-        document.getElementById('gameHint').textContent = '🎉 週挑戰完成！';
-        document.getElementById('gameContent').innerHTML = '<div style="text-align:center;margin:30px;"><div style="font-size:4rem;">🏆</div><div style="font-size:1.5rem;margin:20px;">獲得 ' + reward + ' 金幣！</div></div>';
+        getDomElement('gameHint').textContent = '🎉 週挑戰完成！';
+        getDomElement('gameContent').innerHTML = '<div style="text-align:center;margin:30px;"><div style="font-size:4rem;">🏆</div><div style="font-size:1.5rem;margin:20px;">獲得 ' + reward + ' 金幣！</div></div>';
         
         for (let i = 0; i < 50; i++) setTimeout(() => createConfetti(), i * 30);
         return;
@@ -831,7 +831,7 @@ function weeklyQuest() {
     else chordTraining();
     
     questionsAnswered++;
-    document.getElementById('gameHint').textContent = '📊 週挑戰 ' + questionsAnswered + '/20 - 目標全對！';
+    getDomElement('gameHint').textContent = '📊 週挑戰 ' + questionsAnswered + '/20 - 目標全對！';
 }
 
 // 覆蓋 startGame
@@ -839,15 +839,15 @@ const originalStartGame = startGame;
 startGame = function(mode) {
     if (mode === 'practice') {
         currentMode = 'practice';
-        document.getElementById('homePage').style.display = 'none';
-        document.getElementById('gameArea').classList.add('active');
-        document.getElementById('backBtn').style.display = 'block';
+        getDomElement('homePage').style.display = 'none';
+        getDomElement('gameArea').classList.add('active');
+        getDomElement('backBtn').style.display = 'block';
         practiceMode();
     } else if (mode === 'weekly') {
         currentMode = 'weekly';
-        document.getElementById('homePage').style.display = 'none';
-        document.getElementById('gameArea').classList.add('active');
-        document.getElementById('backBtn').style.display = 'block';
+        getDomElement('homePage').style.display = 'none';
+        getDomElement('gameArea').classList.add('active');
+        getDomElement('backBtn').style.display = 'block';
         weeklyChallenge();
     } else {
         originalStartGame(mode);
@@ -995,7 +995,7 @@ function practiceAnswer(btn, answer, correct) {
     
     // 自動載入下一題（無論對錯）
     setTimeout(() => {
-        const hint = document.getElementById('gameHint').textContent;
+        const hint = getDomElement('gameHint').textContent;
         if (hint.includes('聽力') || hint.includes('聽')) practiceEar();
         else if (hint.includes('音名') || hint.includes('唱名')) practiceNote();
         else if (hint.includes('幾拍')) practiceRhythm();
@@ -1011,7 +1011,7 @@ function practiceAnswer(btn, answer, correct) {
 
 // 修復顯示音符
 function updateGameTexts() {
-    const hint = document.getElementById('gameHint');
+    const hint = getDomElement('gameHint');
     if (!hint) return;
     const text = hint.textContent;
     if (text.includes('聽聲音')) hint.textContent = t('listen');
@@ -2899,7 +2899,7 @@ document.addEventListener('keydown', function(e) {
             showHome();
             break;
         case ' ':
-            if (document.getElementById('gameArea').classList.contains('active')) {
+            if (getDomElement('gameArea').classList.contains('active')) {
                 // 下一題
             }
             break;
@@ -3454,9 +3454,9 @@ setTimeout(updateGameCards, 500);
 
 // 重新定義 updateAllTexts 來更新所有硬編碼文字
 updateAllTexts = function() {
-    if (!document.getElementById('langLabel')) return;
+    if (!getDomElement('langLabel')) return;
     
-    document.getElementById('langLabel').textContent = langNames[currentLang];
+    getDomElement('langLabel').textContent = langNames[currentLang];
     
     // 標題
     if(document.querySelector('h1')) document.querySelector('h1').textContent = t('home');
@@ -4012,12 +4012,12 @@ function updateTimerDisplay() {
 // 覆蓋節奏訓練來使用翻譯
 const oldRhythmTraining = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div class="note-display">' + rhythm.symbol + '</div>' +
         '<div class="options-grid">' + 
         [0.5,1,2,4].map(n => 
@@ -4040,14 +4040,14 @@ const rhythmSymbols = {
 // 覆蓋節奏訓練顯示
 const oldRhythmTraining2 = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
     const symbolHTML = rhythmSymbols[rhythm.beats];
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div class="note-display" style="display:flex;align-items:center;justify-content:center;height:100px;">' + symbolHTML + '</div>' +
         '<div style="text-align:center;margin:10px 0;color:#888;font-size:0.9rem;">' + rhythm.name + '</div>' +
         '<div class="options-grid">' + 
@@ -4074,12 +4074,12 @@ const rhythmSymbols = {
 // 覆蓋顯示
 const oldRT3 = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div style="padding:30px;text-align:center;">' + rhythmSymbols[rhythm.beats] + '</div>' +
         '<div style="text-align:center;margin:15px 0;font-size:1.2rem;color:#ffd700;">' + rhythm.name + '</div>' +
         '<div class="options-grid">' + 
@@ -4101,12 +4101,12 @@ const rhythmSymbols = {
 
 const oldRT4 = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div style="font-size:6rem;text-align:center;padding:30px;">' + rhythmSymbols[rhythm.beats] + '</div>' +
         '<div style="text-align:center;margin:15px 0;font-size:1.3rem;color:#ffd700;">' + rhythm.name + '</div>' +
         '<div class="options-grid">' + 
@@ -4128,12 +4128,12 @@ const rhythmSymbols = {
 
 const oldRT5 = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div style="text-align:center;padding:30px;">' + rhythmSymbols[rhythm.beats] + '</div>' +
         '<div style="text-align:center;margin:15px 0;font-size:1.5rem;color:#ffd700;">' + rhythm.name + '</div>' +
         '<div class="options-grid">' + 
@@ -4155,12 +4155,12 @@ const rhythmSymbols = {
 
 const oldRT6 = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div style="text-align:center;padding:40px;font-size:5rem;">' + rhythmSymbols[rhythm.beats] + '</div>' +
         '<div style="text-align:center;margin:10px 0;font-size:1.2rem;color:#888;">' + rhythm.name + '</div>' +
         '<div class="options-grid">' + 
@@ -4182,12 +4182,12 @@ const rhythmSymbols = {
 
 const oldRT7 = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div style="text-align:center;padding:40px;font-size:5rem;line-height:1;">' + rhythmSymbols[rhythm.beats] + '</div>' +
         '<div style="text-align:center;margin:10px 0;font-size:1.3rem;color:#ffd700;font-weight:bold;">' + rhythm.name + '</div>' +
         '<div class="options-grid">' + 
@@ -4213,12 +4213,12 @@ const rhythmSymbols = {
 
 const oldRT8 = rhythmTraining;
 rhythmTraining = function() {
-    document.getElementById('gameHint').textContent = t('beats');
+    getDomElement('gameHint').textContent = t('beats');
     
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     currentQuestion = rhythm.name;
     
-    document.getElementById('gameContent').innerHTML = 
+    getDomElement('gameContent').innerHTML = 
         '<div style="background:rgba(255,255,255,0.1);border-radius:20px;padding:10px;">' + rhythmSymbols[rhythm.beats] + '</div>' +
         '<div style="text-align:center;margin:15px 0;font-size:1.4rem;color:#ffd700;font-weight:bold;">' + rhythm.name + '</div>' +
         '<div class="options-grid">' + 
