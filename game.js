@@ -882,7 +882,7 @@ document.addEventListener('keydown', (e) => {
         }
     }
     // 鋼琴鍵盤快捷鍵 (Level 4) - 允許自由練習鋼琴，無需答題
-    if (currentLevel === 4) {
+    if (currentLevel === 4 && !e.repeat) {
         const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
         if (pianoKey) {
             e.preventDefault();
