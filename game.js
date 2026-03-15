@@ -736,15 +736,18 @@ function playKeyPressSound() {
     };
 }
 
-function setLevel(level) {
+function setLevel(level, resetStats = true) {
     currentLevel = level;
     document.querySelectorAll('.level-btn').forEach((btn, i) => {
         btn.classList.toggle('active', i + 1 === level);
     });
-    questionsAnswered = 0;
-    correctAnswers = 0;
-    updateProgress();
-    saveProgress();
+    // 只有在明確要求重置統計時才重置（避免頁面載入時丢失進度）
+    if (resetStats) {
+        questionsAnswered = 0;
+        correctAnswers = 0;
+        updateProgress();
+        saveProgress();
+    }
     nextQuestion();
 }
 
@@ -1405,12 +1408,12 @@ function checkAnswer(answer, correct) {
     }, 1500);
 }
 
-// 初始化 - 恢復儲存的進度
+// 初始化 - 恢復儲存的進度（不重置統計資料）
 getDomElement('score').textContent = score;
 getDomElement('streakCount').textContent = streak;
 updateAccuracy();
 updateProgress();
-setLevel(currentLevel);
+setLevel(currentLevel, false);
 
 // 初始化遊戲時長顯示（使用 HTML 中已存在的元素）
 const playTimeDisplay = getDomElement('playTimeDisplay');
