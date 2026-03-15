@@ -59,6 +59,12 @@ self.addEventListener('fetch', (event) => {
                         // 網路失敗時，如果沒有快取就回傳失敗
                         if (!cachedResponse) {
                             console.warn('字體載入失敗且無快取:', event.request.url);
+                            // 回傳一個空 Response 避免 undefined 錯誤
+                            return new Response('', { 
+                                status: 200, 
+                                statusText: 'OK',
+                                headers: { 'Content-Type': 'text/css' }
+                            });
                         }
                         return cachedResponse;
                     });
@@ -114,7 +120,17 @@ self.addEventListener('fetch', (event) => {
                     
                     return caches.match(fallbackPage).then((fallbackResponse) => {
                         // 如果沒有找到對應的快取頁面，回退到 index.html
-                        return fallbackResponse || caches.match('./index.html');
+                        if (fallbackResponse) {
+                            return fallbackResponse;
+                        }
+                        // 嘗試回退到 index.html
+                        return caches.match('./index.html').then((indexResponse) => {
+                            // 確保一定返回一個 Response，避免 undefined
+                            return indexResponse || new Response('Offline - Page not cached', { 
+                                status: 503, 
+                                statusText: 'Service Unavailable' 
+                            });
+                        });
                     });
                 })
         );
