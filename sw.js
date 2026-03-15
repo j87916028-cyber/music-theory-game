@@ -1,5 +1,5 @@
 // 音樂小學堂 - Service Worker 快取離線支援
-const CACHE_NAME = 'music-theory-game-v6';
+const CACHE_NAME = 'music-theory-game-v7';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
