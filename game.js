@@ -336,37 +336,44 @@ function debounce(func, wait, options = { leading: true, trailing: true }) {
     let lastArgs = null;
     let lastThis = null;
     let result;
-    let lastCallTime = 0;
+    let lastInvokeTime = 0;
     
     const leading = options.leading;
     const trailing = options.trailing;
     
     return function executedFunction(...args) {
         const now = Date.now();
+        const isFirstCall = timeout === undefined;
+        
         lastArgs = args;
         lastThis = this;
-        
-        // 如果是第一次呼叫且啟用 leading
-        if (leading && !timeout) {
-            result = func.apply(this, args);
-        }
         
         // 清除之前的計時器
         if (timeout) clearTimeout(timeout);
         
-        // 設定新的計時器
+        // Leading: 第一次呼叫時立即執行
+        if (leading && isFirstCall) {
+            lastInvokeTime = now;
+            result = func.apply(this, args);
+        }
+        
+        // Trailing: 設定計時器，在 wait 毫秒後執行
         if (trailing) {
             timeout = setTimeout(() => {
-                timeout = null;
-                // 只有當有足夠的時間間隔時才執行 trailing
-                // 使用 Date.now() 來確保使用最新的時間
-                if (lastArgs && Date.now() - lastCallTime >= wait) {
+                timeout = undefined;
+                // Trailing edge: 執行最近一次的呼叫
+                if (lastArgs) {
+                    lastInvokeTime = Date.now();
                     result = func.apply(lastThis, lastArgs);
                 }
             }, wait);
         }
         
-        lastCallTime = now;
+        // 更新最後呼叫時間（用於調試或進階用途）
+        if (!isFirstCall) {
+            lastInvokeTime = now;
+        }
+        
         return result;
     };
 }
