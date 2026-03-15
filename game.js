@@ -1028,6 +1028,9 @@ function shuffleArray(array) {
 
 // 根據目前關卡播放答題結果的音效反饋
 function playAnswerFeedback(isCorrect) {
+    // 檢查音效開關狀態
+    if (!soundEnabled) return;
+    
     if (isCorrect) {
         if (currentLevel === 4) {
             // Level 4: 和弦 - 播放正確答案的和弦
