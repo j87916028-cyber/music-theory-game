@@ -614,6 +614,11 @@ document.addEventListener('keydown', (e) => {
             playNote(currentQuestion);
         }
     }
+    // H 鍵顯示幫助說明
+    if (e.key.toLowerCase() === 'h') {
+        e.preventDefault();
+        showHelp();
+    }
     // Escape 鍵：Modal 開啟時關閉 Modal，否則重新開始當前關卡
     if (e.key === 'Escape') {
         e.preventDefault();
