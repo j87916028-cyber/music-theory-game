@@ -684,6 +684,31 @@ function loadSoundSetting() {
 }
 loadSoundSetting();
 
+// 專注模式 - 隱藏分數和統計，專心學習
+function toggleFocusMode() {
+    document.body.classList.toggle('focus-mode');
+    const isFocusMode = document.body.classList.contains('focus-mode');
+    const btn = getDomElement('focusToggle');
+    btn.textContent = isFocusMode ? '🎯' : '👁️';
+    btn.classList.toggle('active', isFocusMode);
+    // 儲存專注模式設定
+    safeLocalStorageSet('musicTheoryFocusMode', isFocusMode ? 'on' : 'off');
+}
+
+// 載入專注模式設定
+function loadFocusModeSetting() {
+    const saved = localStorage.getItem('musicTheoryFocusMode');
+    if (saved === 'on') {
+        document.body.classList.add('focus-mode');
+        const btn = getDomElement('focusToggle');
+        if (btn) {
+            btn.textContent = '🎯';
+            btn.classList.add('active');
+        }
+    }
+}
+loadFocusModeSetting();
+
 // 切換遊戲暫停/繼續狀態
 function togglePause() {
     isPaused = !isPaused;
@@ -723,6 +748,13 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'p' || e.key === 'P') {
         e.preventDefault();
         togglePause();
+        return;
+    }
+    
+    // F 鍵：切換專注模式
+    if (e.key === 'f' || e.key === 'F') {
+        e.preventDefault();
+        toggleFocusMode();
         return;
     }
     

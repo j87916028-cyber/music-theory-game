@@ -47,6 +47,7 @@
         <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識 (R)</button>
         <button class="sound-btn active" id="soundToggle" onclick="toggleSound()" title="切換音效" aria-label="切換音效">🔊</button>
         <button class="history-btn" id="historyBtn" onclick="showAnswerHistory()" title="答題歷史" aria-label="查看答題歷史">📜</button>
+        <button class="focus-btn" id="focusToggle" onclick="toggleFocusMode()" title="專注模式" aria-label="切換專注模式">👁️</button>
         <button class="reset-btn" onclick="resetProgress()" title="重置進度" aria-label="重置遊戲進度">🗑️</button>
         <button class="help-btn" onclick="showHelp()" title="鍵盤快捷鍵" aria-label="顯示鍵盤快捷鍵說明">❓</button>
     </div>
@@ -58,7 +59,7 @@
         <span class="stat-item" title="學習時長">⏱️ <span id="playTimeDisplay">0秒</span></span>
     </div>
     <div class="progress-bar"><div class="progress-fill" id="progress" style="width: 0%"></div></div>
-    <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | 空格 播放聲音 | A-J 彈鋼琴</p>
+    <p class="hint" style="font-size:0.8rem;margin-bottom:15px;">⌨️ 快捷鍵：1-4 答題 | Q/W/E/R 選關卡 | F 專注模式 | P 暫停 | 空格 播放聲音 | A-J 彈鋼琴</p>
     
     <div id="gameArea">
         <div class="feedback" id="feedback" role="status" aria-live="polite"></div>
@@ -200,6 +201,12 @@
                 <li><span class="key-hint">E</span> 切換到 Level 3（節奏練習）</li>
                 <li><span class="key-hint">R</span> 切換到 Level 4（和弦認識）</li>
                 <li><span class="key-hint">N</span> 跳過當前題目</li>
+            </ul>
+            
+            <h3>🎯 遊戲控制</h3>
+            <ul>
+                <li><span class="key-hint">F</span> 切換專注模式（隱藏分數）</li>
+                <li><span class="key-hint">P</span> 暫停/繼續遊戲</li>
             </ul>
             
             <h3>🎹 Level 4 鋼琴鍵盤</h3>

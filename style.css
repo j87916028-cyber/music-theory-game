@@ -122,7 +122,7 @@ h1 {
     margin: 20px 0;
 }
 
-.level-btn, .sound-btn, .reset-btn, .help-btn, .history-btn {
+.level-btn, .sound-btn, .reset-btn, .help-btn, .history-btn, .focus-btn {
     padding: 12px 20px;
     font-size: 1rem;
     background: rgba(255, 255, 255, 0.1);
@@ -133,15 +133,16 @@ h1 {
     transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
-.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover {
+.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover, .focus-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-color);
     box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
 }
 
-.history-btn:hover {
+.history-btn:hover, .focus-btn:hover {
     transform: translateY(-3px);
     border-color: #9b59b6;
+    box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3);
     box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3);
 }
 
@@ -289,6 +290,17 @@ h1 {
     height: 100%;
     background: linear-gradient(90deg, var(--success-color), #00bfff);
     transition: width 0.5s ease;
+}
+
+/* 專注模式 - 隱藏分數和統計，專心學習 */
+body.focus-mode .score-display,
+body.focus-mode .progress-bar {
+    display: none;
+}
+
+body.focus-mode .focus-btn {
+    background: linear-gradient(135deg, #9b59b6, #8e44ad);
+    border-color: #9b59b6;
 }
 
 /* 遊戲區域 */
