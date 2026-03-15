@@ -881,8 +881,8 @@ document.addEventListener('keydown', (e) => {
             nextQuestion();
         }
     }
-    // 鋼琴鍵盤快捷鍵 (Level 4)
-    if (currentLevel === 4 && currentQuestion) {
+    // 鋼琴鍵盤快捷鍵 (Level 4) - 允許自由練習鋼琴，無需答題
+    if (currentLevel === 4) {
         const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
         if (pianoKey) {
             e.preventDefault();
@@ -907,7 +907,8 @@ document.addEventListener('keydown', (e) => {
 
 // 鍵盤放開事件 - 移除鋼琴按鍵的視覺效果
 document.addEventListener('keyup', (e) => {
-    if (currentLevel === 4 && currentQuestion) {
+    // 鋼琴鍵盤快捷鍵 (Level 4) - 允許自由練習，無需答題
+    if (currentLevel === 4) {
         const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
         if (pianoKey) {
             const keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
@@ -1443,7 +1444,7 @@ function level4Question() {
     // 添加提示文字
     const hint = document.createElement('p');
     hint.className = 'hint';
-    hint.textContent = '🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | A-J 彈鋼琴)（黃色鍵為和弦組成音）';
+    hint.textContent = '🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | A-J 彈鋼琴，黃色鍵為和弦組成音) - 無答題時也可自由練習鋼琴！';
     questionArea.appendChild(hint);
     
     // 添加播放按鈕
