@@ -258,7 +258,7 @@ function debounce(func, wait, options = { leading: true, trailing: true }) {
     let lastArgs = null;
     let lastThis = null;
     let result;
-    let lastCallTime;
+    let lastCallTime = 0;
     
     const leading = options.leading;
     const trailing = options.trailing;
@@ -280,8 +280,9 @@ function debounce(func, wait, options = { leading: true, trailing: true }) {
         if (trailing) {
             timeout = setTimeout(() => {
                 timeout = null;
-                // 只有當有新的呼叫時才執行 trailing
-                if (lastArgs && now - lastCallTime >= wait) {
+                // 只有當有足夠的時間間隔時才執行 trailing
+                // 使用 Date.now() 來確保使用最新的時間
+                if (lastArgs && Date.now() - lastCallTime >= wait) {
                     result = func.apply(lastThis, lastArgs);
                 }
             }, wait);
