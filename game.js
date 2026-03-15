@@ -430,7 +430,7 @@ function showAnswerHistory() {
     let html = '';
     
     if (answerHistory.length === 0) {
-        html = '<p style="text-align:center;padding:20px;">還沒有答題記錄喔～</p>';
+        html = '<p class="history-empty">還沒有答題記錄喔～</p>';
     } else {
         // 按關卡分組顯示
         const levelNames = { 1: '🌱 認識音符', 2: '📖 音名與唱名', 3: '🎼 節奏練習', 4: '🎹 和弦認識' };
@@ -915,9 +915,9 @@ function level1Question() {
     
     const html = `
         <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？ (按 1-7 選答案)</p>
-        <div class="play-buttons" style="display:flex;gap:15px;justify-content:center;align-items:center;margin:15px 0;">
-            <button onclick="playNote('${correctNote}')" style="font-size:3rem;background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
-            <button onclick="playNote('${correctNote}')" style="font-size:1.2rem;background:rgba(255,255,255,0.2);border:none;border-radius:15px;padding:10px 20px;cursor:pointer;">🔄 再聽一次</button>
+        <div class="play-buttons">
+            <button class="play-btn" onclick="playNote('${correctNote}')" aria-label="播放音符">🔊</button>
+            <button class="replay-btn" onclick="playNote('${correctNote}')">🔄 再聽一次</button>
         </div>
         <div class="options">
             ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')">${i+1}. ${n}</button>`).join('')}
@@ -951,7 +951,7 @@ function level2Question() {
     const html = `
         <p class="hint">🎧 ${question} (按 1-4 選答案)</p>
         <div class="note-display">${note}</div>
-        <button onclick="playNote('${note}')" style="font-size:2rem;background:rgba(255,255,255,0.2);border:none;border-radius:10px;padding:10px 20px;cursor:pointer;">🔊 再聽一次</button>
+        <button class="replay-btn" onclick="playNote('${note}')">🔊 再聽一次</button>
         <div class="options">
             ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')">${i+1}. ${n}</button>`).join('')}
         </div>
@@ -1011,8 +1011,8 @@ function level3Question() {
     const html = `
         <p class="hint">這個音符有幾拍？ (按 1-4 選答案)</p>
         <div class="note-display">${rhythm.symbol}</div>
-        <p style="font-size:1.5rem;margin:20px 0;">${rhythm.name}</p>
-        <button onclick="playRhythmByName('${rhythm.name}')" style="font-size:3rem;background:linear-gradient(135deg,#e94560,#ff6b6b);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;">🔊</button>
+        <p class="rhythm-display">${rhythm.name}</p>
+        <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
         <div class="options">
             ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')">${i+1}. ${n} 拍</button>`).join('')}
         </div>
@@ -1176,7 +1176,7 @@ function level4Question() {
             keyEl.setAttribute('aria-label', `${k.note} 白鍵，按鍵 ${k.key.toUpperCase()}${isHighlight ? '，和弦音符' : ''}`);
             keyEl.setAttribute('aria-pressed', isHighlight ? 'true' : 'false');
             keyEl.setAttribute('tabindex', '0');
-            keyEl.innerHTML = `${k.note}<span style="font-size:0.6rem;display:block;">${k.key.toUpperCase()}</span>`;
+            keyEl.innerHTML = `${k.note}<span class="piano-key-label">${k.key.toUpperCase()}</span>`;
         }
         
         pianoContainer.appendChild(keyEl);

@@ -937,3 +937,76 @@ button:focus-visible, .key:focus-visible {
         margin-top: 10px;
     }
 }
+
+/* 遊戲內按鈕樣式（從內聯樣式提取） */
+.play-buttons {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+    margin: 15px 0;
+}
+
+.play-btn {
+    font-size: 3rem;
+    background: linear-gradient(135deg, #e94560, #ff6b6b);
+    border: none;
+    border-radius: 50%;
+    width: 100px;
+    height: 100px;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.play-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 5px 20px rgba(233, 69, 96, 0.4);
+}
+
+.play-btn:active {
+    transform: scale(0.95);
+}
+
+.replay-btn {
+    font-size: 1.2rem;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: 15px;
+    padding: 10px 20px;
+    cursor: pointer;
+    transition: background 0.2s, transform 0.2s;
+}
+
+.replay-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: translateY(-2px);
+}
+
+.rhythm-display {
+    font-size: 1.5rem;
+    margin: 20px 0;
+    text-align: center;
+}
+
+/* 音符顯示 */
+.note-display {
+    font-size: 4rem;
+    font-weight: bold;
+    margin: 20px 0;
+    text-align: center;
+    text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
+}
+
+/* 鋼琴鍵盤音符標籤 */
+.piano-key-label {
+    font-size: 0.6rem;
+    display: block;
+    text-align: center;
+}
+
+/* 歷史記錄空狀態 */
+.history-empty {
+    text-align: center;
+    padding: 20px;
+    color: var(--text-muted);
+}
