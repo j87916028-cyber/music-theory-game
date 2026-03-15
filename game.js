@@ -467,13 +467,16 @@ function showAnswerHistory() {
     // 創建或更新 Modal 內容
     let modal = document.getElementById('historyModal');
     if (!modal) {
-        // 創建 Modal
+        // 創建 Modal（添加可訪問性屬性）
         modal = document.createElement('div');
         modal.id = 'historyModal';
         modal.className = 'modal-overlay';
+        modal.setAttribute('role', 'dialog');
+        modal.setAttribute('aria-modal', 'true');
+        modal.setAttribute('aria-labelledby', 'historyModalTitle');
         modal.innerHTML = `
             <div class="modal">
-                <h2>📜 答題歷史</h2>
+                <h2 id="historyModalTitle">📜 答題歷史</h2>
                 <div class="history-container"></div>
                 <button class="modal-close" onclick="closeAnswerHistory()">關閉</button>
             </div>
@@ -483,6 +486,12 @@ function showAnswerHistory() {
     
     modal.querySelector('.history-container').innerHTML = html;
     modal.classList.add('show');
+    
+    // 可訪問性：聚焦到關閉按鈕，方便鍵盤導航
+    setTimeout(() => {
+        const closeBtn = modal.querySelector('.modal-close');
+        if (closeBtn) closeBtn.focus();
+    }, 100);
 }
 
 // 關閉答題歷史 Modal
@@ -1463,7 +1472,14 @@ function showHelp() {
 // 關閉幫助 Modal
 function closeHelp() {
     const modal = getDomElement('helpModal');
-    modal.classList.remove('show');
+    if (modal) {
+        // 支援兩種關閉方式：class='show' 或 直接移除元素
+        if (modal.classList.contains('show')) {
+            modal.classList.remove('show');
+        } else if (modal.parentElement) {
+            modal.remove();
+        }
+    }
 }
 
 // 點擊 Modal 背景關閉

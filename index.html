@@ -4676,8 +4676,18 @@ function showHelpDialog() {
     const d = document.createElement('div');
     d.id = 'helpModal';
     d.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
-    d.innerHTML = '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:350px;text-align:center;"><h2 style="color:#ffd700;margin-bottom:15px;">🎵 音樂達人</h2><p style="color:#ccc;margin:10px 0;">⚡ 快速開始</p><p style="color:#ccc;margin:10px 0;">📋 查看任務</p><p style="color:#ccc;margin:10px 0;">⚙️ 設定功能</p><button onclick="this.parentElement.parentElement.remove()" style="margin-top:20px;padding:10px 30px;background:#2196f3;border:none;border-radius:10px;color:white;cursor:pointer;font-size:1rem;">關閉</button></div>';
+    d.setAttribute('role', 'dialog');
+    d.setAttribute('aria-modal', 'true');
+    d.setAttribute('aria-labelledby', 'helpModalTitle');
+    d.innerHTML = '<div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:350px;text-align:center;"><h2 id="helpModalTitle" style="color:#ffd700;margin-bottom:15px;">🎵 音樂達人</h2><p style="color:#ccc;margin:10px 0;">⚡ 快速開始</p><p style="color:#ccc;margin:10px 0;">📋 查看任務</p><p style="color:#ccc;margin:10px 0;">⚙️ 設定功能</p><button id="helpModalCloseBtn" onclick="closeHelpDialog()" style="margin-top:20px;padding:10px 30px;background:#2196f3;border:none;border-radius:10px;color:white;cursor:pointer;font-size:1rem;">關閉</button></div>';
     document.body.appendChild(d);
+    // 可訪問性：聚焦到關閉按鈕
+    setTimeout(() => document.getElementById('helpModalCloseBtn')?.focus(), 100);
+}
+
+function closeHelpDialog() {
+    const d = document.getElementById('helpModal');
+    if (d) d.remove();
 }
 </script>
 
