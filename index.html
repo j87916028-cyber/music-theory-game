@@ -4751,27 +4751,6 @@ function closeHelpDialog() {
 </script>
 
 <script>
-// 分頁可見性監控
-document.addEventListener('visibilitychange', function() {
-    if(document.hidden) {
-        console.log('🔔 遊戲暫停（分頁隱藏）');
-        // 自動暫停遊戲
-        if(typeof gameRunning !== 'undefined' && gameRunning) {
-            gameRunning = false;
-            clearInterval(timerInterval);
-            console.log('⏸️ 遊戲已自動暫停');
-        }
-    } else {
-        console.log('🔔 遊戲繼續');
-        // 恢復 AudioContext
-        if(audioCtx && audioCtx.state === 'suspended') {
-            audioCtx.resume();
-        }
-    }
-});
-</script>
-
-<script>
 // 遊戲效能監控
 window.addEventListener('load', function() {
 });
