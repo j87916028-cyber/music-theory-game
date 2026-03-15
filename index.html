@@ -785,25 +785,6 @@ function practiceChord() {
     setTimeout(() => { const btn = document.querySelector('#gameContent .option-btn'); if (btn) btn.focus(); }, 100);
 }
 
-function practiceAnswer(btn, answer, correct) {
-    const isCorrect = String(answer) === String(correct);
-    btn.classList.add(isCorrect ? 'correct' : 'wrong');
-    // 添加視覺反饋彈窗（與一般遊戲模式一致）
-    showFeedback(isCorrect ? '✅' : '❌', isCorrect ? '#4caf50' : '#f44336');
-    if (isCorrect) {
-        playSound('correct');
-        setTimeout(() => {
-            // 根據當前模式繼續
-            if (document.getElementById('gameHint').textContent.includes('聽力')) practiceEar();
-            else if (document.getElementById('gameHint').textContent.includes('音名') || document.getElementById('gameHint').textContent.includes('唱名')) practiceNote();
-            else if (document.getElementById('gameHint').textContent.includes('幾拍')) practiceRhythm();
-            else if (document.getElementById('gameHint').textContent.includes('和弦')) practiceChord();
-        }, 500);
-    } else {
-        playSound('wrong');
-    }
-}
-
 // 週挑戰
 function weeklyChallenge() {
     const weekNum = getWeekNumber();
