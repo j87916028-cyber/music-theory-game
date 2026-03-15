@@ -396,6 +396,27 @@ body.focus-mode .focus-btn {
     cursor: pointer;
     transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
     min-width: 120px;
+    position: relative;
+}
+
+/* 數字快捷鍵提示 - 讓數字更突出 */
+.option-btn .key-hint {
+    display: inline-block;
+    background: rgba(255, 215, 0, 0.25);
+    color: #ffd700;
+    font-weight: bold;
+    padding: 2px 8px;
+    border-radius: 4px;
+    margin-right: 8px;
+    font-size: 0.95em;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* 鍵盤聚焦時的數字提示樣式 */
+.option-btn.keyboard-focus .key-hint,
+.option-btn:focus-visible .key-hint {
+    background: rgba(255, 215, 0, 0.5);
+    box-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
 }
 
 .option-btn:hover:not(:disabled) {
