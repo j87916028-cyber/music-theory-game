@@ -1,5 +1,5 @@
 // 音樂小學堂 - Service Worker 快取離線支援
-const CACHE_NAME = 'music-theory-game-v4';
+const CACHE_NAME = 'music-theory-game-v5';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -44,21 +44,37 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
-    // 處理 Google Fonts 的特殊快取策略
+    // 處理 Google Fonts 的特殊快取策略 - Stale-while-revalidate
     if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
         event.respondWith(
             caches.open(CACHE_NAME).then((cache) => {
-                return cache.match(event.request).then((response) => {
-                    if (response) {
-                        return response;
-                    }
-                    return fetch(event.request).then((networkResponse) => {
+                return cache.match(event.request).then((cachedResponse) => {
+                    const fetchPromise = fetch(event.request).then((networkResponse) => {
                         // 快取字體資源以便離線使用
                         if (networkResponse && networkResponse.status === 200) {
                             cache.put(event.request, networkResponse.clone());
                         }
                         return networkResponse;
+                    }).catch(() => {
+                        // 網路失敗時，如果沒有快取就回傳失敗
+                        if (!cachedResponse) {
+                            console.warn('字體載入失敗且無快取:', event.request.url);
+                        }
+                        return cachedResponse;
                     });
+
+                    // 如果有快取，先返回快取，同時在背景更新快取
+                    // 這就是 stale-while-revalidate 策略
+                    if (cachedResponse) {
+                        // 觸發背景更新（不阻塞回應）
+                        fetchPromise.then(() => {
+                            console.log('字體快取已更新:', event.request.url);
+                        }).catch(() => {});
+                        return cachedResponse;
+                    }
+
+                    // 沒有快取時等待網路回應
+                    return fetchPromise;
                 });
             })
         );
