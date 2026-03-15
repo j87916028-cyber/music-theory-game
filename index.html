@@ -4672,6 +4672,9 @@ function showHelp() {
     document.body.insertAdjacentHTML('beforeend', html);
 }
 function showHelpDialog() {
+    // 可訪問性：儲存當前聚焦的元素
+    lastFocusedElement = document.activeElement;
+    
     const d = document.createElement('div');
     d.id = 'helpModal';
     d.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.8);z-index:9999;display:flex;align-items:center;justify-content:center;';
@@ -4687,6 +4690,10 @@ function showHelpDialog() {
 function closeHelpDialog() {
     const d = document.getElementById('helpModal');
     if (d) d.remove();
+    // 可訪問性：關閉後恢復焦點到原本的元素
+    if (lastFocusedElement && lastFocusedElement.focus) {
+        setTimeout(() => lastFocusedElement.focus(), 50);
+    }
 }
 </script>
 

@@ -494,6 +494,9 @@ let isPaused = false; // 遊戲暫停狀態
 const MAX_HISTORY = 20; // 最多保存20條記錄
 let answerHistory = []; // 答題歷史陣列
 
+// 可訪問性：追蹤開啟 Modal 前聚焦的元素，用於關閉後恢復焦點
+let lastFocusedElement = null;
+
 // 儲存答題歷史到 localStorage
 function saveAnswerHistory() {
     if (!safeLocalStorageSet('musicTheoryAnswerHistory', answerHistory)) {
@@ -598,6 +601,9 @@ function showAnswerHistory() {
     modal.querySelector('.history-container').innerHTML = html;
     modal.classList.add('show');
     
+    // 可訪問性：儲存當前聚焦的元素，關閉時恢復
+    lastFocusedElement = document.activeElement;
+    
     // 可訪問性：聚焦到關閉按鈕，方便鍵盤導航
     setTimeout(() => {
         const closeBtn = modal.querySelector('.modal-close');
@@ -610,6 +616,11 @@ function closeAnswerHistory() {
     const modal = document.getElementById('historyModal');
     if (modal) {
         modal.classList.remove('show');
+    }
+    // 可訪問性：關閉後恢復焦點到原本的元素
+    if (lastFocusedElement && lastFocusedElement.focus) {
+        setTimeout(() => lastFocusedElement.focus(), 50);
+        lastFocusedElement = null;
     }
 }
 
