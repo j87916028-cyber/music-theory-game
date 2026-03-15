@@ -606,6 +606,60 @@ h1 {
     to { transform: scale(1); opacity: 1; }
 }
 
+/* 暫停畫面 */
+.pause-overlay {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.85);
+    z-index: 9999;
+    justify-content: center;
+    align-items: center;
+}
+
+.pause-overlay.show {
+    display: flex;
+}
+
+.pause-content {
+    text-align: center;
+    padding: 40px;
+    background: linear-gradient(135deg, var(--bg-gradient-mid), var(--bg-gradient-end));
+    border-radius: 20px;
+    border: 2px solid var(--primary-color);
+    animation: modalPop 0.3s ease;
+}
+
+.pause-content h2 {
+    font-size: 2rem;
+    margin-bottom: 15px;
+    color: var(--primary-color);
+}
+
+.pause-content p {
+    color: var(--text-muted);
+    font-size: 1.1rem;
+}
+
+.pause-content kbd {
+    background: rgba(255, 255, 255, 0.1);
+    padding: 5px 12px;
+    border-radius: 5px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    font-family: monospace;
+    color: var(--text-color);
+}
+
+/* 減少動畫支援 */
+@media (prefers-reduced-motion: reduce) {
+    .pause-content {
+        animation: none;
+    }
+}
+
 .modal h2 {
     text-align: center;
     margin-bottom: 20px;

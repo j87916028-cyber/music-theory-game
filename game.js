@@ -479,6 +479,7 @@ let currentQuestion = null;
 let currentOptions = []; // 儲存當前題目的選項
 let soundEnabled = true; // 音效開關狀態
 let isAnswering = false; // 防止重複答題
+let isPaused = false; // 遊戲暫停狀態
 
 // ========== 答題歷史記錄功能 ==========
 const MAX_HISTORY = 20; // 最多保存20條記錄
@@ -640,10 +641,50 @@ function loadSoundSetting() {
 }
 loadSoundSetting();
 
+// 切換遊戲暫停/繼續狀態
+function togglePause() {
+    isPaused = !isPaused;
+    
+    // 檢查是否已有 pause overlay，沒有的話創建一個
+    let pauseOverlay = document.getElementById('pauseOverlay');
+    if (!pauseOverlay) {
+        pauseOverlay = document.createElement('div');
+        pauseOverlay.id = 'pauseOverlay';
+        pauseOverlay.className = 'pause-overlay';
+        pauseOverlay.innerHTML = `
+            <div class="pause-content">
+                <h2>⏸️ 遊戲暫停</h2>
+                <p>按下 <kbd>P</kbd> 或 <kbd>Esc</kbd> 繼續遊戲</p>
+            </div>
+        `;
+        document.body.appendChild(pauseOverlay);
+    }
+    
+    if (isPaused) {
+        pauseOverlay.classList.add('show');
+        // 暫停時停止答題計時
+        stopPlayTimeTracker();
+    } else {
+        pauseOverlay.classList.remove('show');
+        // 恢復時重新開始計時
+        startPlayTimeTracker();
+    }
+}
+
 // 鍵盤事件監聽
 document.addEventListener('keydown', (e) => {
     // 防止重複觸發（按住不放）
     if (e.repeat) return;
+    
+    // P 鍵：暫停/繼續遊戲
+    if (e.key === 'p' || e.key === 'P') {
+        e.preventDefault();
+        togglePause();
+        return;
+    }
+    
+    // 遊戲暫停時不處理其他鍵盤事件
+    if (isPaused) return;
     
     // Enter 鍵：當使用 Tab 鍵導航到選項時，按 Enter 確認答案
     if (e.key === 'Enter' && !isAnswering) {
@@ -738,9 +779,16 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         showHelp();
     }
-    // Escape 鍵：Modal 開啟時關閉 Modal，否則重新開始當前關卡
+    // Escape 鍵：暫停時恢復遊戲，否則關閉 Modal 或重新開始關卡
     if (e.key === 'Escape') {
         e.preventDefault();
+        
+        // 如果遊戲已暫停，先恢復遊戲
+        if (isPaused) {
+            togglePause();
+            return;
+        }
+        
         const helpModal = getDomElement('helpModal');
         const historyModal = document.getElementById('historyModal');
         
@@ -901,6 +949,9 @@ function updateProgress() {
 }
 
 function nextQuestion() {
+    // 暫停時不生成新題目
+    if (isPaused) return;
+    
     getDomElement('feedback').textContent = '';
     // 清除鍵盤焦點樣式
     document.querySelectorAll('.option-btn.keyboard-focus').forEach(btn => {
@@ -1464,6 +1515,8 @@ function playChord(notesStr) {
 }
 
 function checkAnswer(answer, correct) {
+    // 防止暫停時答題
+    if (isPaused) return;
     // 防止重複答題
     if (isAnswering) return;
     isAnswering = true;
