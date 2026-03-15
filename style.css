@@ -69,7 +69,7 @@ h1 {
     margin: 20px 0;
 }
 
-.level-btn, .sound-btn, .reset-btn, .help-btn {
+.level-btn, .sound-btn, .reset-btn, .help-btn, .history-btn {
     padding: 12px 20px;
     font-size: 1rem;
     background: rgba(255, 255, 255, 0.1);
@@ -81,11 +81,17 @@ h1 {
     will-change: transform;
 }
 
-.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover, .history-btn:hover {
+.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-color);
     box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
     will-change: transform;
+}
+
+.history-btn:hover {
+    transform: translateY(-3px);
+    border-color: #9b59b6;
+    box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3);
 }
 
 .level-btn.active {
@@ -95,25 +101,6 @@ h1 {
 
 .sound-btn.muted {
     opacity: 0.6;
-}
-
-/* 歷史記錄按鈕 */
-.history-btn {
-    padding: 12px 20px;
-    font-size: 1rem;
-    background: rgba(255, 255, 255, 0.1);
-    border: 2px solid rgba(255, 255, 255, 0.2);
-    border-radius: 12px;
-    color: var(--text-color);
-    cursor: pointer;
-    transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
-    will-change: transform;
-}
-
-.history-btn:hover {
-    transform: translateY(-3px);
-    border-color: #9b59b6;
-    box-shadow: 0 5px 20px rgba(155, 89, 182, 0.3);
 }
 
 /* 答題歷史列表樣式 */
