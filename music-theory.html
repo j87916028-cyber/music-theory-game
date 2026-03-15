@@ -137,8 +137,6 @@
                 
                 // 清除事件
                 deferredPrompt = null;
-                
-                console.log('PWA 安裝結果:', choiceResult.outcome);
             });
         });
         
@@ -160,7 +158,6 @@
             if (promptEl) {
                 promptEl.style.display = 'none';
             }
-            console.log('PWA 安裝成功！');
         });
     })();
     </script>
@@ -171,7 +168,7 @@
             window.addEventListener('load', function() {
                 navigator.serviceWorker.register('./sw.js')
                     .then(function(registration) {
-                        console.log('Service Worker 註冊成功:', registration.scope);
+                        // Service Worker 註冊成功
                     })
                     .catch(function(error) {
                         console.warn('Service Worker 註冊失敗:', error);

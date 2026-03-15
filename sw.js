@@ -17,7 +17,7 @@ self.addEventListener('install', (event) => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then((cache) => {
-                console.log('Service Worker: 快取靜態資源');
+                // Service Worker: 快取靜態資源
                 return cache.addAll(ASSETS_TO_CACHE);
             })
             .then(() => self.skipWaiting())
@@ -68,7 +68,7 @@ self.addEventListener('fetch', (event) => {
                     if (cachedResponse) {
                         // 觸發背景更新（不阻塞回應）
                         fetchPromise.then(() => {
-                            console.log('字體快取已更新:', event.request.url);
+                            // 字體快取已更新
                         }).catch(() => {});
                         return cachedResponse;
                     }
