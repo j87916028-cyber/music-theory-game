@@ -203,6 +203,16 @@
             { id: 'band', emoji: '🎷', name: '樂團', unlockXP: 25000 }];
         const achievements = [{ id: 'first', name: '初試身手', desc: '完成第一題', icon: '🎯', req: 1 }, { id: 'streak5', name: '熱身完畢', desc: '達成 5 連擊', icon: '🔥', req: 5 }, { id: 'streak10', name: '火力全開', desc: '達成 10 連擊', icon: '💥', req: 10 }, { id: 'coins100', name: '小有積蓄', desc: '獲得 100 金幣', icon: '💰', req: 100 }, { id: 'coins500', name: '小富翁', desc: '獲得 500 金幣', icon: '🤑', req: 500 }, { id: 'level5', name: '初露頭角', desc: '達到 5 級', icon: '⭐', req: 5 }, { id: 'level10', name: '音樂新星', desc: '達到 10 級', icon: '🌟', req: 10 }, { id: 'daily7', name: '持之以恆', desc: '連續登入 7 天', icon: '📅', req: 7 }];
         
+        // ========== DOM 元素緩存 (效能優化) ==========
+        // 緩存常用 DOM 元素，避免重複查詢
+        const domCache = {};
+        function getDomElement(id) {
+            if (!domCache[id]) {
+                domCache[id] = document.getElementById(id);
+            }
+            return domCache[id];
+        }
+
         // localStorage 錯誤處理
         let storageAvailable = true;
         try {
@@ -238,13 +248,13 @@
         function updateUI() {
             const { level, currentXP, needXP } = calcLevel(playerData.xp);
             playerData.level = level;
-            document.getElementById('playerLevel').textContent = level;
-            document.getElementById('playerXP').textContent = currentXP + '/' + needXP;
-            document.getElementById('xpFill').style.width = (currentXP / needXP * 100) + '%';
-            document.getElementById('totalCoins').textContent = playerData.coins;
-            document.getElementById('dayStreak').textContent = playerData.dayStreak;
+            getDomElement('playerLevel').textContent = level;
+            getDomElement('playerXP').textContent = currentXP + '/' + needXP;
+            getDomElement('xpFill').style.width = (currentXP / needXP * 100) + '%';
+            getDomElement('totalCoins').textContent = playerData.coins;
+            getDomElement('dayStreak').textContent = playerData.dayStreak;
             checkDailyLogin(); updateCollection(); updateAchievements(); updateQuests();
-            const bossCard = document.getElementById('bossCard'); const bossLock = document.getElementById('bossLock');
+            const bossCard = getDomElement('bossCard'); const bossLock = getDomElement('bossLock');
             if (level >= 5) { bossCard.classList.remove('locked'); if (bossLock) bossLock.style.display = 'none'; }
         }
         
@@ -252,8 +262,8 @@
             const today = new Date().toISOString().split('T')[0];
             if (playerData.lastLogin !== today) {
                 if (playerData.lastLogin) { const diff = (new Date(today) - new Date(playerData.lastLogin)) / (1000 * 60 * 60 * 24); if (diff > 1) playerData.dayStreak = 0; }
-                document.getElementById('dailyText').textContent = '點擊領取今日獎勵！';
-            } else { document.getElementById('dailyText').textContent = '已連續登入 ' + playerData.dayStreak + ' 天 ✅'; document.getElementById('dailyReward').style.opacity = '0.7'; }
+                getDomElement('dailyText').textContent = '點擊領取今日獎勵！';
+            } else { getDomElement('dailyText').textContent = '已連續登入 ' + playerData.dayStreak + ' 天 ✅'; getDomElement('dailyReward').style.opacity = '0.7'; }
         }
         
         function claimDailyReward() {
@@ -265,7 +275,7 @@
         }
         
         function updateCollection() {
-            const grid = document.getElementById('instrumentCollection');
+            const grid = getDomElement('instrumentCollection');
             grid.innerHTML = instruments.map(inst => {
                 const owned = playerData.instruments.includes(inst.id); const equipped = playerData.equippedInstrument === inst.id; const unlocked = playerData.xp >= inst.unlockXP;
                 return '<div class="collection-item ' + (owned ? 'owned' : '') + ' ' + (equipped ? 'equipped' : '') + '" onclick="' + (owned ? 'equipInstrument(\'' + inst.id + '\')' : (unlocked ? 'unlockInstrument(\'' + inst.id + '\')' : '')) + '">' + inst.emoji + '<div style="font-size:0.7rem">' + inst.name + '</div>' + (!owned && !unlocked ? '<div style="font-size:0.6rem">🔒</div>' : '') + '</div>';
@@ -279,7 +289,7 @@
         function equipInstrument(id) { if (playerData.instruments.includes(id)) { playerData.equippedInstrument = id; saveData(); updateUI(); } }
         
         function updateAchievements() {
-            const list = document.getElementById('achievementsList');
+            const list = getDomElement('achievementsList');
             list.innerHTML = achievements.map(ach => {
                 const unlocked = playerData.achievements.includes(ach.id);
                 return '<div class="achievement-card ' + (unlocked ? 'unlocked' : '') + '"><div class="achievement-icon">' + ach.icon + '</div><div class="achievement-info"><div class="achievement-title">' + ach.name + '</div><div class="achievement-desc">' + ach.desc + '</div></div>' + (unlocked ? '<div style="font-size:1.5rem">✅</div>' : '') + '</div>';
@@ -292,7 +302,7 @@
                 playerData.dailyQuests = { date: today, quests: [{ id: 'play10', desc: '回答 10 題', progress: 0, target: 10, reward: 20 }, { id: 'perfect3', desc: '3 題全對', progress: 0, target: 3, reward: 30 }, { id: 'earn50', desc: '獲得 50 金幣', progress: 0, target: 50, reward: 40 }] };
                 localStorage.setItem('musicDailyQuests', JSON.stringify(playerData.dailyQuests));
             }
-            const container = document.getElementById('dailyQuests');
+            const container = getDomElement('dailyQuests');
             container.innerHTML = '<h3 style="margin-bottom:15px;">📋 今日任務</h3>';
             playerData.dailyQuests.quests.forEach(q => {
                 container.innerHTML += '<div class="quest-card"><div class="quest-icon">📌</div><div class="quest-info"><div class="quest-title">' + q.desc + '</div><div class="quest-progress">' + q.progress + '/' + q.target + '</div></div><div class="quest-reward">+' + q.reward + '💰</div></div>';
@@ -336,16 +346,16 @@
             setTimeout(() => { osc.disconnect(); gain.disconnect(); }, 600);
         }
         
-        function switchTab(tab, btn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
+        function switchTab(tab, btn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); getDomElement('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
         
-        function showHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('gameArea').classList.remove('active'); document.getElementById('backBtn').style.display = 'none'; updateUI(); }
+        function showHome() { getDomElement('homePage').style.display = 'block'; getDomElement('gameArea').classList.remove('active'); getDomElement('backBtn').style.display = 'none'; updateUI(); }
         
-        function startGame(mode) { currentMode = mode; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false; document.getElementById('homePage').style.display = 'none'; document.getElementById('gameArea').classList.add('active'); document.getElementById('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
+        function startGame(mode) { currentMode = mode; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false; getDomElement('homePage').style.display = 'none'; getDomElement('gameArea').classList.add('active'); getDomElement('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
         
-        function updateGameUI() { document.getElementById('gameScore').textContent = gameScore; document.getElementById('gameCombo').textContent = gameCombo; }
+        function updateGameUI() { getDomElement('gameScore').textContent = gameScore; getDomElement('gameCombo').textContent = gameCombo; }
         
         function nextQuestion() { 
-            document.getElementById('gameContent').innerHTML = ''; 
+            getDomElement('gameContent').innerHTML = ''; 
             // 恢復所有選項按鈕的可用性
             document.querySelectorAll('.option-btn').forEach(btn => {
                 btn.style.pointerEvents = 'auto';
@@ -357,8 +367,8 @@
         function earTraining() {
             const correct = notes[Math.floor(Math.random() * notes.length)];
             currentQuestion = correct;
-            document.getElementById('gameHint').textContent = '🎧 聽聲音，選音符';
-            document.getElementById('gameContent').innerHTML = '<div class="note-display" onclick="playNote(\'' + correct + '\')">🔊</div><div class="options-grid">' + notes.map(n => '<button class="option-btn" onclick="checkAnswer(\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
+            getDomElement('gameHint').textContent = '🎧 聽聲音，選音符';
+            getDomElement('gameContent').innerHTML = '<div class="note-display" onclick="playNote(\'' + correct + '\')">🔊</div><div class="options-grid">' + notes.map(n => '<button class="option-btn" onclick="checkAnswer(\'' + n + '\',\'' + correct + '\')">' + n + '</button>').join('') + '</div>';
             setTimeout(() => playNote(correct), 300);
         }
         
