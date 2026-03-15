@@ -86,7 +86,7 @@ function initPlayTime() {
     sessionStartTime = Date.now();
 }
 
-// 更新並儲存遊戲時長
+// 更新遊戲時長（由定時器呼叫）
 function updatePlayTime() {
     if (sessionStartTime) {
         const sessionSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
@@ -94,14 +94,19 @@ function updatePlayTime() {
         sessionStartTime = Date.now(); // 重置session計時
         
         // 儲存到 localStorage
-        try {
-            const saved = localStorage.getItem('musicTheoryProgress');
-            const data = saved ? JSON.parse(saved) : {};
-            data.totalPlayTime = totalPlayTime;
-            localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
-        } catch (e) {
-            console.warn('儲存遊戲時長失敗:', e);
-        }
+        savePlayTimeToStorage();
+    }
+}
+
+// 只儲存遊戲時長到 localStorage（不累加，由 saveProgress 呼叫）
+function savePlayTimeToStorage() {
+    try {
+        const saved = localStorage.getItem('musicTheoryProgress');
+        const data = saved ? JSON.parse(saved) : {};
+        data.totalPlayTime = totalPlayTime;
+        localStorage.setItem('musicTheoryProgress', JSON.stringify(data));
+    } catch (e) {
+        console.warn('儲存遊戲時長失敗:', e);
     }
 }
 
@@ -142,8 +147,14 @@ function stopPlayTimeTracker() {
         clearInterval(playTimeUpdateInterval);
         playTimeUpdateInterval = null;
     }
-    // 更新儲存的時長
-    updatePlayTime();
+    // 先更新最新的遊戲時長（因為定時器已經停止）
+    if (sessionStartTime) {
+        const sessionSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
+        totalPlayTime += sessionSeconds;
+        sessionStartTime = null;
+    }
+    // 儲存到 localStorage
+    savePlayTimeToStorage();
 }
 
 // 顯示歡迎回來提示
@@ -273,8 +284,8 @@ const saveProgressDebounced = debounce(() => {
 
 // 立即儲存進度（用於需要立即保存的場景）
 function saveProgress() {
-    // 先更新遊戲時長
-    updatePlayTime();
+    // 只儲存遊戲時長，不重新計算（避免重複計時）
+    savePlayTimeToStorage();
     
     try {
         const data = {
