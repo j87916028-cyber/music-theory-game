@@ -33,6 +33,59 @@
     }
 }
 
+/* 可訪問性：高對比度模式支援 */
+@media (prefers-contrast: more) {
+    :root {
+        --primary-color: #ff6b6b;
+        --secondary-color: #ff8a8a;
+        --bg-gradient-start: #000000;
+        --bg-gradient-mid: #0a0a0a;
+        --bg-gradient-end: #1a1a1a;
+        --text-color: #ffffff;
+        --text-muted: #cccccc;
+        --success-color: #00ff00;
+        --error-color: #ff0000;
+    }
+    
+    /* 加強文字對比度 */
+    h1 {
+        -webkit-text-fill-color: #ffffff;
+        background: none;
+        text-shadow: 2px 2px 0 #000;
+    }
+    
+    /* 按鈕更高對比度 */
+    .level-btn, .option-btn, .play-btn, .replay-btn {
+        border-width: 3px;
+        font-weight: bold;
+    }
+    
+    /* 確保 feedback 文字夠亮 */
+    .feedback.correct {
+        background: #004400;
+        border-color: #00ff00;
+    }
+    
+    .feedback.wrong {
+        background: #440000;
+        border-color: #ff0000;
+    }
+    
+    /* 鋼琴鍵盤對比度加強 */
+    .piano .key {
+        border: 2px solid #000;
+    }
+    
+    .piano .key.black {
+        background: #000;
+        border: 2px solid #fff;
+    }
+    
+    .piano .key.playing, .piano .key.highlight {
+        outline: 3px solid #ffff00;
+    }
+}
+
 body {
     font-family: 'Noto Sans TC', 'Microsoft JhengHei', sans-serif;
     background: linear-gradient(135deg, var(--bg-gradient-start) 0%, var(--bg-gradient-mid) 50%, var(--bg-gradient-end) 100%);
