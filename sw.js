@@ -1,5 +1,5 @@
 // 音樂小學堂 - Service Worker 快取離線支援
-const CACHE_NAME = 'music-theory-game-v5';
+const CACHE_NAME = 'music-theory-game-v6';
 const ASSETS_TO_CACHE = [
     './',
     './index.html',
@@ -81,8 +81,11 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 跳過非 GET 請求
-    if (event.request.method !== 'GET') return;
+    // 處理非 GET 請求 - 直接傳遞到網路
+    if (event.request.method !== 'GET') {
+        event.respondWith(fetch(event.request));
+        return;
+    }
 
     // 處理導航請求（HTML 頁面）- 使用網路優先策略
     if (event.request.mode === 'navigate') {
