@@ -483,6 +483,7 @@ body.focus-mode .focus-btn {
     cursor: pointer;
     transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
     user-select: none;
+    will-change: transform, box-shadow;
 }
 
 /* 白鍵佔 2 格位置 */
@@ -563,6 +564,7 @@ body.focus-mode .focus-btn {
     pointer-events: none;
     transition: opacity 0.3s ease;
     z-index: 100;
+    will-change: opacity, transform;
 }
 
 .streak.show {
@@ -606,6 +608,7 @@ body.focus-mode .focus-btn {
     pointer-events: none;
     animation: floatUp 1s ease forwards;
     z-index: 100;
+    will-change: opacity, transform;
 }
 
 @keyframes floatUp {
@@ -628,6 +631,7 @@ body.focus-mode .focus-btn {
     visibility: hidden;
     transition: opacity 0.3s ease, visibility 0.3s ease;
     z-index: 1000;
+    will-change: opacity, visibility;
 }
 
 .modal-overlay.show {
