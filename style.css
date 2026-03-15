@@ -22,7 +22,7 @@
     box-sizing: border-box;
 }
 
-/* 可訪問性：減少動畫偏好支援 */
+/* 可訪問性：減少動畫偏好支援 - 合併所有動畫禁用規則 */
 @media (prefers-reduced-motion: reduce) {
     *,
     *::before,
@@ -30,6 +30,43 @@
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;
+    }
+    
+    /* Modal 動畫禁用 */
+    .modal-overlay.show {
+        transition: none;
+    }
+    
+    .modal {
+        animation: none;
+    }
+    
+    .modal-overlay.show .modal {
+        transform: none;
+        opacity: 1;
+    }
+    
+    /* 暫停畫面動畫禁用 */
+    .pause-content {
+        animation: none;
+    }
+    
+    /* 明確禁用特定動畫元素 */
+    .streak.show,
+    .floating-score,
+    .welcome-back.show {
+        animation: none !important;
+    }
+    
+    /* 移除過渡效果，改為立即顯示 */
+    .welcome-back,
+    .welcome-back.show,
+    .modal-overlay,
+    .modal-overlay.show {
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+        visibility: visible !important;
     }
 }
 
@@ -598,23 +635,7 @@ body.focus-mode .focus-btn {
     visibility: visible;
 }
 
-/* 無障礙：尊重使用者的減少動畫偏好 */
-@media (prefers-reduced-motion: reduce) {
-    .modal-overlay.show {
-        transition: none;
-    }
-    
-    .modal {
-        animation: none;
-    }
-    
-    .modal-overlay.show .modal {
-        transform: none;
-        opacity: 1;
-    }
-}
 
-.modal {
     background: linear-gradient(135deg, var(--bg-gradient-mid), var(--bg-gradient-end));
     padding: 30px;
     border-radius: 20px;
@@ -677,14 +698,7 @@ body.focus-mode .focus-btn {
     color: var(--text-color);
 }
 
-/* 減少動畫支援 */
-@media (prefers-reduced-motion: reduce) {
-    .pause-content {
-        animation: none;
-    }
-}
 
-.modal h2 {
     text-align: center;
     margin-bottom: 20px;
     color: #ffd700;
@@ -897,35 +911,7 @@ body.focus-mode .focus-btn {
     }
 }
 
-/* 無障礙支援 - 減少動畫 */
-@media (prefers-reduced-motion: reduce) {
-    *, *::before, *::after {
-        animation-duration: 0.01ms !important;
-        animation-iteration-count: 1 !important;
-        transition-duration: 0.01ms !important;
-    }
-    
-    /* 明確禁用特定動畫元素 */
-    .streak.show,
-    .floating-score,
-    .welcome-back.show,
-    .modal-overlay.show .modal {
-        animation: none !important;
-    }
-    
-    /* 移除過渡效果，改為立即顯示 */
-    .welcome-back,
-    .welcome-back.show,
-    .modal-overlay,
-    .modal-overlay.show {
-        transition: none !important;
-        opacity: 1 !important;
-        transform: none !important;
-        visibility: visible !important;
-    }
-}
 
-/* 確保鍵盤可導航 */
 button:focus-visible, .key:focus-visible {
     outline: 3px solid #ffd700;
     outline-offset: 2px;
