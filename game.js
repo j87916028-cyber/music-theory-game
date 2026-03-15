@@ -71,6 +71,15 @@ const pianoNoteFreqs = {
     'Si': 493.88
 };
 
+// 音頻節點清理輔助函數 - 統一處理記憶體洩漏防護
+function cleanupAudioNodes(...nodes) {
+    nodes.forEach(node => {
+        if (node) {
+            node.disconnect();
+        }
+    });
+}
+
 // 從 localStorage 載入儲存的進度
 function loadProgress() {
     const saved = localStorage.getItem('musicTheoryProgress');
@@ -893,16 +902,11 @@ function playNote(note) {
         osc.start();
         osc.stop(ctx.currentTime + 0.8);
         
-        osc.onended = () => {
-            osc.disconnect();
-            oscGain.disconnect();
-        };
+        osc.onended = () => cleanupAudioNodes(osc, oscGain);
     });
     
     // 確保 masterGain 也會被清理
-    setTimeout(() => {
-        masterGain.disconnect();
-    }, 1000);
+    setTimeout(() => cleanupAudioNodes(masterGain), 1000);
 }
 
 // 按鍵音效 - 數字鍵按下時的輕脆提示音
@@ -922,10 +926,7 @@ function playKeyPressSound() {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.08);
     osc.start();
     osc.stop(ctx.currentTime + 0.08);
-    osc.onended = () => {
-        osc.disconnect();
-        gain.disconnect();
-    };
+    osc.onended = () => cleanupAudioNodes(osc, gain);
 }
 
 function setLevel(level, resetStats = true) {
@@ -1167,11 +1168,8 @@ function playRhythm(rhythm) {
     osc.start(now);
     osc.stop(now + duration);
     
-    // 修復記憶體洩漏
-    osc.onended = () => {
-        osc.disconnect();
-        gain.disconnect();
-    };
+    // 使用統一的清理函數
+    osc.onended = () => cleanupAudioNodes(osc, gain);
 }
 
 function level3Question() {
@@ -1293,11 +1291,8 @@ function playWrongSound() {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.3);
     osc.start();
     osc.stop(ctx.currentTime + 0.3);
-    // 修復記憶體洩漏：節點停止後斷開連接
-    osc.onended = () => {
-        osc.disconnect();
-        gain.disconnect();
-    };
+    // 使用統一的清理函數
+    osc.onended = () => cleanupAudioNodes(osc, gain);
 }
 
 // 鋼琴鍵盤布局：白鍵 + 黑鍵位置
@@ -1439,11 +1434,8 @@ function playPianoNote(freq) {
     gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.5);
     osc.start();
     osc.stop(ctx.currentTime + 0.5);
-    // 修復記憶體洩漏：節點停止後斷開連接
-    osc.onended = () => {
-        osc.disconnect();
-        gain.disconnect();
-    };
+    // 使用統一的清理函數
+    osc.onended = () => cleanupAudioNodes(osc, gain);
 }
 
 // 震動回饋函數 - 支援觸控裝置
@@ -1506,11 +1498,8 @@ function playChord(notesStr) {
         
         osc.start(ctx.currentTime);
         osc.stop(ctx.currentTime + 0.8);
-        // 修復記憶體洩漏：節點停止後斷開連接
-        osc.onended = () => {
-            osc.disconnect();
-            gain.disconnect();
-        };
+        // 使用統一的清理函數
+        osc.onended = () => cleanupAudioNodes(osc, gain);
     });
 }
 
