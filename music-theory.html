@@ -263,6 +263,74 @@
         }
     </script>
     
+    <!-- 網路狀態檢測 -->
+    <script>
+    (function() {
+        'use strict';
+        
+        // 創建離線提示橫幅
+        function createNetworkBanner(isOffline) {
+            const existing = document.getElementById('networkBanner');
+            if (existing) existing.remove();
+            
+            const banner = document.createElement('div');
+            banner.id = 'networkBanner';
+            
+            if (isOffline) {
+                banner.innerHTML = '<span>📴 您已離線，遊戲資料會自動儲存</span>';
+                banner.style.background = 'linear-gradient(135deg, #ff9800, #f57c00)';
+            } else {
+                banner.innerHTML = '<span>🟢 網路已恢復連線</span>';
+                banner.style.background = 'linear-gradient(135deg, #4caf50, #2e7d32)';
+            }
+            
+            banner.style.cssText = `
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                color: white;
+                padding: 10px 20px;
+                text-align: center;
+                font-size: 14px;
+                z-index: 10001;
+                transform: translateY(-100%);
+                transition: transform 0.3s ease;
+                box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            `;
+            
+            document.body.appendChild(banner);
+            
+            // 顯示橫幅
+            requestAnimationFrame(function() {
+                banner.style.transform = 'translateY(0)';
+            });
+            
+            // 3秒後自動隱藏
+            setTimeout(function() {
+                banner.style.transform = 'translateY(-100%)';
+                setTimeout(function() {
+                    banner.remove();
+                }, 300);
+            }, 3000);
+        }
+        
+        // 初始檢查網路狀態
+        if (!navigator.onLine) {
+            createNetworkBanner(true);
+        }
+        
+        // 監聽網路狀態變化
+        window.addEventListener('online', function() {
+            createNetworkBanner(false);
+        });
+        
+        window.addEventListener('offline', function() {
+            createNetworkBanner(true);
+        });
+    })();
+    </script>
+    
     <!-- 幫助 Modal -->
     <div class="modal-overlay" id="helpModal">
         <div class="modal">
