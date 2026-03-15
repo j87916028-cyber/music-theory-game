@@ -116,6 +116,72 @@
 </head>
 <body>
     <script>window.audioCtx = window.audioCtx || null;</script>
+    <script>
+    // ========== Service Worker 註冊與更新監控 ==========
+    if ('serviceWorker' in navigator) {
+        // 註冊 Service Worker
+        navigator.serviceWorker.register('./sw.js')
+            .then(reg => {
+                console.log('Service Worker 已註冊:', reg.scope);
+                
+                // 檢查更新（每次頁面載入時）
+                reg.update();
+                
+                // 監聽更新
+                reg.addEventListener('updatefound', () => {
+                    const newWorker = reg.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                            // 有新版本可用
+                            showUpdateNotification();
+                        }
+                    });
+                });
+            })
+            .catch(err => console.warn('Service Worker 註冊失敗:', err));
+        
+        // 監聽 Service Worker 訊息
+        navigator.serviceWorker.addEventListener('message', event => {
+            if (event.data && event.data.type === 'UPDATE_AVAILABLE') {
+                showUpdateNotification(event.data.version);
+            }
+        });
+        
+        // 顯示更新提示
+        function showUpdateNotification(version) {
+            // 檢查是否已經顯示過更新提示（24小時內不重複顯示）
+            const lastUpdateNotification = localStorage.getItem('musicGameUpdateNotification');
+            const now = Date.now();
+            if (lastUpdateNotification && (now - parseInt(lastUpdateNotification)) < 24 * 60 * 60 * 1000) {
+                return;
+            }
+            
+            // 顯示更新提示
+            const notification = document.createElement('div');
+            notification.id = 'updateNotification';
+            notification.style.cssText = 'position:fixed;top:20px;right:20px;background:linear-gradient(135deg,#4caf50,#2196f3);padding:15px 20px;border-radius:15px;z-index:10000;box-shadow:0 4px 20px rgba(0,0,0,0.4);cursor:pointer;animation:float 0.5s ease;';
+            notification.innerHTML = '<div style="display:flex;align-items:center;gap:10px;"><span style="font-size:1.5rem;">🔄</span><div><div style="font-weight:bold;">有新版本可用！</div><div style="font-size:0.8rem;opacity:0.9;">點擊重新整理升級</div></div></div>';
+            notification.onclick = () => {
+                localStorage.setItem('musicGameUpdateNotification', Date.now().toString());
+                window.location.reload();
+            };
+            document.body.appendChild(notification);
+            
+            // 記錄顯示時間
+            localStorage.setItem('musicGameUpdateNotification', now.toString());
+            
+            // 10秒後自動移除
+            setTimeout(() => notification.remove(), 10000);
+        }
+        
+        // 定時檢查更新（每5分鐘）
+        setInterval(() => {
+            if (navigator.serviceWorker.controller) {
+                navigator.serviceWorker.controller.postMessage({ type: 'CHECK_FOR_UPDATE' });
+            }
+        }, 5 * 60 * 1000);
+    }
+    </script>
     <button type="button" class="back-btn" onclick="showHome()" style="display:none" id="backBtn">⬅️</button>
     <div id="homePage">
         <h1>🎹 音樂達人</h1>

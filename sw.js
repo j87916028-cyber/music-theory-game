@@ -1,6 +1,6 @@
 // 音樂小學堂 - Service Worker 快取離線支援
 // 使用固定的版本號，只有在應用更新時才需要手動更新
-const CACHE_VERSION = 'v2.0.0'; // 版本號：改用固定版本，手動更新時才遞增
+const CACHE_VERSION = 'v2.0.1'; // 版本號：改用固定版本，手動更新時才遞增
 const CACHE_NAME = 'music-theory-game-' + CACHE_VERSION;
 
 // 預設快取的靜態資源
@@ -91,6 +91,19 @@ self.addEventListener('activate', (event) => {
         })
     );
 });
+
+// 檢查客戶端是否有可用更新並通知
+function checkForUpdate() {
+    self.clients.matchAll({ type: 'window' }).then(clients => {
+        clients.forEach(client => {
+            // 發送更新可用訊息給客戶端
+            client.postMessage({
+                type: 'UPDATE_AVAILABLE',
+                version: CACHE_VERSION
+            });
+        });
+    });
+}
 
 // 請求事件 - 智慧型快取策略
 self.addEventListener('fetch', (event) => {
@@ -189,3 +202,25 @@ function fallbackToCachedPage(requestUrl) {
         response || new Response('Offline', { status: 503, statusText: 'Service Unavailable' })
     );
 }
+
+// 監聽來自客戶端的訊息（用於手動觸發更新檢查）
+self.addEventListener('message', (event) => {
+    if (event.data && event.data.type === 'CHECK_FOR_UPDATE') {
+        // 檢查是否需要更新
+        fetch('./index.html', { cache: 'no-store' })
+            .then(response => {
+                if (response.ok) {
+                    // 如果能成功獲取 index.html，說明有新版本可用
+                    return response.text();
+                }
+                throw new Error('Network response was not ok');
+            })
+            .then(() => {
+                // 通知所有客戶端有可用更新
+                checkForUpdate();
+            })
+            .catch(err => {
+                console.log('檢查更新失敗（可能離線）:', err);
+            });
+    }
+});
