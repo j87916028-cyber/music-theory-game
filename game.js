@@ -1219,6 +1219,8 @@ function level4Question() {
     const playBtn = document.createElement('button');
     playBtn.style.cssText = 'font-size:3rem;background:linear-gradient(135deg,#9b59b6,#8e44ad);border:none;border-radius:50%;width:100px;height:100px;cursor:pointer;';
     playBtn.textContent = '🔊';
+    playBtn.setAttribute('aria-label', '播放和弦');
+    playBtn.setAttribute('title', '播放和弦 (鍵盤空白鍵)');
     playBtn.onclick = () => playChord(chord.notes.join(','));
     questionArea.appendChild(playBtn);
     

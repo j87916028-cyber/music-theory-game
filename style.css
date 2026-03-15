@@ -967,6 +967,13 @@ button:focus-visible, .key:focus-visible {
     transform: scale(0.95);
 }
 
+/* Play button focus style for keyboard accessibility */
+.play-btn:focus {
+    outline: 3px solid #ffd700;
+    outline-offset: 3px;
+    box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
+}
+
 .replay-btn {
     font-size: 1.2rem;
     background: rgba(255, 255, 255, 0.2);
