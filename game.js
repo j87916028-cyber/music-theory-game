@@ -1736,11 +1736,14 @@ function closeHelp() {
 }
 
 // 點擊 Modal 背景關閉
-document.getElementById('helpModal').addEventListener('click', (e) => {
-    if (e.target.classList.contains('modal-overlay')) {
-        closeHelp();
-    }
-});
+const helpModal = document.getElementById('helpModal');
+if (helpModal) {
+    helpModal.addEventListener('click', (e) => {
+        if (e.target.classList.contains('modal-overlay')) {
+            closeHelp();
+        }
+    });
+}
 
 // 歷史記錄 Modal 點擊背景關閉
 document.addEventListener('click', (e) => {
