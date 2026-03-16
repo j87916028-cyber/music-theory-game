@@ -517,6 +517,7 @@ let questionTimerEnabled = false; // 答題計時開關（預設關閉）
 let questionTimeLimit = 15; // 預設答題時間（秒）
 let questionTimer = null; // 計時器 ID
 let questionTimeRemaining = 0; // 剩餘時間
+let cachedGameArea = null; // 快取遊戲區域元素（用於計時器顯示）
 
 // ========== 答題歷史記錄功能 ==========
 const MAX_HISTORY = 20; // 最多保存20條記錄
@@ -872,8 +873,12 @@ function stopQuestionTimer() {
 function updateQuestionTimerDisplay() {
     let timerEl = document.getElementById('questionTimer');
     if (!timerEl) {
-        // 如果元素不存在，創建它
-        const gameArea = document.querySelector('.game-area.active');
+        // 如果元素不存在，使用快取的遊戲區域或重新查詢
+        let gameArea = cachedGameArea;
+        if (!gameArea) {
+            gameArea = document.querySelector('.game-area.active');
+            cachedGameArea = gameArea; // 快取起來供後續使用
+        }
         if (gameArea) {
             timerEl = document.createElement('div');
             timerEl.id = 'questionTimer';
