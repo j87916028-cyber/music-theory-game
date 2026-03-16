@@ -520,6 +520,12 @@ let isAnswering = false; // 防止重複答題
 let isPaused = false; // 遊戲暫停狀態
 let isPausedByVisibility = false; // 標記是否由可見性變更自動暫停
 
+// ========== 答題計時功能 ==========
+let questionTimerEnabled = false; // 答題計時開關（預設關閉）
+let questionTimeLimit = 15; // 預設答題時間（秒）
+let questionTimer = null; // 計時器 ID
+let questionTimeRemaining = 0; // 剩餘時間
+
 // ========== 答題歷史記錄功能 ==========
 const MAX_HISTORY = 20; // 最多保存20條記錄
 let answerHistory = []; // 答題歷史陣列
@@ -793,11 +799,150 @@ function togglePause() {
         pauseOverlay.classList.add('show');
         // 暫停時停止答題計時
         stopPlayTimeTracker();
+        stopQuestionTimer();
     } else {
         pauseOverlay.classList.remove('show');
         // 恢復時重新開始計時
         startPlayTimeTracker();
+        startQuestionTimer();
     }
+}
+
+// 切換答題計時模式
+function toggleQuestionTimer() {
+    questionTimerEnabled = !questionTimerEnabled;
+    
+    // 更新 stats 區域的計時器狀態指示
+    const timerStatusEl = document.getElementById('timerStatus');
+    const timerStatBox = document.getElementById('timerStatBox');
+    if (timerStatusEl) {
+        timerStatusEl.textContent = questionTimerEnabled ? '⏱️' : '⏱️';
+        timerStatusEl.style.color = questionTimerEnabled ? '#00bfff' : '#aaa';
+    }
+    if (timerStatBox) {
+        timerStatBox.style.opacity = questionTimerEnabled ? '1' : '0.5';
+    }
+    
+    // 顯示提示
+    const feedbackEl = getDomElement('feedback');
+    if (feedbackEl) {
+        feedbackEl.textContent = questionTimerEnabled ? '⏱️ 答題計時已開啟' : '⏱️ 答題計時已關閉';
+        feedbackEl.style.color = questionTimerEnabled ? '#00bfff' : '#aaa';
+        feedbackEl.classList.add('show');
+        setTimeout(() => feedbackEl.classList.remove('show'), 1500);
+    }
+    
+    // 如果正在答題中，根據新狀態決定是否開始計時
+    if (currentQuestion && !isPaused) {
+        if (questionTimerEnabled) {
+            startQuestionTimer();
+        } else {
+            stopQuestionTimer();
+        }
+    }
+    
+    // 更新計時器顯示
+    updateQuestionTimerDisplay();
+}
+
+// 開始答題計時
+function startQuestionTimer() {
+    if (!questionTimerEnabled || isPaused || !currentQuestion || isAnswering) return;
+    
+    stopQuestionTimer(); // 先清除之前的計時器
+    questionTimeRemaining = questionTimeLimit;
+    
+    updateQuestionTimerDisplay();
+    
+    questionTimer = setInterval(() => {
+        questionTimeRemaining--;
+        updateQuestionTimerDisplay();
+        
+        if (questionTimeRemaining <= 0) {
+            stopQuestionTimer();
+            // 時間到視為答錯
+            handleTimeout();
+        }
+    }, 1000);
+}
+
+// 停止答題計時
+function stopQuestionTimer() {
+    if (questionTimer) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+    }
+    questionTimeRemaining = 0;
+    updateQuestionTimerDisplay();
+}
+
+// 更新計時器顯示
+function updateQuestionTimerDisplay() {
+    let timerEl = document.getElementById('questionTimer');
+    if (!timerEl) {
+        // 如果元素不存在，創建它
+        const gameArea = document.querySelector('.game-area.active');
+        if (gameArea) {
+            timerEl = document.createElement('div');
+            timerEl.id = 'questionTimer';
+            timerEl.className = 'question-timer';
+            gameArea.insertBefore(timerEl, gameArea.firstChild);
+        }
+    }
+    
+    if (timerEl) {
+        if (questionTimerEnabled && questionTimeRemaining > 0) {
+            timerEl.textContent = `⏱️ ${questionTimeRemaining}秒`;
+            timerEl.style.display = 'block';
+            
+            // 根據剩餘時間調整顏色
+            if (questionTimeRemaining <= 3) {
+                timerEl.style.color = '#ff6b6b';
+                timerEl.style.animation = 'pulse 0.5s infinite';
+            } else if (questionTimeRemaining <= 5) {
+                timerEl.style.color = '#ffd700';
+                timerEl.style.animation = 'pulse 1s infinite';
+            } else {
+                timerEl.style.color = '#4caf50';
+                timerEl.style.animation = 'none';
+            }
+        } else {
+            timerEl.style.display = 'none';
+        }
+    }
+}
+
+// 處理答題超時
+function handleTimeout() {
+    if (!currentQuestion || isAnswering) return;
+    
+    isAnswering = true;
+    
+    // 顯示時間到提示
+    const feedbackEl = getDomElement('feedback');
+    if (feedbackEl) {
+        feedbackEl.textContent = '⌛ 時間到！';
+        feedbackEl.style.color = '#ff6b6b';
+        feedbackEl.classList.add('show');
+    }
+    
+    // 扣分（但不分數扣到負數）
+    score = Math.max(0, score - 5);
+    streak = 0; // 連續答對歸零
+    
+    // 顯示正確答案
+    showCorrectAnswer();
+    
+    // 更新 UI
+    updateUI();
+    saveProgressDebounced();
+    
+    // 2秒後進入下一題
+    setTimeout(() => {
+        isAnswering = false;
+        feedbackEl.classList.remove('show');
+        nextQuestion();
+    }, 2000);
 }
 
 // 鍵盤事件監聽
@@ -816,6 +961,13 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
         toggleFocusMode();
+        return;
+    }
+    
+    // T 鍵：切換答題計時模式
+    if (e.key === 't' || e.key === 'T') {
+        e.preventDefault();
+        toggleQuestionTimer();
         return;
     }
     
@@ -1113,6 +1265,11 @@ function nextQuestion() {
     
     // 綁定鋼琴鍵盤事件（支援 click, touchstart, keydown）
     bindPianoEvents();
+    
+    // 開始答題計時
+    if (questionTimerEnabled && !isPaused) {
+        startQuestionTimer();
+    }
 }
 
 // 鋼琴事件綁定狀態追蹤
@@ -1693,6 +1850,9 @@ function checkAnswer(answer, correct) {
     // 防止重複答題
     if (isAnswering) return;
     isAnswering = true;
+    
+    // 停止答題計時
+    stopQuestionTimer();
     
     const isCorrect = String(answer) === String(correct);
     questionsAnswered++;
