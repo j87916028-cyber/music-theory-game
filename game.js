@@ -2024,7 +2024,7 @@ function playChord(notesStr) {
     });
 }
 
-function checkAnswer(answer, correct) {
+function checkAnswer(answer, correct) { console.log("checkAnswer called:", answer, correct, "isPaused:", isPaused, "isAnswering:", isAnswering, "currentOptions:", currentOptions, "currentQuestion:", currentQuestion)
     // 防止暫停時答題
     if (isPaused) return;
     // 防止重複答題
