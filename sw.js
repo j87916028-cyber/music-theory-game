@@ -1,6 +1,6 @@
 // 音樂小學堂 - Service Worker 快取離線支援
 // 使用固定的版本號，只有在應用更新時才需要手動更新
-const CACHE_VERSION = 'v2.0.2'; // 版本號：添加 fetch 超時處理優化
+const CACHE_VERSION = 'v2.0.3'; // 版本號：啟用 Navigation Preload 加速導航請求
 const CACHE_NAME = 'music-theory-game-' + CACHE_VERSION;
 
 // 預設快取的靜態資源
@@ -48,8 +48,13 @@ self.addEventListener('install', (event) => {
 
 // 啟用事件 - 清理舊快取（保留舊版本作為離線回退）
 self.addEventListener('activate', (event) => {
+    // 啟用 Navigation Preload 加速導航請求
+    const enablePreload = self.registration.navigationPreload?.enable() 
+        .then(() => console.log('Navigation Preload 已啟用'))
+        .catch(() => { /* 瀏覽器不支持 Navigation Preload，靜默失敗 */ });
+    
     event.waitUntil(
-        caches.keys().then((cacheNames) => {
+        enablePreload.then(() => caches.keys()).then((cacheNames) => {
             // 解析版本號以計算要保留的舊版本
             const versionMatch = CACHE_VERSION.match(/v(\d+)\.(\d+)\.(\d+)/);
             const versionsToKeep = [CACHE_NAME];
@@ -156,9 +161,15 @@ self.addEventListener('fetch', (event) => {
     }
 
     // 導航請求（HTML 頁面）- 網路優先，有離線回退，添加超時處理
+    // 使用 Navigation Preload 加速：嘗試並行獲取資源
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetchWithTimeout(event.request, 5000)
+            Promise.race([
+                // 嘗試使用 Navigation Preload（如果已啟用）
+                event.preloadResponse || Promise.reject('no preload'),
+                // 或者使用一般 fetch 但有超時
+                fetchWithTimeout(event.request, 5000)
+            ])
                 .then((response) => {
                     // 成功後快取結果
                     const responseClone = response.clone();
@@ -168,11 +179,22 @@ self.addEventListener('fetch', (event) => {
                     return response;
                 })
                 .catch(() => {
-                    // 離線時嘗試返回快取的頁面，若無則顯示離線頁面
-                    return caches.match(event.request).then(cached => {
-                        if (cached) return cached;
-                        return fallbackToCachedPage(event.request.url);
-                    });
+                    // 如果 preload 失敗，嘗試一般 fetch
+                    return fetchWithTimeout(event.request, 5000)
+                        .then((response) => {
+                            const responseClone = response.clone();
+                            caches.open(CACHE_NAME).then((cache) => {
+                                cache.put(event.request, responseClone);
+                            });
+                            return response;
+                        })
+                        .catch(() => {
+                            // 離線時嘗試返回快取的頁面，若無則顯示離線頁面
+                            return caches.match(event.request).then(cached => {
+                                if (cached) return cached;
+                                return fallbackToCachedPage(event.request.url);
+                            });
+                        });
                 })
         );
         return;
