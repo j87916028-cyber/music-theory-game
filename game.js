@@ -1979,6 +1979,8 @@ function checkAnswer(answer, correct) {
     if (isAnswering) return;
     // 安全檢查：確保 currentOptions 存在且有內容（防止遊戲狀態錯誤）
     if (!currentOptions || !currentOptions.length) return;
+    // 安全檢查：確保有題目在進行中
+    if (!currentQuestion) return;
     
     isAnswering = true;
     
