@@ -1010,6 +1010,16 @@ document.addEventListener('keydown', (e) => {
         return;
     }
     
+    // ESC 鍵：退出遊戲返回首頁
+    if (e.key === 'Escape') {
+        e.preventDefault();
+        // 如果在遊戲中，返回首頁
+        if (currentLevel && getDomElement('gameArea')?.classList.contains('active')) {
+            showHome();
+            return;
+        }
+    }
+    
     // F 鍵：切換專注模式
     if (e.key === 'f' || e.key === 'F') {
         e.preventDefault();
