@@ -536,8 +536,10 @@ function resetProgress() {
 
 // 更新 UI 顯示
 function updateUI() {
-    getDomElement('score').textContent = score;
-    getDomElement('streakCount').textContent = streak;
+    const scoreEl = getDomElement('score');
+    const streakEl = getDomElement('streakCount');
+    if (scoreEl) scoreEl.textContent = score;
+    if (streakEl) streakEl.textContent = streak;
     updateAccuracy();
     updateProgress();
 }
@@ -806,8 +808,10 @@ function untrapFocus() {
 function toggleSound() {
     soundEnabled = !soundEnabled;
     const btn = getDomElement('soundToggle');
-    btn.textContent = soundEnabled ? '🔊' : '🔇';
-    btn.classList.toggle('muted', !soundEnabled);
+    if (btn) {
+        btn.textContent = soundEnabled ? '🔊' : '🔇';
+        btn.classList.toggle('muted', !soundEnabled);
+    }
     // 儲存音效設定
     safeLocalStorageSet('musicTheorySound', soundEnabled ? 'on' : 'off');
 }
@@ -818,8 +822,10 @@ function loadSoundSetting() {
     if (saved === 'off') {
         soundEnabled = false;
         const btn = getDomElement('soundToggle');
-        btn.textContent = '🔇';
-        btn.classList.add('muted');
+        if (btn) {
+            btn.textContent = '🔇';
+            btn.classList.add('muted');
+        }
     }
 }
 loadSoundSetting();
@@ -829,8 +835,10 @@ function toggleFocusMode() {
     document.body.classList.toggle('focus-mode');
     const isFocusMode = document.body.classList.contains('focus-mode');
     const btn = getDomElement('focusToggle');
-    btn.textContent = isFocusMode ? '🎯' : '👁️';
-    btn.classList.toggle('active', isFocusMode);
+    if (btn) {
+        btn.textContent = isFocusMode ? '🎯' : '👁️';
+        btn.classList.toggle('active', isFocusMode);
+    }
     // 儲存專注模式設定
     safeLocalStorageSet('musicTheoryFocusMode', isFocusMode ? 'on' : 'off');
 }
@@ -1381,14 +1389,16 @@ function setLevel(level, resetStats = true) {
 
 function updateProgress() {
     const progress = questionsAnswered > 0 ? (correctAnswers / questionsAnswered) * 100 : 0;
-    getDomElement('progress').style.width = progress + '%';
+    const progressEl = getDomElement('progress');
+    if (progressEl) progressEl.style.width = progress + '%';
 }
 
 function nextQuestion() {
     // 暫停時不生成新題目
     if (isPaused) return;
     
-    getDomElement('feedback').textContent = '';
+    const feedbackEl = getDomElement('feedback');
+    if (feedbackEl) feedbackEl.textContent = '';
     // 清除所有選項按鈕的狀態樣式（鍵盤焦點、對錯標記）
     document.querySelectorAll('.option-btn').forEach(btn => {
         btn.classList.remove('keyboard-focus', 'correct', 'wrong');
@@ -2105,8 +2115,10 @@ function checkAnswer(answer, correct) {
         triggerHapticFeedback('heavy');
     }
     
-    getDomElement('score').textContent = score;
-    getDomElement('streakCount').textContent = streak;
+    const scoreEl = getDomElement('score');
+    const streakEl = getDomElement('streakCount');
+    if (scoreEl) scoreEl.textContent = score;
+    if (streakEl) streakEl.textContent = streak;
     updateProgress();
     
     // 儲存進度到 localStorage（使用 Debounced 版本避免頻繁寫入）
@@ -2130,8 +2142,10 @@ function checkAnswer(answer, correct) {
 }
 
 // 初始化 - 恢復儲存的進度（不重置統計資料）
-getDomElement('score').textContent = score;
-getDomElement('streakCount').textContent = streak;
+const initScoreEl = getDomElement('score');
+const initStreakEl = getDomElement('streakCount');
+if (initScoreEl) initScoreEl.textContent = score;
+if (initStreakEl) initStreakEl.textContent = streak;
 updateAccuracy();
 updateProgress();
 setLevel(currentLevel, false);
