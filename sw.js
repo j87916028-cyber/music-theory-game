@@ -112,20 +112,35 @@ function checkForUpdate() {
 
 // 請求事件 - 智慧型快取策略
 // 添加 fetchWithTimeout 輔助函數，避免網路請求卡住
+// 使用 AbortController 實現超時，這是現代瀏覽器推薦的方式
 function fetchWithTimeout(request, timeout = 5000) {
-    return new Promise((resolve, reject) => {
-        const timeoutId = setTimeout(() => {
-            reject(new Error('Fetch timeout'));
-        }, timeout);
-        
-        fetch(request).then(response => {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => {
+        controller.abort();
+    }, timeout);
+    
+    // 確保 request 有 signal 屬性
+    const fetchOptions = {};
+    if (request instanceof Request) {
+        if (!request.signal) {
+            fetchOptions.signal = controller.signal;
+        }
+    } else {
+        fetchOptions.signal = controller.signal;
+    }
+    
+    return fetch(request, fetchOptions)
+        .then(response => {
             clearTimeout(timeoutId);
-            resolve(response);
-        }).catch(err => {
+            return response;
+        })
+        .catch(err => {
             clearTimeout(timeoutId);
-            reject(err);
+            if (err.name === 'AbortError') {
+                throw new Error('Fetch timeout');
+            }
+            throw err;
         });
-    });
 }
 
 self.addEventListener('fetch', (event) => {
