@@ -1018,6 +1018,18 @@ button:focus-visible, .key:focus-visible {
     }
 }
 
+/* 計時器脈衝動畫 - 用於答題計時器 */
+@keyframes pulse {
+    0%, 100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+    50% {
+        transform: scale(1.1);
+        opacity: 0.8;
+    }
+}
+
 .install-prompt .install-content {
     display: flex;
     align-items: center;
