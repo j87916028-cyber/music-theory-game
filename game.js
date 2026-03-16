@@ -1503,6 +1503,7 @@ function bindPianoEvents() {
 function cleanupPianoEvents() {
     if (!pianoEventsBound) return;
     
+    // 正確移除事件監聽器 - 必須在修改 handler 之前移除
     document.removeEventListener('touchstart', pianoEventHandlers.touchstart);
     document.removeEventListener('touchend', pianoEventHandlers.touchend);
     document.removeEventListener('touchcancel', pianoEventHandlers.touchcancel);
@@ -1511,17 +1512,10 @@ function cleanupPianoEvents() {
     document.removeEventListener('mouseup', pianoEventHandlers.mouseup);
     document.removeEventListener('mouseleave', pianoEventHandlers.mouseleave);
     
-    // 重置狀態，但保留 handler 物件結構以便後續重新綁定
-    // 這樣下次呼叫 bindPianoEvents() 時可以正常重新賦值函數
+    // 重置狀態標記，保留 handler 函數引用以便下次綁定時能正確移除
+    // 不要用空函數替換 handler，否則會導致 removeEventListener 失效（函數引用不同）
     pianoEventsBound = false;
     activeTouches.clear();
-    pianoEventHandlers.touchstart = function() {};
-    pianoEventHandlers.touchend = function() {};
-    pianoEventHandlers.touchcancel = function() {};
-    pianoEventHandlers.touchmove = function() {};
-    pianoEventHandlers.mousedown = function() {};
-    pianoEventHandlers.mouseup = function() {};
-    pianoEventHandlers.mouseleave = function() {};
 }
 
 // 頁面卸載時清理事件監聽器（防止記憶體洩漏）
