@@ -26,20 +26,48 @@ function getDomElement(id) {
 
 // 音頻上下文 - 延遲初始化，確保在用戶互動後才創建
 let audioCtx = null;
+let audioSupported = null; // 快取音頻支援狀態
+
+function checkAudioSupport() {
+    // 檢查音頻支援狀態（快取結果避免重複檢查）
+    if (audioSupported !== null) {
+        return audioSupported;
+    }
+    
+    try {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (!AudioContextClass) {
+            audioSupported = false;
+            console.warn('AudioContext not supported in this browser');
+            return false;
+        }
+        // 嘗試創建一個測試音頻上下文
+        const testCtx = new AudioContextClass();
+        audioSupported = true;
+        return true;
+    } catch (e) {
+        audioSupported = false;
+        console.warn('AudioContext test failed:', e);
+        return false;
+    }
+}
 
 function getAudioContext() {
+    // 先檢查音頻是否支援
+    if (!checkAudioSupport()) {
+        return null;
+    }
+    
     try {
         if (!audioCtx) {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
-            if (!AudioContextClass) {
-                console.warn('AudioContext not supported in this browser');
-                return null;
-            }
             audioCtx = new AudioContextClass();
         }
         // 喚醒 AudioContext（解決瀏覽器自動播放政策限制）
         if (audioCtx.state === 'suspended') {
-            audioCtx.resume();
+            audioCtx.resume().catch(e => {
+                console.warn('Failed to resume AudioContext:', e);
+            });
         }
         return audioCtx;
     } catch (e) {
@@ -64,10 +92,15 @@ const pianoNoteFreqs = {
 };
 
 // 音頻節點清理輔助函數 - 統一處理記憶體洩漏防護
+// 改進：增加類型檢查，確保節點有 disconnect 方法後再調用
 function cleanupAudioNodes(...nodes) {
     nodes.forEach(node => {
-        if (node) {
-            node.disconnect();
+        if (node && typeof node.disconnect === 'function') {
+            try {
+                node.disconnect();
+            } catch (e) {
+                // 靜默處理斷開連接時的錯誤（某些節點可能已經斷開）
+            }
         }
     });
 }
@@ -269,6 +302,24 @@ function showFirstTimeWelcome() {
     setTimeout(() => {
         welcomeEl.classList.remove('show');
     }, 6000);
+}
+
+// 顯示音頻不支持的提示（僅顯示一次）
+let audioNotSupportedHintShown = false;
+function showAudioNotSupportedHint() {
+    if (audioNotSupportedHintShown) return;
+    audioNotSupportedHintShown = true;
+    
+    const feedbackEl = getDomElement('feedback');
+    if (feedbackEl) {
+        feedbackEl.textContent = '⚠️ 您的瀏覽器不支援音頻，遊戲將以靜音模式運行';
+        feedbackEl.style.color = '#ff9800';
+        feedbackEl.classList.add('show');
+        
+        setTimeout(() => {
+            feedbackEl.classList.remove('show');
+        }, 5000);
+    }
 }
 
 // 每日簽到獎勵功能
@@ -1168,7 +1219,11 @@ function playNote(note) {
         return;
     }
     const ctx = getAudioContext();
-    if (!ctx) return;
+    if (!ctx) {
+        // 音頻不支持時提供視覺反饋
+        showAudioNotSupportedHint();
+        return;
+    }
     
     const baseFreq = noteFreqs[note];
     const masterGain = ctx.createGain();
