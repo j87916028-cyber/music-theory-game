@@ -827,6 +827,9 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && !isAnswering && currentQuestion) {
         const focusedBtn = document.activeElement;
         if (focusedBtn && focusedBtn.classList.contains('option-btn') && !document.querySelector('.option-btn.correct')) {
+            // 安全檢查：確保 currentOptions 存在
+            if (!currentOptions || !currentOptions.length) return;
+            
             e.preventDefault();
             // 找到 focusedBtn 在所有 option-btn 中的索引
             const allBtns = Array.from(document.querySelectorAll('.option-btn'));
@@ -845,6 +848,9 @@ document.addEventListener('keydown', (e) => {
     // 防呆檢查：確保有題目在進行中才處理答題快捷鍵
     const maxOptions = currentLevel === 1 ? 7 : 4;
     if (currentQuestion && e.key >= '1' && e.key <= String(maxOptions)) {
+        // 安全檢查：確保 currentOptions 存在且有內容
+        if (!currentOptions || !currentOptions.length) return;
+        
         const index = parseInt(e.key) - 1;
         
         // 清除之前的鍵盤焦點樣式
@@ -1710,6 +1716,9 @@ function checkAnswer(answer, correct) {
     
     // 標記答案按鈕（答對顯示綠色，答錯顯示紅色+綠色標記正確答案）
     // 改用按鈕索引匹配 currentOptions，避免文字格式問題
+    // 安全檢查：確保 currentOptions 存在
+    if (!currentOptions || !currentOptions.length) return;
+    
     const buttons = document.querySelectorAll('.option-btn');
     buttons.forEach((btn, index) => {
         // 移除鍵盤焦點樣式
