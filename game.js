@@ -2,7 +2,7 @@
 
 // ========== DOM 元素緩存 (效能優化) ==========
 // 緩存常用 DOM 元素，避免重複查詢
-// 注意：此緩存假設元素在頁面生命週期內持續存在，避免每次調用時執行昂貴的 DOM 檢查
+// 注意：此緩存會驗證元素是否仍在 DOM 中，避免返回已分離的元素
 const domCache = {};
 function getDomElement(id) {
     // 參數驗證：確保傳入有效的 id
@@ -11,9 +11,15 @@ function getDomElement(id) {
         return null;
     }
     
-    // 先檢查緩存（直接返回，假設元素在頁面生命週期內持續存在）
+    // 先檢查緩存，並驗證元素是否仍在 DOM 中
     if (domCache[id]) {
-        return domCache[id];
+        // 使用 isConnected 屬性檢查元素是否仍連接到 DOM
+        // 這防止了元素被 innerHTML 替換後返回已分離的舊元素
+        if (domCache[id].isConnected) {
+            return domCache[id];
+        }
+        // 元素已從 DOM 中分離，清除緩存並重新查詢
+        delete domCache[id];
     }
     
     // 查詢 DOM 並緩存結果
