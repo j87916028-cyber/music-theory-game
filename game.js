@@ -28,12 +28,19 @@ function getDomElement(id) {
 let audioCtx = null;
 let audioSupported = null; // 快取音頻支援狀態
 
-// XSS 防護：HTML 轉義函數
+// XSS 防護：HTML 轉義函數（優化版本 - 使用字串替換避免重複創建 DOM 元素）
+const HTML_ESCAPE_MAP = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+};
+const HTML_ESCAPE_REGEX = /[&<>"']/g;
+
 function escapeHtml(text) {
     if (text === null || text === undefined) return '';
-    const div = document.createElement('div');
-    div.textContent = String(text);
-    return div.innerHTML;
+    return String(text).replace(HTML_ESCAPE_REGEX, char => HTML_ESCAPE_MAP[char]);
 }
 
 function checkAudioSupport() {
