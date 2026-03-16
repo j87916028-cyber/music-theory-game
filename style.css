@@ -498,6 +498,11 @@ body.focus-mode .focus-btn {
     grid-template-columns: repeat(14, calc(var(--white-key-width) / 2));
     grid-template-rows: 1fr;
     justify-content: center;
+    /* 觸控優化：防止滑動時選取文字，確保觸控鋼琴時流暢 */
+    touch-action: none;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    user-select: none;
 }
 
 .piano .key {

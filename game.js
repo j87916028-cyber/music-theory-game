@@ -1312,6 +1312,9 @@ function bindPianoEvents() {
     };
     
     pianoEventHandlers.touchmove = function(e) {
+        // 防止在滑動時選取文字或觸發其他預設行為
+        e.preventDefault();
+        
         // 支援手指在琴鍵上滑動時即時切換音符
         for (const touch of e.changedTouches) {
             const tracked = activeTouches.get(touch.identifier);
