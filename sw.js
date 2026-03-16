@@ -55,40 +55,39 @@ self.addEventListener('activate', (event) => {
     
     event.waitUntil(
         enablePreload.then(() => caches.keys()).then((cacheNames) => {
-            // 解析版本號以計算要保留的舊版本
-            const versionMatch = CACHE_VERSION.match(/v(\d+)\.(\d+)\.(\d+)/);
-            const versionsToKeep = [CACHE_NAME];
+            // 簡化版本清理邏輯：保留當前版本 + 最近 2 個舊版本
+            // 使用 semver 解析來正確排序版本
+            const parseVersion = (name) => {
+                const match = name.match(/v(\d+)\.(\d+)\.(\d+)/);
+                if (!match) return { major: 0, minor: 0, patch: 0, raw: name };
+                return {
+                    major: parseInt(match[1]),
+                    minor: parseInt(match[2]),
+                    patch: parseInt(match[3]),
+                    raw: name
+                };
+            };
             
-            if (versionMatch) {
-                // 計算並保留最近兩個舊版本
-                for (let i = 1; i <= 2; i++) {
-                    let major = parseInt(versionMatch[1]);
-                    let minor = parseInt(versionMatch[2]);
-                    let patch = parseInt(versionMatch[3]) - i;
-                    
-                    // 處理借位
-                    if (patch < 0) {
-                        patch = 99;
-                        minor--;
-                    }
-                    if (minor < 0) {
-                        minor = 99;
-                        major--;
-                    }
-                    if (major >= 0) {
-                        versionsToKeep.push(`music-theory-game-v${major}.${minor}.${patch}`);
-                    }
-                }
-            }
+            // 解析並排序所有版本（從新到舊）
+            const allVersions = cacheNames
+                .filter(name => name.startsWith('music-theory-game-'))
+                .map(name => ({ name, ...parseVersion(name) }))
+                .sort((a, b) => {
+                    if (a.major !== b.major) return b.major - a.major;
+                    if (a.minor !== b.minor) return b.minor - a.minor;
+                    return b.patch - a.patch;
+                });
+            
+            // 保留最多 3 個版本（當前版本 + 2 個舊版本）
+            const versionsToKeep = allVersions.slice(0, 3).map(v => v.name);
+            const toDelete = allVersions.slice(3).map(v => v.name);
 
+            // 刪除舊版本
             return Promise.all(
-                cacheNames
-                    .filter(name => name.startsWith('music-theory-game-') && 
-                                   !versionsToKeep.includes(name))
-                    .map(name => {
-                        console.log('清理舊快取:', name);
-                        return caches.delete(name);
-                    })
+                toDelete.map(name => {
+                    console.log('清理舊快取:', name);
+                    return caches.delete(name);
+                })
             );
         }).then(() => {
             console.log('Service Worker: 激活成功');
