@@ -1846,6 +1846,9 @@ function checkAnswer(answer, correct) {
     if (isPaused) return;
     // 防止重複答題
     if (isAnswering) return;
+    // 安全檢查：確保 currentOptions 存在且有內容（防止遊戲狀態錯誤）
+    if (!currentOptions || !currentOptions.length) return;
+    
     isAnswering = true;
     
     // 停止答題計時
@@ -1872,9 +1875,6 @@ function checkAnswer(answer, correct) {
     
     // 標記答案按鈕（答對顯示綠色，答錯顯示紅色+綠色標記正確答案）
     // 改用按鈕索引匹配 currentOptions，避免文字格式問題
-    // 安全檢查：確保 currentOptions 存在
-    if (!currentOptions || !currentOptions.length) return;
-    
     const buttons = document.querySelectorAll('.option-btn');
     buttons.forEach((btn, index) => {
         // 移除鍵盤焦點樣式
