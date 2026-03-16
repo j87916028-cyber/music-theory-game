@@ -28,6 +28,14 @@ function getDomElement(id) {
 let audioCtx = null;
 let audioSupported = null; // 快取音頻支援狀態
 
+// XSS 防護：HTML 轉義函數
+function escapeHtml(text) {
+    if (text === null || text === undefined) return '';
+    const div = document.createElement('div');
+    div.textContent = String(text);
+    return div.innerHTML;
+}
+
 function checkAudioSupport() {
     // 檢查音頻支援狀態（快取結果避免重複檢查）
     if (audioSupported !== null) {
@@ -641,10 +649,10 @@ function showAnswerHistory() {
                     <div class="history-icon">${icon}</div>
                     <div class="history-content">
                         <div class="history-level">${levelName}</div>
-                        <div class="history-question">題目：${record.question}</div>
+                        <div class="history-question">題目：${escapeHtml(record.question)}</div>
                         <div class="history-answers">
-                            你的答案：${record.userAnswer} 
-                            ${!record.isCorrect ? `→ 正確答案：${record.correctAnswer}` : ''}
+                            你的答案：${escapeHtml(record.userAnswer)} 
+                            ${!record.isCorrect ? `→ 正確答案：${escapeHtml(record.correctAnswer)}` : ''}
                         </div>
                         <div class="history-time">${time}</div>
                     </div>
