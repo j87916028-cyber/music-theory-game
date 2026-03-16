@@ -1245,10 +1245,37 @@ const hintStyle = document.createElement('style');
 hintStyle.textContent = '.hint-text { font-size: 1.1rem; color: #ffd700; margin: 15px 0; text-align: center; }';
 document.head.appendChild(hintStyle);
 
-// 離線提示
-if (!navigator.onLine) {
-    document.body.insertAdjacentHTML('afterbegin', '<div style="position:fixed;top:0;left:0;right:0;background:#f44336;color:white;padding:10px;text-align:center;z-index:10000;">⚠️ 您已離線，部分功能可能無法使用</div>');
+// 網路狀態指示器（改進：添加即時監聽）
+function updateNetworkStatus() {
+    const existingIndicator = document.getElementById('networkStatusIndicator');
+    if (navigator.onLine) {
+        // 上線：顯示短暫的綠色提示然後消失
+        if (existingIndicator) {
+            existingIndicator.style.background = '#4caf50';
+            existingIndicator.innerHTML = '✅ 已恢復連線';
+            setTimeout(() => existingIndicator.remove(), 2000);
+        }
+    } else {
+        // 離線：顯示紅色警示
+        if (!existingIndicator) {
+            const indicator = document.createElement('div');
+            indicator.id = 'networkStatusIndicator';
+            indicator.style.cssText = 'position:fixed;top:0;left:0;right:0;background:#f44336;color:white;padding:10px;text-align:center;z-index:10000;font-weight:bold;';
+            indicator.textContent = '⚠️ 您已離線，部分功能可能無法使用';
+            document.body.insertAdjacentHTML('afterbegin', indicator.outerHTML);
+            document.body.firstElementChild.id = 'networkStatusIndicator';
+        }
+    }
 }
+
+// 初始化網路狀態（頁面載入時檢查）
+if (!navigator.onLine) {
+    updateNetworkStatus();
+}
+
+// 監聽網路狀態變化（改進：持續監聽而非只檢查一次）
+window.addEventListener('online', updateNetworkStatus);
+window.addEventListener('offline', updateNetworkStatus);
 </script>
 
 <script>
