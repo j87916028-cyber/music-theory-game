@@ -1891,7 +1891,35 @@ function playPianoKey(note) {
         setTimeout(() => {
             keyElement.removeAttribute('aria-pressed');
         }, 300);
+        
+        // 顯示音符名稱彈出提示（視覺回饋）
+        showNotePopup(keyElement, note);
     }
+}
+
+// 顯示音符名稱彈出提示
+function showNotePopup(keyElement, noteName) {
+    // 移除舊的彈出提示（避免重複）
+    const existingPopup = keyElement.querySelector('.note-popup');
+    if (existingPopup) {
+        existingPopup.remove();
+    }
+    
+    // 創建新的彈出提示
+    const popup = document.createElement('div');
+    popup.className = 'note-popup';
+    popup.textContent = noteName;
+    
+    // 根據黑白鍵調整樣式
+    const isBlackKey = keyElement.classList.contains('black');
+    popup.style.setProperty('--popup-bg', isBlackKey ? 'rgba(255, 215, 0, 0.95)' : 'rgba(233, 69, 96, 0.95)');
+    
+    keyElement.appendChild(popup);
+    
+    // 動畫結束後移除元素
+    popup.addEventListener('animationend', () => {
+        popup.remove();
+    });
 }
 
 function playPianoNote(freq) {
