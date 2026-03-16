@@ -22,6 +22,23 @@
     box-sizing: border-box;
 }
 
+/* 遊戲區域渲染效能優化 */
+#gameArea {
+    contain: content;
+    will-change: contents;
+}
+
+#questionArea {
+    contain: content;
+    will-change: contents;
+    transform: translateZ(0); /* 啟用硬體加速 */
+}
+
+.options {
+    contain: content;
+    will-change: contents;
+}
+
 /* 可訪問性：減少動畫偏好支援 - 合併所有動畫禁用規則 */
 @media (prefers-reduced-motion: reduce) {
     *,
@@ -366,6 +383,8 @@ body.focus-mode .focus-btn {
     border-radius: 10px;
     margin-bottom: 20px;
     animation: fadeIn 0.3s ease;
+    contain: content;
+    will-change: contents, opacity;
 }
 
 .feedback.correct {
@@ -421,6 +440,7 @@ body.focus-mode .focus-btn {
     min-width: 120px;
     position: relative;
     will-change: transform, opacity;
+    contain: content;
 }
 
 /* 數字快捷鍵提示 - 讓數字更突出 */
@@ -515,6 +535,9 @@ body.focus-mode .focus-btn {
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     user-select: none;
+    /* 渲染效能優化 */
+    contain: content;
+    will-change: transform;
 }
 
 .piano .key {
