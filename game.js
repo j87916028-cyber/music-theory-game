@@ -1580,7 +1580,7 @@ function level1Question() {
             <button class="replay-btn" data-play="${correctNote}"">🔄 再聽一次</button>
         </div>
         <div class="options">
-            ${shuffledNotes.map((n, i) => `<button class="option-btn" data-answer="${n},${correctNote}" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
+            ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1613,7 +1613,7 @@ function level2Question() {
         <div class="note-display">${note}</div>
         <button class="replay-btn" data-play="${note}"">🔊 再聽一次</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" data-answer="${n},${correctAnswer}" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1673,7 +1673,7 @@ function level3Question() {
         <p class="rhythm-display">${rhythm.name}</p>
         <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" data-answer="${beatsToName[n]},${rhythm.name}" aria-label="選項 ${i+1}: ${n} 拍"><span class="key-hint">${i+1}</span>${n} 拍</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')" aria-label="選項 ${i+1}: ${n} 拍"><span class="key-hint">${i+1}</span>${n} 拍</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -2024,7 +2024,8 @@ function playChord(notesStr) {
     });
 }
 
-function checkAnswer(answer, correct) { console.log("checkAnswer called:", answer, correct, "isPaused:", isPaused, "isAnswering:", isAnswering, "currentOptions:", currentOptions, "currentQuestion:", currentQuestion)
+function checkAnswer(answer, correct) {
+    console.log("checkAnswer called:", answer, correct);
     // 防止暫停時答題
     if (isPaused) return;
     // 防止重複答題
@@ -2257,7 +2258,9 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // 全域點擊事件處理（修復選項按鈕無回應問題）
 (function() {
+    console.log("Click listener attached");
     document.addEventListener('click', function(e) {
+        console.log("Click event fired", e.target);
         var btn = e.target.closest('button');
         if (!btn) return;
         
