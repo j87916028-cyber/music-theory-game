@@ -64,6 +64,10 @@ function checkAudioSupport() {
         }
         // 嘗試創建一個測試音頻上下文
         const testCtx = new AudioContextClass();
+        // 關閉測試上下文以釋放資源
+        if (testCtx.state !== 'closed') {
+            testCtx.close();
+        }
         audioSupported = true;
         return true;
     } catch (e) {
@@ -84,11 +88,17 @@ function getAudioContext() {
             const AudioContextClass = window.AudioContext || window.webkitAudioContext;
             audioCtx = new AudioContextClass();
         }
-        // 喚醒 AudioContext（解決瀏覽器自動播放政策限制）
+        // 每次取得 AudioContext 時都檢查並喚醒（解決切換分頁後變成 suspended 的問題）
         if (audioCtx.state === 'suspended') {
             audioCtx.resume().catch(e => {
                 console.warn('Failed to resume AudioContext:', e);
             });
+        }
+        // 額外檢查：確保音頻上下文處於可用狀態
+        // 有些瀏覽器在 suspend 後需要多個 resume 調用
+        if (audioCtx.state !== 'running') {
+            // 嘗試再次喚醒
+            audioCtx.resume().catch(() => {});
         }
         return audioCtx;
     } catch (e) {
