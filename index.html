@@ -291,7 +291,7 @@
         
         let playerData = { xp: parseInt(localStorage.getItem('musicXP') || '0'), coins: parseInt(localStorage.getItem('musicCoins') || '0'), level: 1, dayStreak: parseInt(localStorage.getItem('musicStreak') || '0'), lastLogin: localStorage.getItem('musicLastLogin') || '', totalPlayed: parseInt(localStorage.getItem('musicPlayed') || '0'), achievements: JSON.parse(localStorage.getItem('musicAchievements') || '[]'), instruments: JSON.parse(localStorage.getItem('musicInstruments') || '["piano"]'), equippedInstrument: localStorage.getItem('musicEquipped') || 'piano', dailyQuests: JSON.parse(localStorage.getItem('musicDailyQuests') || '{}'},
         
-        let gameScore = 0, gameCombo = 0, currentMode = '', currentQuestion = null, questionsAnswered = 0, correctThisRound = 0, perfectChecked = false;
+        let gameScore = 0, gameCombo = 0, currentMode = '', currentQuestion = null, questionsAnswered = 0, correctThisRound = 0, perfectChecked = false, currentPracticeMode = null;
         
         function calcLevel(xp) { let level = 1, needXP = 50; while (xp >= needXP) { xp -= needXP; level++; needXP = Math.floor(needXP * 1.5); } return { level, currentXP: xp, needXP }; }
         function saveData() {
@@ -416,7 +416,7 @@
         
         function showHome() { getDomElement('homePage').style.display = 'block'; getDomElement('gameArea').classList.remove('active'); getDomElement('backBtn').style.display = 'none'; updateUI(); }
         
-        function startGame(mode) { currentMode = mode; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false; getDomElement('homePage').style.display = 'none'; getDomElement('gameArea').classList.add('active'); getDomElement('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
+        function startGame(mode) { currentMode = mode; currentPracticeMode = null; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false; getDomElement('homePage').style.display = 'none'; getDomElement('gameArea').classList.add('active'); getDomElement('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
         
         function updateGameUI() { getDomElement('gameScore').textContent = gameScore; getDomElement('gameCombo').textContent = gameCombo; }
         
@@ -813,6 +813,7 @@ function practiceMode() {
 }
 
 function practiceEar() {
+    currentPracticeMode = 'ear';
     const correct = notes[Math.floor(Math.random() * notes.length)];
     playNote(correct);
     getDomElement('gameHint').textContent = '👂 這是什麼音符？';
@@ -824,6 +825,7 @@ function practiceEar() {
 }
 
 function practiceNote() {
+    currentPracticeMode = 'note';
     const note = notes[Math.floor(Math.random() * notes.length)];
     const mode = Math.random() > 0.5;
     const correct = mode ? noteNames[note] : note;
@@ -837,6 +839,7 @@ function practiceNote() {
 }
 
 function practiceRhythm() {
+    currentPracticeMode = 'rhythm';
     const rhythm = rhythms[Math.floor(Math.random() * rhythms.length)];
     getDomElement('gameHint').textContent = '這個音符有幾拍？';
     // 洗牌選項
@@ -847,6 +850,7 @@ function practiceRhythm() {
 }
 
 function practiceChord() {
+    currentPracticeMode = 'chord';
     const chord = chords[Math.floor(Math.random() * chords.length)];
     playChord(chord.notes);
     getDomElement('gameHint').textContent = '這是什麼和弦？';
@@ -1066,13 +1070,15 @@ function practiceAnswer(btn, answer, correct) {
     // 添加視覺反饋彈窗（與一般遊戲模式一致）
     showFeedback(isCorrect ? '✅' : '❌', isCorrect ? '#4caf50' : '#f44336');
     
-    // 自動載入下一題（無論對錯）
+    // 自動載入下一題（無論對錯）- 使用 currentPracticeMode 變數而非文字匹配
     setTimeout(() => {
-        const hint = getDomElement('gameHint').textContent;
-        if (hint.includes('聽力') || hint.includes('聽')) practiceEar();
-        else if (hint.includes('音名') || hint.includes('唱名')) practiceNote();
-        else if (hint.includes('幾拍')) practiceRhythm();
-        else if (hint.includes('和弦')) practiceChord();
+        switch(currentPracticeMode) {
+            case 'ear': practiceEar(); break;
+            case 'note': practiceNote(); break;
+            case 'rhythm': practiceRhythm(); break;
+            case 'chord': practiceChord(); break;
+            default: practiceEar(); // 預設為聽力練習
+        }
     }, 600);
     
     if (isCorrect) {
