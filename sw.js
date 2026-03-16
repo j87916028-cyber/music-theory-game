@@ -150,7 +150,13 @@ self.addEventListener('fetch', (event) => {
                     });
                     return response;
                 })
-                .catch(() => caches.match(event.request).then(cached => cached || fallbackToCachedPage(event.request.url)))
+                .catch(() => {
+                    // 離線時嘗試返回快取的頁面，若無則顯示離線頁面
+                    return caches.match(event.request).then(cached => {
+                        if (cached) return cached;
+                        return fallbackToCachedPage(event.request.url);
+                    });
+                })
         );
         return;
     }
