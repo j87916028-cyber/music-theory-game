@@ -25,18 +25,15 @@
 /* 遊戲區域渲染效能優化 */
 #gameArea {
     contain: content;
-    will-change: contents;
 }
 
 #questionArea {
     contain: content;
-    will-change: contents;
     transform: translateZ(0); /* 啟用硬體加速 */
 }
 
 .options {
     contain: content;
-    will-change: contents;
 }
 
 /* 可訪問性：減少動畫偏好支援 - 合併所有動畫禁用規則 */
@@ -384,7 +381,7 @@ body.focus-mode .focus-btn {
     margin-bottom: 20px;
     animation: fadeIn 0.3s ease;
     contain: content;
-    will-change: contents, opacity;
+    will-change: opacity;
 }
 
 .feedback.correct {
