@@ -1,6 +1,6 @@
 // 音樂小學堂 - Service Worker 快取離線支援
 // 使用固定的版本號，只有在應用更新時才需要手動更新
-const CACHE_VERSION = 'v2.0.1'; // 版本號：改用固定版本，手動更新時才遞增
+const CACHE_VERSION = 'v2.0.2'; // 版本號：添加 fetch 超時處理優化
 const CACHE_NAME = 'music-theory-game-' + CACHE_VERSION;
 
 // 預設快取的靜態資源
@@ -106,6 +106,23 @@ function checkForUpdate() {
 }
 
 // 請求事件 - 智慧型快取策略
+// 添加 fetchWithTimeout 輔助函數，避免網路請求卡住
+function fetchWithTimeout(request, timeout = 5000) {
+    return new Promise((resolve, reject) => {
+        const timeoutId = setTimeout(() => {
+            reject(new Error('Fetch timeout'));
+        }, timeout);
+        
+        fetch(request).then(response => {
+            clearTimeout(timeoutId);
+            resolve(response);
+        }).catch(err => {
+            clearTimeout(timeoutId);
+            reject(err);
+        });
+    });
+}
+
 self.addEventListener('fetch', (event) => {
     const url = new URL(event.request.url);
 
@@ -114,7 +131,7 @@ self.addEventListener('fetch', (event) => {
         event.respondWith(
             caches.open(CACHE_NAME).then((cache) => {
                 return cache.match(event.request).then((cachedResponse) => {
-                    const fetchPromise = fetch(event.request).then((networkResponse) => {
+                    const fetchPromise = fetchWithTimeout(event.request, 3000).then((networkResponse) => {
                         if (networkResponse && networkResponse.status === 200) {
                             cache.put(event.request, networkResponse.clone());
                         }
@@ -138,10 +155,10 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 導航請求（HTML 頁面）- 網路優先，有離線回退
+    // 導航請求（HTML 頁面）- 網路優先，有離線回退，添加超時處理
     if (event.request.mode === 'navigate') {
         event.respondWith(
-            fetch(event.request)
+            fetchWithTimeout(event.request, 5000)
                 .then((response) => {
                     // 成功後快取結果
                     const responseClone = response.clone();
@@ -161,13 +178,13 @@ self.addEventListener('fetch', (event) => {
         return;
     }
 
-    // 靜態資源 - 快取優先，後續更新
+    // 靜態資源 - 快取優先，後續更新，添加超時處理
     event.respondWith(
         caches.match(event.request)
             .then((cachedResponse) => {
                 if (cachedResponse) {
-                    // 背景更新快取
-                    fetch(event.request).then((response) => {
+                    // 背景更新快取（添加超時避免長時間等待）
+                    fetchWithTimeout(event.request, 3000).then((response) => {
                         if (response && response.status === 200) {
                             caches.open(CACHE_NAME).then(cache => cache.put(event.request, response));
                         }
@@ -175,7 +192,7 @@ self.addEventListener('fetch', (event) => {
                     return cachedResponse;
                 }
 
-                return fetch(event.request)
+                return fetchWithTimeout(event.request, 5000)
                     .then((response) => {
                         if (!response || response.status !== 200) {
                             return response;
