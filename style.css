@@ -169,6 +169,7 @@ h1 {
     color: var(--text-color);
     cursor: pointer;
     transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    will-change: transform, box-shadow;
 }
 
 .level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover, .focus-btn:hover {
@@ -419,6 +420,7 @@ body.focus-mode .focus-btn {
     transition: transform 0.3s ease, background 0.3s ease, border-color 0.3s ease, opacity 0.3s ease;
     min-width: 120px;
     position: relative;
+    will-change: transform, opacity;
 }
 
 /* 數字快捷鍵提示 - 讓數字更突出 */
@@ -1146,6 +1148,7 @@ button:focus-visible, .key:focus-visible {
     height: 100px;
     cursor: pointer;
     transition: transform 0.2s, box-shadow 0.2s;
+    will-change: transform;
 }
 
 .play-btn:hover {
@@ -1172,6 +1175,7 @@ button:focus-visible, .key:focus-visible {
     padding: 10px 20px;
     cursor: pointer;
     transition: background 0.2s, transform 0.2s;
+    will-change: transform;
 }
 
 .replay-btn:hover {
