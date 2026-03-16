@@ -40,11 +40,11 @@
     <h1>🎵 音樂小學堂</h1>
     <p class="hint">從零開始，輕鬆學樂理</p>
     
-    <div class="level-select">
-        <button class="level-btn active" onclick="setLevel(1)">🌱 認識音符 (Q)</button>
-        <button class="level-btn" onclick="setLevel(2)">📖 音名與唱名 (W)</button>
-        <button class="level-btn" onclick="setLevel(3)">🎼 節奏練習 (E)</button>
-        <button class="level-btn" onclick="setLevel(4)">🎹 和弦認識 (R)</button>
+    <div class="level-select" role="group" aria-label="遊戲關卡選擇">
+        <button class="level-btn active" onclick="setLevel(1)" aria-pressed="true">🌱 認識音符 (Q)</button>
+        <button class="level-btn" onclick="setLevel(2)" aria-pressed="false">📖 音名與唱名 (W)</button>
+        <button class="level-btn" onclick="setLevel(3)" aria-pressed="false">🎼 節奏練習 (E)</button>
+        <button class="level-btn" onclick="setLevel(4)" aria-pressed="false">🎹 和弦認識 (R)</button>
         <button class="sound-btn active" id="soundToggle" onclick="toggleSound()" title="切換音效" aria-label="切換音效">🔊</button>
         <button class="history-btn" id="historyBtn" onclick="showAnswerHistory()" title="答題歷史" aria-label="查看答題歷史">📜</button>
         <button class="focus-btn" id="focusToggle" onclick="toggleFocusMode()" title="專注模式" aria-label="切換專注模式">👁️</button>

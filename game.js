@@ -1350,7 +1350,10 @@ function playKeyPressSound() {
 function setLevel(level, resetStats = true) {
     currentLevel = level;
     document.querySelectorAll('.level-btn').forEach((btn, i) => {
-        btn.classList.toggle('active', i + 1 === level);
+        const isActive = i + 1 === level;
+        btn.classList.toggle('active', isActive);
+        // 更新 aria-pressed 屬性以支援螢幕閱讀器
+        btn.setAttribute('aria-pressed', isActive ? 'true' : 'false');
     });
     // 只有在明確要求重置統計時才重置（避免頁面載入時丢失進度）
     if (resetStats) {
