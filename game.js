@@ -2053,7 +2053,6 @@ function playChord(notesStr) {
 }
 
 function checkAnswer(answer, correct) {
-    console.log("checkAnswer called:", answer, correct);
     // 防止暫停時答題
     if (isPaused) return;
     // 防止重複答題
@@ -2286,9 +2285,7 @@ window.addEventListener('unhandledrejection', (event) => {
 
 // 全域點擊事件處理（修復選項按鈕無回應問題）
 (function() {
-    console.log("Click listener attached");
     document.addEventListener('click', function(e) {
-        console.log("Click event fired", e.target);
         var btn = e.target.closest('button');
         if (!btn) return;
         
