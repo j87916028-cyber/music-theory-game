@@ -1037,6 +1037,46 @@ document.addEventListener('keydown', (e) => {
     // 遊戲暫停時不處理其他鍵盤事件
     if (isPaused) return;
     
+    // 箭頭鍵導航：選項按鈕的上下左右導航（提升鍵盤可訪問性）
+    const optionButtons = document.querySelectorAll('.option-btn');
+    const activeIndex = Array.from(optionButtons).findIndex(btn => btn.classList.contains('keyboard-focus'));
+    const gridColumns = 2; // 假設選項為 2x2 或 2x3 配置
+    
+    if (optionButtons.length > 0) {
+        // 右箭头：下一個選項
+        if (e.key === 'ArrowRight') {
+            e.preventDefault();
+            const nextIndex = activeIndex < 0 ? 0 : Math.min(activeIndex + 1, optionButtons.length - 1);
+            optionButtons.forEach(btn => btn.classList.remove('keyboard-focus'));
+            optionButtons[nextIndex].classList.add('keyboard-focus');
+            return;
+        }
+        // 左箭头：上一個選項
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            const prevIndex = activeIndex < 0 ? 0 : Math.max(activeIndex - 1, 0);
+            optionButtons.forEach(btn => btn.classList.remove('keyboard-focus'));
+            optionButtons[prevIndex].classList.add('keyboard-focus');
+            return;
+        }
+        // 下箭头：下一行選項
+        if (e.key === 'ArrowDown') {
+            e.preventDefault();
+            const nextRowIndex = activeIndex < 0 ? gridColumns : Math.min(activeIndex + gridColumns, optionButtons.length - 1);
+            optionButtons.forEach(btn => btn.classList.remove('keyboard-focus'));
+            optionButtons[nextRowIndex].classList.add('keyboard-focus');
+            return;
+        }
+        // 上箭头：上一行選項
+        if (e.key === 'ArrowUp') {
+            e.preventDefault();
+            const prevRowIndex = activeIndex < 0 ? optionButtons.length - gridColumns : Math.max(activeIndex - gridColumns, 0);
+            optionButtons.forEach(btn => btn.classList.remove('keyboard-focus'));
+            optionButtons[prevRowIndex].classList.add('keyboard-focus');
+            return;
+        }
+    }
+    
     // Enter 鍵：當使用 Tab 鍵導航到選項時，按 Enter 確認答案
     // 防呆檢查：確保有題目在進行中
     if (e.key === 'Enter' && !isAnswering && currentQuestion) {
