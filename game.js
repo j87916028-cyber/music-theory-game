@@ -4,6 +4,21 @@
 // 緩存常用 DOM 元素，避免重複查詢
 // 注意：此緩存會驗證元素是否仍在 DOM 中，避免返回已分離的元素
 const domCache = {};
+
+// 清除 DOM 緩存的輔助函數
+// 當 DOM 大範圍更新時（如切換遊戲模式），手動清除緩存以避免記憶體洩漏
+function clearDomCache() {
+    // 只清除可能因 DOM 替換而失效的緩存項目
+    // 保留仍連接到 DOM 的元素緩存（它們仍然有效）
+    const keysToDelete = [];
+    for (const id in domCache) {
+        if (domCache[id] && !domCache[id].isConnected) {
+            keysToDelete.push(id);
+        }
+    }
+    keysToDelete.forEach(id => delete domCache[id]);
+}
+
 function getDomElement(id) {
     // 參數驗證：確保傳入有效的 id
     if (!id || typeof id !== 'string') {
@@ -1380,6 +1395,9 @@ function playKeyPressSound() {
 }
 
 function setLevel(level, resetStats = true) {
+    // 切換關卡時清除 DOM 緩存，避免返回已分離的元素
+    clearDomCache();
+    
     currentLevel = level;
     document.querySelectorAll('.level-btn').forEach((btn, i) => {
         const isActive = i + 1 === level;

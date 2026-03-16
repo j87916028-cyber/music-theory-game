@@ -245,7 +245,7 @@
         
         function switchTab(tab) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); event.target.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); document.getElementById('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
         
-        function showHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('gameArea').classList.remove('active'); document.getElementById('backBtn').style.display = 'none'; updateUI(); }
+        function showHome() { document.getElementById('homePage').style.display = 'block'; document.getElementById('gameArea').classList.remove('active'); document.getElementById('backBtn').style.display = 'none'; updateUI(); if (typeof clearDomCache === 'function') clearDomCache(); }
         
         function startGame(mode) { currentMode = mode; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; document.getElementById('homePage').style.display = 'none'; document.getElementById('gameArea').classList.add('active'); document.getElementById('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
         
