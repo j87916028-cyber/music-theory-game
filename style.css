@@ -1209,3 +1209,21 @@ button:focus-visible, .key:focus-visible {
     padding: 20px;
     color: var(--text-muted);
 }
+
+/* 鍵盤按鍵動畫 - 答題時的視覺反饋 */
+@keyframes keyPress {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.92);
+        background: rgba(233, 69, 96, 0.4);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+.option-btn.keypress-anim {
+    animation: keyPress 0.15s ease-out;
+}

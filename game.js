@@ -1058,15 +1058,21 @@ document.addEventListener('keydown', (e) => {
         
         const index = parseInt(e.key) - 1;
         
-        // 清除之前的鍵盤焦點樣式
+        // 清除之前的鍵盤焦點樣式和動畫
         document.querySelectorAll('.option-btn.keyboard-focus').forEach(btn => {
             btn.classList.remove('keyboard-focus');
         });
         
-        // 添加鍵盤焦點樣式到目前選項
+        // 添加鍵盤聚焦樣式到目前選項
         const buttons = document.querySelectorAll('.option-btn');
         if (buttons[index]) {
             buttons[index].classList.add('keyboard-focus');
+            // 添加按鍵動畫效果提供視覺反饋
+            buttons[index].classList.add('keypress-anim');
+            // 動畫結束後移除類別，以便下次可以再次觸发动畫
+            setTimeout(() => {
+                buttons[index].classList.remove('keypress-anim');
+            }, 150);
         }
         
         // 確保選項存在且題目未結束
