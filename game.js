@@ -848,6 +848,11 @@ function startQuestionTimer() {
     updateQuestionTimerDisplay();
     
     questionTimer = setInterval(() => {
+        // 遊戲暫停時停止計時
+        if (isPaused) {
+            return;
+        }
+        
         questionTimeRemaining--;
         updateQuestionTimerDisplay();
         
