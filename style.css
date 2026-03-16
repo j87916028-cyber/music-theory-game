@@ -524,7 +524,8 @@ body.focus-mode .focus-btn {
     grid-column: span 2;
 }
 
-.piano .key:hover {
+/* 白鍵 hover 樣式 - 確保與 playing 狀態不衝突 */
+.piano .key:not(.black):hover:not(.playing) {
     background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%);
 }
 
@@ -566,7 +567,8 @@ body.focus-mode .focus-btn {
 .piano .key[data-note="Sol♯"]  { grid-column: 10; }
 .piano .key[data-note="La♯"]   { grid-column: 12; }
 
-.piano .key.black:hover {
+/* 黑鍵 hover 樣式 - 確保與 playing 狀態不衝突 */
+.piano .key.black:hover:not(.playing) {
     background: linear-gradient(to bottom, #444 0%, #222 100%);
 }
 
