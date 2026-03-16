@@ -148,11 +148,19 @@ let totalPlayTime = 0; // 總遊戲時長（秒）
 
 // 初始化遊戲時長（在 loadProgress 後調用）
 function initPlayTime() {
-    // 載入保存的遊戲時長（確保在 savedProgress 變數聲明之前也能正常工作）
-    const progress = loadProgress();
-    if (progress && progress.totalPlayTime) {
-        totalPlayTime = progress.totalPlayTime;
+    // 優化：直接從 localStorage 讀取 totalPlayTime，避免不必要的 JSON 解析和驗證
+    try {
+        const saved = localStorage.getItem('musicTheoryProgress');
+        if (saved) {
+            const data = JSON.parse(saved);
+            if (data && typeof data.totalPlayTime === 'number' && data.totalPlayTime > 0) {
+                totalPlayTime = data.totalPlayTime;
+            }
+        }
+    } catch (e) {
+        // 安靜處理錯誤，保持預設值 0
     }
+    
     // 設置當前session開始時間
     sessionStartTime = Date.now();
 }
