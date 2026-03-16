@@ -1576,11 +1576,11 @@ function level1Question() {
     const html = `
         <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？ (按 1-7 選答案 | 空白 播放聲音)</p>
         <div class="play-buttons">
-            <button class="play-btn" onclick="playNote('${correctNote}')" aria-label="播放音符">🔊</button>
-            <button class="replay-btn" onclick="playNote('${correctNote}')">🔄 再聽一次</button>
+            <button class="play-btn" data-play="${correctNote}"" aria-label="播放音符">🔊</button>
+            <button class="replay-btn" data-play="${correctNote}"">🔄 再聽一次</button>
         </div>
         <div class="options">
-            ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
+            ${shuffledNotes.map((n, i) => `<button class="option-btn" data-answer="${n},${correctNote}" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1611,9 +1611,9 @@ function level2Question() {
     const html = `
         <p class="hint">🎧 ${question} (按 1-4 選答案 | 空白 播放聲音)</p>
         <div class="note-display">${note}</div>
-        <button class="replay-btn" onclick="playNote('${note}')">🔊 再聽一次</button>
+        <button class="replay-btn" data-play="${note}"">🔊 再聽一次</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" data-answer="${n},${correctAnswer}" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1673,7 +1673,7 @@ function level3Question() {
         <p class="rhythm-display">${rhythm.name}</p>
         <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')" aria-label="選項 ${i+1}: ${n} 拍"><span class="key-hint">${i+1}</span>${n} 拍</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" data-answer="${beatsToName[n]},${rhythm.name}" aria-label="選項 ${i+1}: ${n} 拍"><span class="key-hint">${i+1}</span>${n} 拍</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -2254,3 +2254,22 @@ window.addEventListener('unhandledrejection', (event) => {
     
     event.preventDefault();
 });
+
+// 全域點擊事件處理（修復選項按鈕無回應問題）
+(function() {
+    document.addEventListener('click', function(e) {
+        var btn = e.target.closest('button');
+        if (!btn) return;
+        
+        if (btn.dataset.answer) {
+            var parts = btn.dataset.answer.split(',');
+            if (parts.length === 2) {
+                checkAnswer(parts[0], parts[1]);
+            }
+        }
+        
+        if (btn.dataset.play) {
+            playNote(btn.dataset.play);
+        }
+    }, true);
+})();
