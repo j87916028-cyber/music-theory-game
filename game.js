@@ -950,8 +950,9 @@ document.addEventListener('keydown', (e) => {
             nextQuestion();
         }
     }
-    // 鋼琴鍵盤快捷鍵 (Level 4) - 允許自由練習鋼琴，無需答題
-    if (currentLevel === 4 && !e.repeat) {
+    // 鋼琴鍵盤快捷鍵 - 所有關卡可用，允許自由練習鋼琴
+    // 不再限制只能在 Level 4 使用，方便用戶在所有關卡練習鋼琴
+    if (!e.repeat) {
         const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
         if (pianoKey) {
             e.preventDefault();
@@ -976,14 +977,12 @@ document.addEventListener('keydown', (e) => {
 
 // 鍵盤放開事件 - 移除鋼琴按鍵的視覺效果
 document.addEventListener('keyup', (e) => {
-    // 鋼琴鍵盤快捷鍵 (Level 4) - 允許自由練習，無需答題
-    if (currentLevel === 4) {
-        const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
-        if (pianoKey) {
-            const keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
-            if (keyElement) {
-                keyElement.classList.remove('playing');
-            }
+    // 鋼琴鍵盤快捷鍵 - 所有關卡可用
+    const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
+    if (pianoKey) {
+        const keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
+        if (keyElement) {
+            keyElement.classList.remove('playing');
         }
     }
     // 支援 Tab 鍵導航到鋼琴鍵後用 Enter/Space 彈奏
