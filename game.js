@@ -1558,7 +1558,7 @@ function level1Question() {
     currentOptions = shuffledNotes; // 儲存洗牌後的選項順序
     
     const html = `
-        <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？ (按 1-7 選答案)</p>
+        <p class="hint">🎧 點擊播放鍵，聽聽是什麼音符？ (按 1-7 選答案 | 空白 播放聲音)</p>
         <div class="play-buttons">
             <button class="play-btn" onclick="playNote('${correctNote}')" aria-label="播放音符">🔊</button>
             <button class="replay-btn" onclick="playNote('${correctNote}')">🔄 再聽一次</button>
@@ -1593,7 +1593,7 @@ function level2Question() {
     currentOptions = options; // 儲存選項順序
     
     const html = `
-        <p class="hint">🎧 ${question} (按 1-4 選答案)</p>
+        <p class="hint">🎧 ${question} (按 1-4 選答案 | 空白 播放聲音)</p>
         <div class="note-display">${note}</div>
         <button class="replay-btn" onclick="playNote('${note}')">🔊 再聽一次</button>
         <div class="options">
@@ -1652,7 +1652,7 @@ function level3Question() {
     currentOptions = options.map(n => beatsToName[n]); // 儲存音符名稱以便正確比對
     
     const html = `
-        <p class="hint">這個音符有幾拍？ (按 1-4 選答案)</p>
+        <p class="hint">這個音符有幾拍？ (按 1-4 選答案 | 空白 播放節奏)</p>
         <div class="note-display">${rhythm.symbol}</div>
         <p class="rhythm-display">${rhythm.name}</p>
         <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
@@ -1848,7 +1848,7 @@ function level4Question() {
     // 添加提示文字
     const hint = document.createElement('p');
     hint.className = 'hint';
-    hint.textContent = '🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | A-J 彈鋼琴，黃色鍵為和弦組成音) - 無答題時也可自由練習鋼琴！';
+    hint.textContent = '🎧 聽和弦，選擇正確的名稱 (按 1-4 選答案 | 空白 播放和弦 | A-J 彈鋼琴，黃色鍵為和弦組成音) - 無答題時也可自由練習鋼琴！';
     questionArea.appendChild(hint);
     
     // 添加播放按鈕
