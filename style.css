@@ -571,13 +571,16 @@ body.focus-mode .focus-btn {
 
 .piano .key.playing, .piano .key:focus {
     background: linear-gradient(to bottom, #ffd700 0%, #ffb700 100%);
-    transform: translateY(3px);
+    transform: translateY(3px) translateZ(0);
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    will-change: transform, box-shadow;
 }
 
 .piano .key.highlight {
     background: linear-gradient(to bottom, #fff59d 0%, #ffee58 100%);
+    transform: translateZ(0);
     box-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
+    will-change: transform, box-shadow;
 }
 
 .piano .key:focus {
