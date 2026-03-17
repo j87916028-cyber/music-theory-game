@@ -2,39 +2,95 @@
 
 // ========== DOM 元素緩存 (效能優化) ==========
 // 緩存常用 DOM 元素，避免重複查詢
-// 注意：此緩存會驗證元素是否仍在 DOM 中，避免返回已分離的元素
+// 使用 MutationObserver 監聽 DOM 變化，只在需要時清除緩存
 const domCache = {};
+
+// 建立 MutationObserver 監聽 DOM 變化
+// 當檢測到常見的 DOM 替換操作時，選擇性清除相關緩存
+let domObserver = null;
+
+function initDomObserver() {
+    if (domObserver) return;
+    
+    // 觀察 document.body 的子節點變化
+    domObserver = new MutationObserver((mutations) => {
+        let shouldClearAll = false;
+        
+        for (const mutation of mutations) {
+            // 檢測是否有節點被移除或替換
+            for (const removedNode of mutation.removedNodes) {
+                // 如果移除了整個遊戲區域，清除所有相關緩存
+                if (removedNode.id === 'gameArea' || 
+                    removedNode.id === 'mainContainer' ||
+                    removedNode.classList?.contains('mode-card')) {
+                    shouldClearAll = true;
+                    break;
+                }
+                
+                // 檢查被移除節點的子元素是否在緩存中
+                if (removedNode.querySelectorAll) {
+                    const cachedIds = Object.keys(domCache);
+                    for (const id of cachedIds) {
+                        if (domCache[id] && !domCache[id].isConnected) {
+                            delete domCache[id];
+                        }
+                    }
+                }
+            }
+            
+            if (shouldClearAll) break;
+        }
+        
+        // 批量清理已斷開的緩存
+        if (!shouldClearAll) {
+            const keysToDelete = [];
+            for (const id in domCache) {
+                if (domCache[id] && !domCache[id].isConnected) {
+                    keysToDelete.push(id);
+                }
+            }
+            keysToDelete.forEach(id => delete domCache[id]);
+        }
+    });
+    
+    // 開始觀察 body
+    if (document.body) {
+        domObserver.observe(document.body, { 
+            childList: true, 
+            subtree: true 
+        });
+    } else {
+        // 如果 body 還沒準備好，等 DOMContentLoaded 後再觀察
+        document.addEventListener('DOMContentLoaded', () => {
+            domObserver.observe(document.body, { 
+                childList: true, 
+                subtree: true 
+            });
+        }, { once: true });
+    }
+}
+
+// 初始化觀察器
+initDomObserver();
 
 // 清除 DOM 緩存的輔助函數
 // 當 DOM 大範圍更新時（如切換遊戲模式），手動清除緩存以避免記憶體洩漏
 function clearDomCache() {
-    // 只清除可能因 DOM 替換而失效的緩存項目
-    // 保留仍連接到 DOM 的元素緩存（它們仍然有效）
-    const keysToDelete = [];
+    // 清除所有緩存
     for (const id in domCache) {
-        if (domCache[id] && !domCache[id].isConnected) {
-            keysToDelete.push(id);
-        }
+        delete domCache[id];
     }
-    keysToDelete.forEach(id => delete domCache[id]);
 }
 
 function getDomElement(id) {
     // 參數驗證：確保傳入有效的 id
     if (!id || typeof id !== 'string') {
-        console.warn('getDomElement: 無效的 id 參數', id);
         return null;
     }
     
-    // 先檢查緩存，並驗證元素是否仍在 DOM 中
+    // 直接從緩存返回（由 MutationObserver 負責維護緩存有效性）
     if (domCache[id]) {
-        // 使用 isConnected 屬性檢查元素是否仍連接到 DOM
-        // 這防止了元素被 innerHTML 替換後返回已分離的舊元素
-        if (domCache[id].isConnected) {
-            return domCache[id];
-        }
-        // 元素已從 DOM 中分離，清除緩存並重新查詢
-        delete domCache[id];
+        return domCache[id];
     }
     
     // 查詢 DOM 並緩存結果
