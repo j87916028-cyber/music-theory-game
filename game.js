@@ -374,7 +374,7 @@ function stopPlayTimeTracker() {
 function showWelcomeBack(lastPlayed) {
     if (!lastPlayed) return;
     
-    const welcomeEl = document.getElementById('welcomeBack');
+    const welcomeEl = getDomElement('welcomeBack');
     const lastDate = new Date(lastPlayed);
     const now = new Date();
     const diffMs = now - lastDate;
@@ -404,7 +404,7 @@ function showWelcomeBack(lastPlayed) {
 
 // 顯示首次遊戲歡迎提示
 function showFirstTimeWelcome() {
-    const welcomeEl = document.getElementById('welcomeBack');
+    const welcomeEl = getDomElement('welcomeBack');
     welcomeEl.innerHTML = `🎉 歡迎來到音樂小學堂！<br><small>點擊 🔊 播放音符，選擇正確答案開始學習～</small>`;
     welcomeEl.classList.add('show');
     
@@ -467,7 +467,7 @@ function checkDailyLogin() {
         
         // 顯示簽到獎勵提示
         setTimeout(() => {
-            const welcomeEl = document.getElementById('welcomeBack');
+            const welcomeEl = getDomElement('welcomeBack');
             welcomeEl.innerHTML = `${rewardMessage}<br><small>天天登入，獎勵翻倍！</small>`;
             welcomeEl.classList.add('show');
             welcomeEl.style.background = 'rgba(255, 215, 0, 0.9)'; // 金色背景
@@ -730,7 +730,7 @@ function addToHistory(question, userAnswer, correctAnswer, isCorrect, level) {
 function showAnswerHistory() {
     loadAnswerHistory(); // 確保載入最新歷史
     
-    const historyBtn = document.getElementById('historyBtn');
+    const historyBtn = getDomElement('historyBtn');
     if (!historyBtn) return;
     
     let html = '';
@@ -771,7 +771,7 @@ function showAnswerHistory() {
     }
     
     // 創建或更新 Modal 內容
-    let modal = document.getElementById('historyModal');
+    let modal = getDomElement('historyModal');
     if (!modal) {
         // 創建 Modal（添加可訪問性屬性）
         modal = document.createElement('div');
@@ -808,7 +808,7 @@ function showAnswerHistory() {
 
 // 關閉答題歷史 Modal
 function closeAnswerHistory() {
-    const modal = document.getElementById('historyModal');
+    const modal = getDomElement('historyModal');
     if (modal) {
         modal.classList.remove('show');
     }
@@ -943,7 +943,7 @@ function togglePause() {
     isPaused = !isPaused;
     
     // 檢查是否已有 pause overlay，沒有的話創建一個
-    let pauseOverlay = document.getElementById('pauseOverlay');
+    let pauseOverlay = getDomElement('pauseOverlay');
     if (!pauseOverlay) {
         pauseOverlay = document.createElement('div');
         pauseOverlay.id = 'pauseOverlay';
@@ -975,8 +975,8 @@ function toggleQuestionTimer() {
     questionTimerEnabled = !questionTimerEnabled;
     
     // 更新 stats 區域的計時器狀態指示
-    const timerStatusEl = document.getElementById('timerStatus');
-    const timerStatBox = document.getElementById('timerStatBox');
+    const timerStatusEl = getDomElement('timerStatus');
+    const timerStatBox = getDomElement('timerStatBox');
     if (timerStatusEl) {
         timerStatusEl.textContent = questionTimerEnabled ? '⏱️' : '⏱️';
         timerStatusEl.style.color = questionTimerEnabled ? '#00bfff' : '#aaa';
@@ -1045,7 +1045,7 @@ function stopQuestionTimer() {
 
 // 更新計時器顯示
 function updateQuestionTimerDisplay() {
-    let timerEl = document.getElementById('questionTimer');
+    let timerEl = getDomElement('questionTimer');
     if (!timerEl) {
         // 如果元素不存在，使用快取的遊戲區域或重新查詢
         let gameArea = cachedGameArea;
@@ -1058,6 +1058,8 @@ function updateQuestionTimerDisplay() {
             timerEl.id = 'questionTimer';
             timerEl.className = 'question-timer';
             gameArea.insertBefore(timerEl, gameArea.firstChild);
+            // 將新創建的元素加入緩存
+            domCache['questionTimer'] = timerEl;
         }
     }
     
@@ -1330,7 +1332,7 @@ document.addEventListener('keydown', (e) => {
         }
         
         const helpModal = getDomElement('helpModal');
-        const historyModal = document.getElementById('historyModal');
+        const historyModal = getDomElement('historyModal');
         
         // 檢查並關閉所有開啟的 Modal
         if (helpModal && helpModal.classList.contains('show')) {
@@ -2332,7 +2334,7 @@ function closeHelp() {
 }
 
 // 點擊 Modal 背景關閉
-const helpModal = document.getElementById('helpModal');
+const helpModal = getDomElement('helpModal');
 if (helpModal) {
     helpModal.addEventListener('click', (e) => {
         if (e.target.classList.contains('modal-overlay')) {
@@ -2343,7 +2345,7 @@ if (helpModal) {
 
 // 歷史記錄 Modal 點擊背景關閉
 document.addEventListener('click', (e) => {
-    const historyModal = document.getElementById('historyModal');
+    const historyModal = getDomElement('historyModal');
     if (historyModal && e.target === historyModal) {
         closeAnswerHistory();
     }
