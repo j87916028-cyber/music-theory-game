@@ -48,51 +48,58 @@ self.addEventListener('install', (event) => {
 
 // 啟用事件 - 清理舊快取（保留舊版本作為離線回退）
 self.addEventListener('activate', (event) => {
-    // 啟用 Navigation Preload 加速導航請求
-    const enablePreload = self.registration.navigationPreload?.enable() 
-        .then(() => console.log('Navigation Preload 已啟用'))
-        .catch(() => { /* 瀏覽器不支持 Navigation Preload，靜默失敗 */ });
-    
     event.waitUntil(
-        enablePreload.then(() => caches.keys()).then((cacheNames) => {
-            // 簡化版本清理邏輯：保留當前版本 + 最近 2 個舊版本
-            // 使用 semver 解析來正確排序版本
-            const parseVersion = (name) => {
-                const match = name.match(/v(\d+)\.(\d+)\.(\d+)/);
-                if (!match) return { major: 0, minor: 0, patch: 0, raw: name };
-                return {
-                    major: parseInt(match[1]),
-                    minor: parseInt(match[2]),
-                    patch: parseInt(match[3]),
-                    raw: name
+        // 先 claim clients，確保 Service Worker 控制所有頁面
+        self.clients.claim()
+            .then(() => {
+                // Navigation Preload 需要在 clients.claim() 後才能正確啟用
+                // 這樣可以確保離線導航請求能夠並行獲取資源
+                if (self.registration.navigationPreload) {
+                    return self.registration.navigationPreload.enable()
+                        .then(() => console.log('Navigation Preload 已啟用'))
+                        .catch(() => { /* 瀏覽器不支持 Navigation Preload，靜默失敗 */ });
+                }
+            })
+            .then(() => caches.keys())
+            .then((cacheNames) => {
+                // 簡化版本清理邏輯：保留當前版本 + 最近 2 個舊版本
+                // 使用 semver 解析來正確排序版本
+                const parseVersion = (name) => {
+                    const match = name.match(/v(\d+)\.(\d+)\.(\d+)/);
+                    if (!match) return { major: 0, minor: 0, patch: 0, raw: name };
+                    return {
+                        major: parseInt(match[1]),
+                        minor: parseInt(match[2]),
+                        patch: parseInt(match[3]),
+                        raw: name
+                    };
                 };
-            };
-            
-            // 解析並排序所有版本（從新到舊）
-            const allVersions = cacheNames
-                .filter(name => name.startsWith('music-theory-game-'))
-                .map(name => ({ name, ...parseVersion(name) }))
-                .sort((a, b) => {
-                    if (a.major !== b.major) return b.major - a.major;
-                    if (a.minor !== b.minor) return b.minor - a.minor;
-                    return b.patch - a.patch;
-                });
-            
-            // 保留最多 3 個版本（當前版本 + 2 個舊版本）
-            const versionsToKeep = allVersions.slice(0, 3).map(v => v.name);
-            const toDelete = allVersions.slice(3).map(v => v.name);
+                
+                // 解析並排序所有版本（從新到舊）
+                const allVersions = cacheNames
+                    .filter(name => name.startsWith('music-theory-game-'))
+                    .map(name => ({ name, ...parseVersion(name) }))
+                    .sort((a, b) => {
+                        if (a.major !== b.major) return b.major - a.major;
+                        if (a.minor !== b.minor) return b.minor - a.minor;
+                        return b.patch - a.patch;
+                    });
+                
+                // 保留最多 3 個版本（當前版本 + 2 個舊版本）
+                const versionsToKeep = allVersions.slice(0, 3).map(v => v.name);
+                const toDelete = allVersions.slice(3).map(v => v.name);
 
-            // 刪除舊版本
-            return Promise.all(
-                toDelete.map(name => {
-                    console.log('清理舊快取:', name);
-                    return caches.delete(name);
-                })
-            );
-        }).then(() => {
-            console.log('Service Worker: 激活成功');
-            return self.clients.claim();
-        })
+                // 刪除舊版本
+                return Promise.all(
+                    toDelete.map(name => {
+                        console.log('清理舊快取:', name);
+                        return caches.delete(name);
+                    })
+                );
+            })
+            .then(() => {
+                console.log('Service Worker: 激活成功');
+            })
     );
 });
 
