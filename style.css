@@ -186,12 +186,14 @@ h1 {
     will-change: transform, box-shadow;
 }
 
-.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover, .focus-btn:hover {
+/* 按鈕 hover 狀態 - 合併統一的 hover 樣式 */
+.level-btn:hover, .sound-btn:hover, .reset-btn:hover, .help-btn:hover {
     transform: translateY(-3px);
     border-color: var(--primary-color);
     box-shadow: 0 5px 20px rgba(233, 69, 96, 0.3);
 }
 
+/* 歷史記錄和焦點模式按鈕使用紫色 hover */
 .history-btn:hover, .focus-btn:hover {
     transform: translateY(-3px);
     border-color: #9b59b6;
@@ -199,11 +201,12 @@ h1 {
 }
 
 /* 按鈕 active 狀態 - 點擊時的視覺回饋 */
-.level-btn:active, .sound-btn:active, .reset-btn:active, .help-btn:active, .history-btn:active, .focus-btn:active {
+.level-btn:active, .sound-btn:active, .reset-btn:active, .help-btn:active {
     transform: scale(0.95) translateY(0);
     box-shadow: 0 2px 10px rgba(233, 69, 96, 0.2);
 }
 
+/* 歷史記錄和焦點模式按鈕使用紫色 active */
 .history-btn:active, .focus-btn:active {
     box-shadow: 0 2px 10px rgba(155, 89, 182, 0.2);
 }
