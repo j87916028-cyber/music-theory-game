@@ -1353,8 +1353,12 @@ document.addEventListener('keydown', (e) => {
         if (pianoKey) {
             e.preventDefault();
             playPianoKey(pianoKey.note);
-            // 添加視覺反饋
-            const keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
+            // 使用緩存添加視覺反饋（效能優化）
+            let keyElement = pianoKeyElementsCache[pianoKey.note];
+            if (!keyElement) {
+                keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
+                if (keyElement) pianoKeyElementsCache[pianoKey.note] = keyElement;
+            }
             if (keyElement) {
                 keyElement.classList.add('playing');
             }
@@ -1376,7 +1380,12 @@ document.addEventListener('keyup', (e) => {
     // 鋼琴鍵盤快捷鍵 - 所有關卡可用
     const pianoKey = pianoKeys.find(k => k.key === e.key.toLowerCase());
     if (pianoKey) {
-        const keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
+        // 使用緩存獲取元素（效能優化）
+        let keyElement = pianoKeyElementsCache[pianoKey.note];
+        if (!keyElement) {
+            keyElement = document.querySelector(`.key[data-note="${pianoKey.note}"]`);
+            if (keyElement) pianoKeyElementsCache[pianoKey.note] = keyElement;
+        }
         if (keyElement) {
             keyElement.classList.remove('playing');
         }
@@ -1901,6 +1910,22 @@ const pianoKeys = [
     { note: 'Si', isBlack: false, blackKeyIndex: null, key: 'j' }
 ];
 
+// 鋼琴元素緩存 - 避免重複 DOM 查詢（效能優化）
+// 使用音符名稱作為 key，快速查找鋼琴按鍵元素
+const pianoKeyElementsCache = {};
+
+// 初始化鋼琴元素緩存 - 在鋼琴 DOM 生成後調用
+function cachePianoElements() {
+    pianoKeyElementsCache.length = 0; // 清空緩存
+    const pianoKeys_ = document.querySelectorAll('.piano .key');
+    pianoKeys_.forEach(key => {
+        const note = key.dataset.note;
+        if (note) {
+            pianoKeyElementsCache[note] = key;
+        }
+    });
+}
+
 function level4Question() {
     const chord = chords[Math.floor(Math.random() * chords.length)];
     currentQuestion = chord.name;
@@ -1983,6 +2008,9 @@ function level4Question() {
     pianoDiv.appendChild(pianoContainer);
     questionArea.appendChild(pianoDiv);
     
+    // 初始化鋼琴元素緩存（效能優化）
+    cachePianoElements();
+    
     // 添加選項容器
     const optionsDiv = document.createElement('div');
     optionsDiv.className = 'options';
@@ -2001,8 +2029,17 @@ function playPianoKey(note) {
     // 使用模組層面的 pianoNoteFreqs 物件（避免每次創建新物件）
     playPianoNote(pianoNoteFreqs[note] || 261.63);
     
-    // 更新鋼琴按鍵的 aria-pressed 狀態
-    const keyElement = document.querySelector(`.key[data-note="${note}"]`);
+    // 使用緩存獲取鋼琴按鍵元素（效能優化）
+    // 如果緩存中沒有，fallback 到 querySelector
+    let keyElement = pianoKeyElementsCache[note];
+    if (!keyElement) {
+        keyElement = document.querySelector(`.key[data-note="${note}"]`);
+        // 更新緩存以便後續使用
+        if (keyElement) {
+            pianoKeyElementsCache[note] = keyElement;
+        }
+    }
+    
     if (keyElement) {
         keyElement.setAttribute('aria-pressed', 'true');
         setTimeout(() => {
