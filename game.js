@@ -1193,6 +1193,23 @@ document.addEventListener('keydown', (e) => {
             optionButtons[prevRowIndex].classList.add('keyboard-focus');
             return;
         }
+        
+        // 數字鍵 1-4：快速選擇答案（改善鍵盤使用者體驗）
+        const num = parseInt(e.key);
+        if (num >= 1 && num <= 4 && !isAnswering && currentQuestion) {
+            const btnIndex = num - 1;
+            if (btnIndex < optionButtons.length && !document.querySelector('.option-btn.correct')) {
+                if (!currentOptions || !currentOptions.length) return;
+                
+                e.preventDefault();
+                playKeyPressSound();
+                const selectedAnswer = currentOptions[btnIndex];
+                setTimeout(() => {
+                    checkAnswer(selectedAnswer, currentQuestion);
+                }, 100);
+                return;
+            }
+        }
     }
     
     // Enter 鍵：當使用 Tab 鍵導航到選項時，按 Enter 確認答案
