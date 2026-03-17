@@ -414,7 +414,18 @@
         
         function switchTab(tab, btn) { document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active')); if (btn) btn.classList.add('active'); document.querySelectorAll('.tab-content').forEach(c => c.style.display = 'none'); getDomElement('tab' + tab.charAt(0).toUpperCase() + tab.slice(1)).style.display = 'block'; }
         
-        function showHome() { getDomElement('homePage').style.display = 'block'; getDomElement('gameArea').classList.remove('active'); getDomElement('backBtn').style.display = 'none'; updateUI(); clearDomCache(); }
+        function showHome() { 
+            // 清理問答計時器，防止記憶體洩漏
+            if (questionTimer) {
+                clearInterval(questionTimer);
+                questionTimer = null;
+            }
+            getDomElement('homePage').style.display = 'block'; 
+            getDomElement('gameArea').classList.remove('active'); 
+            getDomElement('backBtn').style.display = 'none'; 
+            updateUI(); 
+            clearDomCache(); 
+        }
         
         function startGame(mode) { currentMode = mode; currentPracticeMode = null; gameScore = 0; gameCombo = 0; questionsAnswered = 0; correctThisRound = 0; perfectChecked = false; getDomElement('homePage').style.display = 'none'; getDomElement('gameArea').classList.add('active'); getDomElement('backBtn').style.display = 'block'; updateGameUI(); nextQuestion(); }
         
