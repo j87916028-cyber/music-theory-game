@@ -590,6 +590,21 @@ body.focus-mode .focus-btn {
     will-change: transform, box-shadow;
 }
 
+/* 修復：當按鍵同時具有 playing 和 highlight 類別時，確保兩種樣式都正確顯示 */
+/* 使用組合選擇器提供更高優先級，playing 樣式優先於 highlight */
+.piano .key.playing.highlight,
+.piano .key.highlight.playing {
+    background: linear-gradient(to bottom, var(--accent-gold) 0%, var(--accent-gold-dark) 100%);
+    transform: translateY(3px) translateZ(0);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 20px rgba(255, 235, 59, 0.4);
+}
+
+.piano .key.black.playing.highlight,
+.piano .key.black.highlight.playing {
+    background: linear-gradient(to bottom, #555 0%, #333 100%);
+    box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 15px rgba(255, 235, 59, 0.5);
+}
+
 .piano .key:focus {
     outline: 2px solid var(--accent-blue);
     outline-offset: 2px;
