@@ -3027,30 +3027,82 @@ document.addEventListener('keydown', function(e) {
 function showShortcuts() {
     const html = `
         <div id="shortcutsPanel" style="position:fixed;top:0;left:0;right:0;bottom:0;background:rgba(0,0,0,0.9);z-index:5000;display:flex;align-items:center;justify-content:center;">
-            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:350px;">
+            <div style="background:linear-gradient(135deg,#1a1a2e,#16213e);padding:30px;border-radius:20px;max-width:400px;max-height:90vh;overflow-y:auto;">
                 <div style="display:flex;justify-content:space-between;margin-bottom:20px;">
                     <h2 style="color:#ffd700;">⌨️ 快捷鍵</h2>
                     <button onclick="document.getElementById('shortcutsPanel').remove()" style="background:none;border:none;color:white;font-size:1.5rem;cursor:pointer;">✕</button>
                 </div>
                 
-                <div style="display:grid;gap:10px;">
-                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                <h3 style="color:#00bfff;margin:15px 0 10px;">🎮 遊戲模式</h3>
+                <div style="display:grid;gap:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
                         <span>聽力訓練</span><span style="color:#ffd700;">1</span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
                         <span>音符練習</span><span style="color:#ffd700;">2</span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
                         <span>節奏訓練</span><span style="color:#ffd700;">3</span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
-                        <span>和弦練習</span><span style="color:#ffd700;">4</span>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>和弦教室</span><span style="color:#ffd700;">4</span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
                         <span>鋼琴</span><span style="color:#ffd700;">5</span>
                     </div>
-                    <div style="display:flex;justify-content:space-between;padding:10px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
                         <span>返回首頁</span><span style="color:#ffd700;">Esc</span>
+                    </div>
+                </div>
+                
+                <h3 style="color:#00bfff;margin:15px 0 10px;">⚡ 遊戲中快捷鍵</h3>
+                <div style="display:grid;gap:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>暫停/繼續</span><span style="color:#ffd700;">P</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>專注模式</span><span style="color:#ffd700;">F</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>答題計時</span><span style="color:#ffd700;">T</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>跳過題目</span><span style="color:#ffd700;">N</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>播放聲音</span><span style="color:#ffd700;">空白鍵</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>顯示幫助</span><span style="color:#ffd700;">H</span>
+                    </div>
+                </div>
+                
+                <h3 style="color:#00bfff;margin:15px 0 10px;">🎯 答題導航</h3>
+                <div style="display:grid;gap:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>選擇答案 1-4</span><span style="color:#ffd700;">1-4</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>上/下/左/右</span><span style="color:#ffd700;">方向鍵</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>確認答案</span><span style="color:#ffd700;">Enter</span>
+                    </div>
+                </div>
+                
+                <h3 style="color:#00bfff;margin:15px 0 10px;">🎚️ 等級設定</h3>
+                <div style="display:grid;gap:8px;">
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>Lv.1</span><span style="color:#ffd700;">Q</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>Lv.2</span><span style="color:#ffd700;">W</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>Lv.3</span><span style="color:#ffd700;">E</span>
+                    </div>
+                    <div style="display:flex;justify-content:space-between;padding:8px;background:rgba(255,255,255,0.1);border-radius:8px;">
+                        <span>Lv.4</span><span style="color:#ffd700;">R</span>
                     </div>
                 </div>
             </div>
