@@ -182,7 +182,7 @@
         }, 5 * 60 * 1000);
     }
     </script>
-    <button type="button" class="back-btn" onclick="showHome(); return false;" id="backBtn" style="display:none">⬅️</button>
+    <button type="button" class="back-btn" onclick="console.log("back clicked"); try { showHome(); } catch(e) { alert(e); }" id="backBtn" style="display:none">⬅️</button>
     <div id="homePage">
         <h1>🎹 音樂達人</h1>
         <div class="stats-row">
