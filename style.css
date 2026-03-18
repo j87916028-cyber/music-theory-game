@@ -769,7 +769,7 @@ body.focus-mode .focus-btn {
     visibility: visible;
 }
 
-
+.modal {
     background: linear-gradient(135deg, var(--bg-gradient-mid), var(--bg-gradient-end));
     padding: 30px;
     border-radius: 20px;
