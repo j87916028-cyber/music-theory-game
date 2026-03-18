@@ -959,14 +959,14 @@ function togglePause() {
     
     if (isPaused) {
         pauseOverlay.classList.add('show');
-        // 暫停時停止答題計時
+        // 暫停時停止答題計時（保留剩餘時間）
         stopPlayTimeTracker();
-        stopQuestionTimer();
+        pauseQuestionTimer();
     } else {
         pauseOverlay.classList.remove('show');
-        // 恢復時重新開始計時
+        // 恢復時繼續答題計時（從剩餘時間繼續倒數）
         startPlayTimeTracker();
-        startQuestionTimer();
+        resumeQuestionTimer();
     }
 }
 
@@ -1017,11 +1017,6 @@ function startQuestionTimer() {
     updateQuestionTimerDisplay();
     
     questionTimer = setInterval(() => {
-        // 遊戲暫停時停止計時
-        if (isPaused) {
-            return;
-        }
-        
         questionTimeRemaining--;
         updateQuestionTimerDisplay();
         
@@ -1031,6 +1026,32 @@ function startQuestionTimer() {
             handleTimeout();
         }
     }, 1000);
+}
+
+// 暫停答題計時（遊戲暫停時呼叫）
+function pauseQuestionTimer() {
+    if (questionTimer) {
+        clearInterval(questionTimer);
+        questionTimer = null;
+        // 儲存剩餘時間，恢復時繼續倒數
+        // questionTimeRemaining 保持不變
+    }
+}
+
+// 恢復答題計時（遊戲恢復時呼叫）
+function resumeQuestionTimer() {
+    if (questionTimerEnabled && questionTimeRemaining > 0 && !isPaused && currentQuestion && !isAnswering) {
+        questionTimer = setInterval(() => {
+            questionTimeRemaining--;
+            updateQuestionTimerDisplay();
+            
+            if (questionTimeRemaining <= 0) {
+                stopQuestionTimer();
+                // 時間到視為答錯
+                handleTimeout();
+            }
+        }, 1000);
+    }
 }
 
 // 停止答題計時
