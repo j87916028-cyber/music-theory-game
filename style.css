@@ -9,17 +9,17 @@
     --bg-gradient-end: #16213e;
     --text-color: #ffffff;
     --text-muted: rgba(255, 255, 255, 0.7);
-    --success-color: var(--success-color);
+    --success-color: #4CAF50;
     --error-color: #f44336;
     --white-key-width: 35px;
     --black-key-width: 24px;
     /* 常用強調色 */
-    --accent-gold: var(--accent-gold);
-    --accent-gold-dark: var(--accent-gold-dark);
-    --accent-blue: var(--accent-blue);
+    --accent-gold: #FFD700;
+    --accent-gold-dark: #DAA520;
+    --accent-blue: #3498db;
     --accent-purple: #9b59b6;
     --accent-purple-dark: #8e44ad;
-    --success-light: var(--success-light);
+    --success-light: #81C784;
 }
 
 /* 基本重置 */
