@@ -440,6 +440,7 @@ body.focus-mode .focus-btn {
 /* 使用 CSS class 觸发动畫（取代 DOM clone） */
 .fade-in {
     animation: fadeIn 0.3s ease-out;
+    will-change: opacity, transform;
 }
 
 /* 選項按鈕 */
@@ -687,6 +688,7 @@ body.focus-mode .focus-btn {
     z-index: 10;
     box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
     animation: notePopupAnim 0.6s ease forwards;
+    will-change: opacity, transform;
 }
 
 .note-popup::after {
