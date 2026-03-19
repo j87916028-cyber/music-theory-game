@@ -20,6 +20,22 @@
     --accent-purple: #9b59b6;
     --accent-purple-dark: #8e44ad;
     --success-light: #81C784;
+    /* 鋼琴鍵盤顏色 */
+    --piano-white: #ffffff;
+    --piano-white-dark: #f5f5f5;
+    --piano-black: #333333;
+    --piano-black-dark: #000000;
+    --piano-gray-light: #e0e0e0;
+    --piano-gray: #d0d0d0;
+    --piano-gray-dark: #555555;
+    --piano-gray-darker: #444444;
+    --piano-gray-darkest: #222222;
+    --piano-gray-light2: #666666;
+    /* 成就獎勵顏色 */
+    --achievement-gold-light: #ffe082;
+    --achievement-gold: #ffd54f;
+    --achievement-yellow-light: #fff59d;
+    --achievement-yellow: #ffee58;
 }
 
 /* 基本重置 */
@@ -550,7 +566,7 @@ body.focus-mode .focus-btn {
 .piano .key {
     width: var(--white-key-width);
     height: 140px;
-    background: linear-gradient(to bottom, #ffffff 0%, #f5f5f5 100%);
+    background: linear-gradient(to bottom, var(--piano-white) 0%, var(--piano-white-dark) 100%);
     border: 1px solid #ccc;
     border-radius: 0 0 8px 8px;
     display: flex;
@@ -559,7 +575,7 @@ body.focus-mode .focus-btn {
     align-items: center;
     padding-bottom: 10px;
     font-size: 0.7rem;
-    color: #333;
+    color: var(--piano-black);
     cursor: pointer;
     transition: transform 0.1s ease, background 0.1s ease, box-shadow 0.1s ease;
     user-select: none;
@@ -573,7 +589,7 @@ body.focus-mode .focus-btn {
 
 /* 白鍵 hover 樣式 - 確保與 playing 狀態不衝突 */
 .piano .key:not(.black):hover:not(.playing) {
-    background: linear-gradient(to bottom, #e0e0e0 0%, #d0d0d0 100%);
+    background: linear-gradient(to bottom, var(--piano-gray-light) 0%, var(--piano-gray) 100%);
 }
 
 .piano .key.playing, .piano .key:focus {
@@ -584,7 +600,7 @@ body.focus-mode .focus-btn {
 }
 
 .piano .key.highlight {
-    background: linear-gradient(to bottom, #fff59d 0%, #ffee58 100%);
+    background: linear-gradient(to bottom, var(--achievement-yellow-light) 0%, var(--achievement-yellow) 100%);
     transform: translateZ(0);
     box-shadow: 0 0 20px rgba(255, 235, 59, 0.6);
     will-change: transform, box-shadow;
@@ -601,7 +617,7 @@ body.focus-mode .focus-btn {
 
 .piano .key.black.playing.highlight,
 .piano .key.black.highlight.playing {
-    background: linear-gradient(to bottom, #555 0%, #333 100%);
+    background: linear-gradient(to bottom, var(--piano-gray-dark) 0%, var(--piano-black) 100%);
     box-shadow: 0 0 25px rgba(255, 215, 0, 0.8), 0 0 15px rgba(255, 235, 59, 0.5);
 }
 
@@ -617,7 +633,7 @@ body.focus-mode .focus-btn {
     position: relative;
     width: var(--black-key-width);
     height: 90px;
-    background: linear-gradient(to bottom, #333 0%, #000 100%);
+    background: linear-gradient(to bottom, var(--piano-black) 0%, var(--piano-black-dark) 100%);
     border-radius: 0 0 5px 5px;
     z-index: 2;
     color: #fff;
@@ -634,11 +650,11 @@ body.focus-mode .focus-btn {
 
 /* 黑鍵 hover 樣式 - 確保與 playing 狀態不衝突 */
 .piano .key.black:hover:not(.playing) {
-    background: linear-gradient(to bottom, #444 0%, #222 100%);
+    background: linear-gradient(to bottom, var(--piano-gray-darker) 0%, var(--piano-gray-darkest) 100%);
 }
 
 .piano .key.black.playing {
-    background: linear-gradient(to bottom, #666 0%, #333 100%);
+    background: linear-gradient(to bottom, var(--piano-gray-light2) 0%, var(--piano-black) 100%);
     transform: translateY(3px);
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
 }
@@ -1093,7 +1109,7 @@ button:focus-visible, .key:focus-visible {
 
 /* 鋼琴鍵盤焦點樣式 - 與 playing 狀態区分 */
 .piano .key:focus {
-    background: linear-gradient(to bottom, #ffe082 0%, #ffd54f 100%) !important;
+    background: linear-gradient(to bottom, var(--achievement-gold-light) 0%, var(--achievement-gold) 100%) !important;
 }
 
 /* 改善觸控設備的互動體驗 */
