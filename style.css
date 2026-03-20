@@ -641,6 +641,9 @@ body.focus-mode .focus-btn {
     font-size: 0.6rem;
     grid-row: 1;
     justify-self: center;
+    /* GPU 硬體加速優化 */
+    transform: translateZ(0);
+    backface-visibility: hidden;
 }
 
 .piano .key[data-note="Do♯"]   { grid-column: 2; }
@@ -656,8 +659,9 @@ body.focus-mode .focus-btn {
 
 .piano .key.black.playing {
     background: linear-gradient(to bottom, var(--piano-gray-light2) 0%, var(--piano-black) 100%);
-    transform: translateY(3px);
+    transform: translateY(3px) translateZ(0);
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.5);
+    will-change: transform, box-shadow;
 }
 
 /* 黑鍵 highlight 樣式 - 和弦音符提示 */
@@ -665,6 +669,9 @@ body.focus-mode .focus-btn {
     background: linear-gradient(to bottom, var(--accent-gold) 0%, var(--accent-gold-dark) 100%);
     box-shadow: 0 0 15px rgba(255, 215, 0, 0.6);
     z-index: 3;
+    /* GPU 硬體加速優化 */
+    transform: translateZ(0);
+    will-change: transform, box-shadow;
 }
 
 /* 鋼琴音符彈出提示 */
