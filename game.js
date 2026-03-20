@@ -1106,7 +1106,18 @@ function updateQuestionTimerDisplay() {
     }
 }
 
-// 處理答題超時
+// 顯示正確答案（超時或答錯時呼叫）
+function showCorrectAnswer() {
+    const buttons = document.querySelectorAll('.option-btn');
+    buttons.forEach((btn, index) => {
+        const btnValue = currentOptions[index];
+        if (String(btnValue) === String(currentQuestion)) {
+            btn.classList.add('correct');
+        }
+        btn.disabled = true;
+    });
+}
+
 function handleTimeout() {
     if (!currentQuestion || isAnswering) return;
     
