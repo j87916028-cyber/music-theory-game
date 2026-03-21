@@ -1950,7 +1950,10 @@ const pianoKeyElementsCache = {};
 
 // 初始化鋼琴元素緩存 - 在鋼琴 DOM 生成後調用
 function cachePianoElements() {
-    pianoKeyElementsCache.length = 0; // 清空緩存
+    // 清空快取（pianoKeyElementsCache 是物件，不是陣列，所以不能用 length = 0）
+    for (const key in pianoKeyElementsCache) {
+        delete pianoKeyElementsCache[key];
+    }
     const pianoKeys_ = document.querySelectorAll('.piano .key');
     pianoKeys_.forEach(key => {
         const note = key.dataset.note;
