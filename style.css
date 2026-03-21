@@ -879,7 +879,7 @@ body.focus-mode .focus-btn {
     color: var(--text-color);
 }
 
-
+.modal h2 {
     text-align: center;
     margin-bottom: 20px;
     color: var(--accent-gold);
