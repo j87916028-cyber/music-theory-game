@@ -1323,6 +1323,17 @@ button:focus-visible, .key:focus-visible {
     text-shadow: 0 0 20px rgba(233, 69, 96, 0.5);
 }
 
+/* 節奏練習的音符符號 - 更突出的視覺效果 */
+.note-display.rhythm-symbol {
+    font-size: 5rem;
+    background: rgba(233, 69, 96, 0.15);
+    border-radius: 20px;
+    padding: 30px 50px;
+    display: inline-block;
+    border: 2px solid rgba(233, 69, 96, 0.3);
+    box-shadow: 0 0 30px rgba(233, 69, 96, 0.2);
+}
+
 /* 鋼琴鍵盤音符標籤 */
 .piano-key-label {
     font-size: 0.6rem;

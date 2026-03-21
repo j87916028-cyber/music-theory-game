@@ -1771,46 +1771,35 @@ const rhythms = [
     { name: '八分音符', beats: 0.5, symbol: '♪', duration: 0.25 }
 ];
 
-// 播放節奏音效 - 使用點擊音效模擬節拍器，增強節奏學習體驗
+// 播放節奏音效
 function playRhythm(rhythm) {
     if (!soundEnabled) return;
     const ctx = getAudioContext();
     if (!ctx) return;
-
-    const totalDuration = rhythm.duration || 0.5; // 總節奏長度（秒）
-    const beatCount = rhythm.beats || 1;           // 總拍數
-    const clickInterval = totalDuration / beatCount; // 每拍之間的間隔（秒）
-
-    // 使用 AudioContext 的當前時間作為基準
-    const startTime = ctx.currentTime + 0.05; // 稍微延遲一點，讓聲音更自然
-
-    for (let i = 0; i < beatCount; i++) {
-        const clickTime = startTime + i * clickInterval;
-
-        // 為每個點擊建立獨立的振盪器和增益節點
-        const osc = ctx.createOscillator();
-        const gain = ctx.createGain();
-
-        osc.connect(gain);
-        gain.connect(ctx.destination);
-
-        // 較高的頻率更像節拍器的「滴」聲
-        osc.frequency.value = 880;
-        osc.type = 'square'; // 方波有更清脆的打擊感
-
-        // 短促的音量包絡：快速 attack，快速 decay
-        // 這讓每個 click 都是獨立的脈衝，而不是連續的嗡嗡聲
-        gain.gain.setValueAtTime(0, clickTime);
-        gain.gain.linearRampToValueAtTime(0.25, clickTime + 0.005);  // 快速上升
-        gain.gain.exponentialRampToValueAtTime(0.001, clickTime + 0.08); // 快速衰減
-
-        osc.start(clickTime);
-        osc.stop(clickTime + 0.1);
-
-        // 清理音頻節點，防止記憶體洩漏
-        osc.onended = () => cleanupAudioNodes(osc, gain);
-        setTimeout(() => cleanupAudioNodes(osc, gain), (clickTime - ctx.currentTime + 0.15) * 1000 + 100);
-    }
+    
+    const duration = rhythm.duration || 0.5; // 使用 duration 控制節奏長度
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.frequency.value = 440; // 使用較高頻率的正弦波
+    osc.type = 'sine';
+    
+    // 根據節奏長度調整音量包絡
+    const now = ctx.currentTime;
+    gain.gain.setValueAtTime(0, now);
+    gain.gain.linearRampToValueAtTime(0.3, now + 0.02);
+    gain.gain.setValueAtTime(0.3, now + duration - 0.05);
+    gain.gain.exponentialRampToValueAtTime(0.01, now + duration);
+    
+    osc.start(now);
+    osc.stop(now + duration);
+    
+    // 使用統一的清理函數，確保音頻節點完全斷開連接（防止記憶體洩漏）
+    osc.onended = () => cleanupAudioNodes(osc, gain);
+    // 額外保護：設定超時後強制清理（以防 onended 回調未觸發）
+    setTimeout(() => cleanupAudioNodes(osc, gain), duration * 1000 + 100);
 }
 
 function level3Question() {
@@ -1822,13 +1811,13 @@ function level3Question() {
     const beatsToName = { 0.5: '八分音符', 1: '四分音符', 2: '二分音符', 4: '全音符' };
     currentOptions = options.map(n => beatsToName[n]); // 儲存音符名稱以便正確比對
     
-    // 音符名稱用於內部比對，但不在題目中顯示，避免用戶直接讀名稱猜答案
     const html = `
-        <p class="hint">這個符號代表幾拍？（按 1-4 選答案 | 空白 播放節奏）</p>
-        <div class="note-display rhythm-symbol">${rhythm.symbol}</div>
+        <p class="hint">這個音符有幾拍？ (按 1-4 選答案 | 空白 播放節奏)</p>
+        <div class="note-display">${rhythm.symbol}</div>
+        <p class="rhythm-display">${rhythm.name}</p>
         <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')" aria-label="選項 ${i+1}: ${beatsToName[n]}"><span class="key-hint">${i+1}</span>${beatsToName[n]}</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')" aria-label="選項 ${i+1}: ${n} 拍"><span class="key-hint">${i+1}</span>${n} 拍</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;

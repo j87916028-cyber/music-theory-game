@@ -1822,10 +1822,10 @@ function level3Question() {
     const beatsToName = { 0.5: '八分音符', 1: '四分音符', 2: '二分音符', 4: '全音符' };
     currentOptions = options.map(n => beatsToName[n]); // 儲存音符名稱以便正確比對
     
-    // 音符名稱用於內部比對，但不在題目中顯示，避免用戶直接讀名稱猜答案
     const html = `
-        <p class="hint">這個符號代表幾拍？（按 1-4 選答案 | 空白 播放節奏）</p>
-        <div class="note-display rhythm-symbol">${rhythm.symbol}</div>
+        <p class="hint">這個音符有幾拍？ (按 1-4 選答案 | 空白 播放節奏)</p>
+        <div class="note-display">${rhythm.symbol}</div>
+        <p class="rhythm-display">${rhythm.name}</p>
         <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
         <div class="options">
             ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')" aria-label="選項 ${i+1}: ${beatsToName[n]}"><span class="key-hint">${i+1}</span>${beatsToName[n]}</button>`).join('')}
