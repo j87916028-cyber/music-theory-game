@@ -1930,18 +1930,18 @@ function playWrongSound() {
 // 標準鋼琴配置：Do-Re-Mi-Fa-Sol-La-Si，白鍵之間的黑鍵是 Do♯、Re♯、Fa♯、Sol♯、La♯
 // 注意：Mi-Fa 之間和 Si-Do 之間沒有黑鍵！
 const pianoKeys = [
-    { note: 'Do', isBlack: false, blackKeyIndex: null, key: 'a' },
-    { note: 'Do♯', isBlack: true, blackKeyIndex: 1, key: 'w' },   // 在 Do(0) 和 Re(1) 之間 → 白鍵索引+1
-    { note: 'Re', isBlack: false, blackKeyIndex: null, key: 's' },
-    { note: 'Re♯', isBlack: true, blackKeyIndex: 2, key: 'e' },   // 在 Re(1) 和 Mi(2) 之間 → 白鍵索引+1
-    { note: 'Mi', isBlack: false, blackKeyIndex: null, key: 'd' },
-    { note: 'Fa', isBlack: false, blackKeyIndex: null, key: 'f' },
-    { note: 'Fa♯', isBlack: true, blackKeyIndex: 4, key: 't' },   // 在 Fa(3) 和 Sol(4) 之間 → 白鍵索引+1 (跳過 Mi)
-    { note: 'Sol', isBlack: false, blackKeyIndex: null, key: 'g' },
-    { note: 'Sol♯', isBlack: true, blackKeyIndex: 5, key: 'y' },   // 在 Sol(4) 和 La(5) 之間 → 白鍵索引+1
-    { note: 'La', isBlack: false, blackKeyIndex: null, key: 'h' },
-    { note: 'La♯', isBlack: true, blackKeyIndex: 6, key: 'u' },   // 在 La(5) 和 Si(6) 之間 → 白鍵索引+1
-    { note: 'Si', isBlack: false, blackKeyIndex: null, key: 'j' }
+    { note: 'Do', isBlack: false, key: 'a' },
+    { note: 'Do♯', isBlack: true, key: 'w' },
+    { note: 'Re', isBlack: false, key: 's' },
+    { note: 'Re♯', isBlack: true, key: 'e' },
+    { note: 'Mi', isBlack: false, key: 'd' },
+    { note: 'Fa', isBlack: false, key: 'f' },
+    { note: 'Fa♯', isBlack: true, key: 't' },
+    { note: 'Sol', isBlack: false, key: 'g' },
+    { note: 'Sol♯', isBlack: true, key: 'y' },
+    { note: 'La', isBlack: false, key: 'h' },
+    { note: 'La♯', isBlack: true, key: 'u' },
+    { note: 'Si', isBlack: false, key: 'j' }
 ];
 
 // 鋼琴元素緩存 - 避免重複 DOM 查詢（效能優化）
