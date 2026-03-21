@@ -548,7 +548,7 @@
             });
             
             questionsAnswered++; playerData.totalPlayed++;
-            const isCorrect = String(answer) === String(correct);
+            const isCorrect = parseFloat(answer) === parseFloat(correct);
             if (isCorrect) { gameScore += 10 + gameCombo * 2; gameCombo++; correctThisRound++; if (correctThisRound === 1) perfectChecked = false; playerData.coins += 5; playerData.xp += 3; playSound('correct'); showFeedback('✅', '#4caf50'); if (gameCombo >= 5) { playSound('coin'); showFeedback('🔥 ' + gameCombo + ' COMBO!', '#ffd700'); } }
             else { gameCombo = 0; correctThisRound = 0; perfectChecked = false; playSound('wrong'); showFeedback('❌', '#f44336'); }
             updateGameUI(); checkQuests(); saveData();
@@ -1076,7 +1076,7 @@ loadSettings();
 
 // 練習模式回調 - 答對答錯都自動載入新題目
 function practiceAnswer(btn, answer, correct) {
-    const isCorrect = String(answer) === String(correct);
+    const isCorrect = parseFloat(answer) === parseFloat(correct);
     btn.classList.add(isCorrect ? 'correct' : 'wrong');
     // 添加視覺反饋彈窗（與一般遊戲模式一致）
     showFeedback(isCorrect ? '✅' : '❌', isCorrect ? '#4caf50' : '#f44336');
