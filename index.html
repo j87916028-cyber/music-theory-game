@@ -1849,6 +1849,10 @@ function startRhythmGame() {
 
 function spawnBeat() {
     const area = document.getElementById('rhythmArea');
+    // 移除舊的節拍 DOM，避免多個節拍同時堆積在畫面上
+    const oldBeat = document.getElementById('activeBeat');
+    if (oldBeat) oldBeat.remove();
+
     const beat = document.createElement('div');
     beat.style.cssText = 'position:absolute;width:60px;height:60px;background:linear-gradient(135deg,#00bfff,#0099cc);border-radius:50%;left:50%;bottom:50px;transform:translateX(-50%);animation:beatFall 1.5s linear forwards;';
     beat.id = 'activeBeat';
@@ -1857,7 +1861,7 @@ function spawnBeat() {
     setTimeout(() => {
         if (beat.parentNode) {
             beat.remove();
-            // 錯過
+            // 節拍未被點擊（錯過），重置連擊
             perfectCount = 0;
         }
     }, 1500);
