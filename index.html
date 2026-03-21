@@ -1848,23 +1848,19 @@ function startRhythmGame() {
 }
 
 function spawnBeat() {
-    const area = document.getElementById('rhythmArea');
-    // 移除舊的節拍 DOM，避免多個節拍同時堆積在畫面上
-    const oldBeat = document.getElementById('activeBeat');
-    if (oldBeat) oldBeat.remove();
+    if (!rhythmRunning) return;
 
+    const area = document.getElementById('rhythmArea');
     const beat = document.createElement('div');
+    beat.className = 'rhythm-beat';
     beat.style.cssText = 'position:absolute;width:60px;height:60px;background:linear-gradient(135deg,#00bfff,#0099cc);border-radius:50%;left:50%;bottom:50px;transform:translateX(-50%);animation:beatFall 1.5s linear forwards;';
-    beat.id = 'activeBeat';
     area.appendChild(beat);
     
-    setTimeout(() => {
-        if (beat.parentNode) {
-            beat.remove();
-            // 節拍未被點擊（錯過），重置連擊
-            perfectCount = 0;
-        }
-    }, 1500);
+    // 動畫結束後自動移除，若遊戲已結束則跳過
+    beat.addEventListener('animationend', () => {
+        if (beat.parentNode) beat.remove();
+        if (rhythmRunning) perfectCount = 0;
+    });
 }
 
 function tapBeat(e) {
@@ -1872,33 +1868,42 @@ function tapBeat(e) {
     e.preventDefault();
     
     const now = Date.now();
-    const beat = document.getElementById('activeBeat');
     
-    if (beat) {
+    // 找出所有在画面上的節拍，取最接近打擊線的那一個
+    const beats = document.querySelectorAll('.rhythm-beat');
+    const lineY = document.getElementById('rhythmArea').getBoundingClientRect().bottom - 50;
+    
+    let closestBeat = null;
+    let closestDiff = Infinity;
+    
+    beats.forEach(beat => {
         const rect = beat.getBoundingClientRect();
-        const lineY = document.getElementById('rhythmArea').getBoundingClientRect().bottom - 50;
         const diff = Math.abs(rect.bottom - lineY);
-        
-        if (diff < 30) {
+        if (diff < closestDiff) {
+            closestDiff = diff;
+            closestBeat = beat;
+        }
+    });
+    
+    if (closestBeat && closestDiff < 80) {
+        if (closestDiff < 30) {
             // Perfect!
             rhythmScore += 100;
             perfectCount++;
             showRhythmFeedback('PERFECT!', '#4caf50');
-            beat.remove();
-        } else if (diff < 60) {
+        } else {
             // Good
             rhythmScore += 50;
             perfectCount++;
             showRhythmFeedback('GOOD', '#ffd700');
-            beat.remove();
-        } else {
-            // Miss
+        }
+        closestBeat.remove();
+    } else {
+        // Miss 或提前按
+        if (beats.length > 0) {
             perfectCount = 0;
             showRhythmFeedback('MISS', '#f44336');
-        }
-    } else {
-        // 提前按
-        if (now - lastBeatTime < 300) {
+        } else if (now - lastBeatTime < 300) {
             rhythmScore -= 10;
             showRhythmFeedback('TOO EARLY', '#f44336');
         }
