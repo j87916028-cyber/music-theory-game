@@ -1162,11 +1162,11 @@ document.addEventListener('keydown', (e) => {
         return;
     }
     
-    // ESC 鍵：退出遊戲返回首頁
+    // ESC 鍵：退出遊戲返回首頁（當有題目在進行中時）
     if (e.key === 'Escape') {
         e.preventDefault();
-        // 如果在遊戲中，返回首頁
-        if (currentLevel && getDomElement('gameArea')?.classList.contains('active')) {
+        // 有題目在進行中時，返回首頁（清除題目、停止計時、隱藏反饋）
+        if (currentQuestion && !isPaused) {
             showHome();
             return;
         }
@@ -2351,6 +2351,40 @@ if (savedProgress && savedProgress.lastPlayed) {
 } else {
     // 首次遊戲，顯示歡迎提示
     showFirstTimeWelcome();
+}
+
+// 返回首頁：清除題目、停止計時、隱藏反饋，恢復初始狀態
+function showHome() {
+    // 清除當前題目狀態
+    currentQuestion = null;
+    currentOptions = [];
+
+    // 停止答題計時
+    stopQuestionTimer();
+
+    // 重置答題鎖
+    isAnswering = false;
+
+    // 清除反饋訊息
+    const feedbackEl = getDomElement('feedback');
+    if (feedbackEl) {
+        feedbackEl.textContent = '';
+        feedbackEl.className = 'feedback';
+    }
+
+    // 隱藏暫停 overlay（如果有的話）
+    const pauseOverlay = getDomElement('pauseOverlay');
+    if (pauseOverlay) {
+        pauseOverlay.classList.remove('show');
+    }
+    isPaused = false;
+    isPausedByVisibility = false;
+
+    // 清除 questionArea 內容，恢復初始提示
+    const questionArea = getDomElement('questionArea');
+    if (questionArea) {
+        questionArea.innerHTML = '<p class="hint">選擇上方關卡開始學習音樂吧！</p>';
+    }
 }
 
 // 檢查每日簽到獎勵
