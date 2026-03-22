@@ -1269,9 +1269,10 @@ document.addEventListener('keydown', (e) => {
     }
     
     // 數字鍵 1-4 選擇答案（Level 1 可用 1-7）
-    // 防呆檢查：確保有題目在進行中才處理答題快捷鍵
+    // 防呆檢查：確保有題目在進行中且不在答題中，才處理答題快捷鍵
+    // 注意：第一個數字鍵處理器（上面）已有 !isAnswering 檢查，這裡再次檢查以防第一個處理器因按鈕範圍外而略過時，此處理器仍會執行
     const maxOptions = currentLevel === 1 ? 7 : 4;
-    if (currentQuestion && e.key >= '1' && e.key <= String(maxOptions)) {
+    if (!isAnswering && currentQuestion && e.key >= '1' && e.key <= String(maxOptions)) {
         // 安全檢查：確保 currentOptions 存在且有內容
         if (!currentOptions || !currentOptions.length) return;
         
