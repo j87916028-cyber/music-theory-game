@@ -570,6 +570,7 @@ function saveProgress() {
 // 頁面關閉前自動儲存進度
 window.addEventListener('beforeunload', () => {
     saveProgress();
+    saveAnswerHistory(); // 即時保存回答歷史（debounced 版本可能尚未執行）
     stopPlayTimeTracker(); // 儲存遊戲時長
 });
 
@@ -709,6 +710,14 @@ function loadAnswerHistory() {
     }
 }
 
+// 儲存答題歷史到 localStorage（Debounced 版本，延遲 300ms）
+// 使用 trailing 模式確保在短時間內多次答題時只執行一次儲存
+const saveAnswerHistoryDebounced = debounce(() => {
+    if (!safeLocalStorageSet('musicTheoryAnswerHistory', answerHistory)) {
+        console.warn('儲存答題歷史失敗');
+    }
+}, 300, { leading: false, trailing: true });
+
 // 添加答題記錄
 function addToHistory(question, userAnswer, correctAnswer, isCorrect, level) {
     const record = {
@@ -723,7 +732,7 @@ function addToHistory(question, userAnswer, correctAnswer, isCorrect, level) {
     if (answerHistory.length > MAX_HISTORY) {
         answerHistory = answerHistory.slice(0, MAX_HISTORY); // 保持最多20條
     }
-    saveAnswerHistory();
+    saveAnswerHistoryDebounced(); // 使用 debounced 版本減少 localStorage 寫入
 }
 
 // 顯示答題歷史 Modal

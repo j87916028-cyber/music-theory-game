@@ -106,6 +106,56 @@ function isValidChords() {
 }
 
 /**
+ * Debounce 函數（用於減少頻繁保存操作）
+ */
+function debounce(func, wait, options = { leading: true, trailing: true }) {
+    let timeout;
+    let lastArgs = null;
+    let lastThis = null;
+    let result;
+    let lastInvokeTime = 0;
+    
+    const leading = options.leading;
+    const trailing = options.trailing;
+    
+    return function executedFunction(...args) {
+        const now = Date.now();
+        const isFirstCall = timeout === undefined;
+        
+        lastArgs = args;
+        lastThis = this;
+        
+        // 清除之前的計時器
+        if (timeout) clearTimeout(timeout);
+        
+        // Leading: 第一次呼叫時立即執行
+        if (leading && isFirstCall) {
+            lastInvokeTime = now;
+            result = func.apply(this, args);
+        }
+        
+        // Trailing: 設定計時器，在 wait 毫秒後執行
+        if (trailing) {
+            timeout = setTimeout(() => {
+                timeout = undefined;
+                // Trailing edge: 執行最近一次的呼叫
+                if (lastArgs) {
+                    lastInvokeTime = Date.now();
+                    result = func.apply(lastThis, lastArgs);
+                }
+            }, wait);
+        }
+        
+        // 更新最後呼叫時間（用於調試或進階用途）
+        if (!isFirstCall) {
+            lastInvokeTime = now;
+        }
+        
+        return result;
+    };
+}
+
+/**
  * 節奏資料驗證
  */
 const rhythms = [
@@ -337,6 +387,92 @@ describe('音樂小學堂 - 單元測試', () => {
             const names = chords.map(c => c.name);
             const uniqueNames = new Set(names);
             expect(uniqueNames.size).toBe(names.length);
+        });
+    });
+
+    describe('Debounce 函數', () => {
+        beforeEach(() => {
+            jest.useFakeTimers();
+        });
+
+        afterEach(() => {
+            jest.useRealTimers();
+        });
+
+        test('trailing 模式：只在超時後執行一次', () => {
+            const func = jest.fn();
+            const debouncedFn = debounce(func, 100, { leading: false, trailing: true });
+            
+            debouncedFn('a');
+            debouncedFn('b');
+            debouncedFn('c');
+            
+            expect(func).not.toHaveBeenCalled();
+            
+            jest.advanceTimersByTime(100);
+            
+            expect(func).toHaveBeenCalledTimes(1);
+            expect(func).toHaveBeenCalledWith('c');
+        });
+
+        test('leading 模式：立即執行', () => {
+            const func = jest.fn();
+            const debouncedFn = debounce(func, 100, { leading: true, trailing: false });
+            
+            debouncedFn('a');
+            
+            expect(func).toHaveBeenCalledTimes(1);
+            expect(func).toHaveBeenCalledWith('a');
+        });
+
+        test('leading + trailing 模式：先立即執行，超時後再執行最後一次', () => {
+            const func = jest.fn();
+            const debouncedFn = debounce(func, 100, { leading: true, trailing: true });
+            
+            debouncedFn('a');
+            debouncedFn('b');
+            
+            expect(func).toHaveBeenCalledTimes(1);
+            expect(func).toHaveBeenCalledWith('a');
+            
+            jest.advanceTimersByTime(100);
+            
+            expect(func).toHaveBeenCalledTimes(2);
+            expect(func).toHaveBeenCalledWith('b');
+        });
+
+        test('保持 this 上下文', () => {
+            const obj = {
+                value: 0,
+                increment: debounce(function(delta) {
+                    this.value += delta;
+                    return this.value;
+                }, 100, { leading: true, trailing: true })
+            };
+            
+            obj.increment(5);
+            expect(obj.value).toBe(5);
+            
+            obj.increment(3);
+            jest.advanceTimersByTime(100);
+            expect(obj.value).toBe(8);
+        });
+
+        test('超時前再次呼叫會重置計時器', () => {
+            const func = jest.fn();
+            const debouncedFn = debounce(func, 100, { leading: false, trailing: true });
+            
+            debouncedFn('a');
+            jest.advanceTimersByTime(50);
+            debouncedFn('b');
+            jest.advanceTimersByTime(50);
+            
+            expect(func).not.toHaveBeenCalled();
+            
+            jest.advanceTimersByTime(50);
+            
+            expect(func).toHaveBeenCalledTimes(1);
+            expect(func).toHaveBeenCalledWith('b');
         });
     });
 
