@@ -1,0 +1,27 @@
+{
+  "name": "music-theory-game",
+  "version": "1.0.0",
+  "description": "🎵 音樂小學堂 - 學習音樂理論的趣味遊戲",
+  "main": "game.js",
+  "scripts": {
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/j87916028-cyber/music-theory-game.git"
+  },
+  "keywords": ["music", "education", "game", "pwa"],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/j87916028-cyber/music-theory-game/issues"
+  },
+  "homepage": "https://github.com/j87916028-cyber/music-theory-game#readme",
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "jest": "^30.3.0",
+    "jest-environment-jsdom": "^30.3.0"
+  }
+}
