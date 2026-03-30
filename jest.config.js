@@ -4,8 +4,9 @@ module.exports = {
   testMatch: ['**/tests/**/*.test.js', '**/*.test.js'],
   collectCoverageFrom: [
     'game.js',
+    'functions.js',
     '!node_modules/'
   ],
   coverageDirectory: 'coverage',
-  verbose: true
+  verbose: true,
 };

@@ -193,6 +193,12 @@ const pianoNoteFreqs = {
     'Si': 493.88
 };
 
+// ========== 可測試函數命名空間 ==========
+// 將純函數與測試資料匯出至全域 MusicGame 命名空間
+// 供單元測試直接引用真實實作，而非複製邏輯
+const MusicGame = { notes, noteNames, noteFreqs };
+if (typeof window !== 'undefined') window.MusicGame = MusicGame;
+
 // 音頻節點清理輔助函數 - 統一處理記憶體洩漏防護
 // 改進：增加類型檢查，確保節點有 disconnect 方法後再調用
 function cleanupAudioNodes(...nodes) {
@@ -2507,3 +2513,47 @@ window.addEventListener('unhandledrejection', (event) => {
         }
     }, true);
 })();
+
+// ========== 測試匯出（置於檔案末端，確保所有函數已定義） ==========
+// 將純函數與資料附加至 MusicGame，供 Jest 單元測試引用真實實作
+MusicGame.escapeHtml = escapeHtml;
+MusicGame.HTML_ESCAPE_MAP = HTML_ESCAPE_MAP;
+MusicGame.HTML_ESCAPE_REGEX = HTML_ESCAPE_REGEX;
+MusicGame.isQuotaExceededError = isQuotaExceededError;
+MusicGame.formatPlayTime = formatPlayTime;
+MusicGame.debounce = debounce;
+MusicGame.shuffleArray = shuffleArray;
+MusicGame.chords = chords;
+MusicGame.rhythms = rhythms;
+MusicGame.cleanupAudioNodes = cleanupAudioNodes;
+
+// 驗證工具函數（供測試使用）
+MusicGame.isValidNoteFrequencies = function() {
+    const expectedNotes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+    return expectedNotes.every(note =>
+        typeof MusicGame.noteFreqs[note] === 'number' && MusicGame.noteFreqs[note] > 0
+    );
+};
+
+MusicGame.isValidChords = function() {
+    return MusicGame.chords.every(chord => {
+        const hasValidName = typeof chord.name === 'string' && chord.name.length > 0;
+        const hasValidNotes = Array.isArray(chord.notes) && chord.notes.length >= 3;
+        const allNotesValid = chord.notes.every(note => MusicGame.noteFreqs.hasOwnProperty(note));
+        const hasSymbol = typeof chord.symbol === 'string';
+        return hasValidName && hasValidNotes && allNotesValid && hasSymbol;
+    });
+};
+
+MusicGame.isValidRhythms = function() {
+    return MusicGame.rhythms.every(rhythm => {
+        const hasValidName = typeof rhythm.name === 'string' && rhythm.name.length > 0;
+        const hasValidBeats = typeof rhythm.beats === 'number' && rhythm.beats > 0;
+        const hasValidSymbol = typeof rhythm.symbol === 'string' && rhythm.symbol.length > 0;
+        return hasValidName && hasValidBeats && hasValidSymbol;
+    });
+};
+
+if (typeof module !== 'undefined' && module.exports) {
+    module.exports = MusicGame;
+}
