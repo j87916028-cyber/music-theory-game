@@ -1817,9 +1817,13 @@ function playRhythm(rhythm) {
         osc.start(clickTime);
         osc.stop(clickTime + 0.1);
 
-        // 清理音頻節點，防止記憶體洩漏
+        // 修復：使用 osc.onended 確保精確清理，而不是 setTimeout
+        // osc.onended 在 oscillator 實際停止時觸發，比 setTimeout 更可靠
         osc.onended = () => cleanupAudioNodes(osc, gain);
-        setTimeout(() => cleanupAudioNodes(osc, gain), (clickTime - ctx.currentTime + 0.15) * 1000 + 100);
+        
+        // 移除有問題的 setTimeout 備用機制，避免記憶體洩漏風險
+        // 原因：setTimeout 的延遲時間在迴圈開始時計算，與實際停止時間可能不同步
+        // 當使用者快速連續播放時，舊的 setTimeout 可能在新 oscillator 創建後才執行
     }
 }
 
