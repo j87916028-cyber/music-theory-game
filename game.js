@@ -180,7 +180,7 @@ function getAudioContext() {
 
 const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
 const noteNames = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
-const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
+const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88, 'Do♯': 277.18, 'Re♯': 311.13, 'Fa♯': 369.99, 'Sol♯': 415.30, 'La♯': 466.16 };
 
 // 鋼琴完整音符頻率（包含黑白鍵）- 模組層面定義避免重複創建
 const pianoNoteFreqs = {

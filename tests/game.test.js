@@ -73,7 +73,7 @@ function isQuotaExceededError(error) {
 /**
  * 驗證音符頻率資料結構
  */
-const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88 };
+const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88, 'Do♯': 277.18, 'Re♯': 311.13, 'Fa♯': 369.99, 'Sol♯': 415.30, 'La♯': 466.16 };
 
 function isValidNoteFrequencies() {
     const expectedNotes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
@@ -341,8 +341,8 @@ describe('音樂小學堂 - 單元測試', () => {
             expect(isValidNoteFrequencies()).toBe(true);
         });
 
-        test('音符數量正確', () => {
-            expect(Object.keys(noteFreqs).length).toBe(7);
+        test('音符數量正確（7個白鍵 + 5個黑鍵）', () => {
+            expect(Object.keys(noteFreqs).length).toBe(12);
         });
 
         test('頻率值為正數', () => {
@@ -351,11 +351,60 @@ describe('音樂小學堂 - 單元測試', () => {
             });
         });
 
-        test('頻率遞增順序正確', () => {
-            const frequencies = Object.values(noteFreqs);
-            for (let i = 1; i < frequencies.length; i++) {
-                expect(frequencies[i]).toBeGreaterThan(frequencies[i - 1]);
+        test('白鍵頻率遞增順序正確', () => {
+            const whiteKeyFreqs = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'].map(n => noteFreqs[n]);
+            for (let i = 1; i < whiteKeyFreqs.length; i++) {
+                expect(whiteKeyFreqs[i]).toBeGreaterThan(whiteKeyFreqs[i - 1]);
             }
+        });
+
+        test('黑鍵頻率高於相鄰的白鍵', () => {
+            // 每個黑鍵的頻率應該高於前一個白鍵但低於後一個白鍵
+            expect(noteFreqs['Do♯']).toBeGreaterThan(noteFreqs['Do']);
+            expect(noteFreqs['Do♯']).toBeLessThan(noteFreqs['Re']);
+            
+            expect(noteFreqs['Re♯']).toBeGreaterThan(noteFreqs['Re']);
+            expect(noteFreqs['Re♯']).toBeLessThan(noteFreqs['Mi']);
+            
+            expect(noteFreqs['Fa♯']).toBeGreaterThan(noteFreqs['Fa']);
+            expect(noteFreqs['Fa♯']).toBeLessThan(noteFreqs['Sol']);
+            
+            expect(noteFreqs['Sol♯']).toBeGreaterThan(noteFreqs['Sol']);
+            expect(noteFreqs['Sol♯']).toBeLessThan(noteFreqs['La']);
+            
+            expect(noteFreqs['La♯']).toBeGreaterThan(noteFreqs['La']);
+            expect(noteFreqs['La♯']).toBeLessThan(noteFreqs['Si']);
+        });
+
+        test('包含黑鍵頻率（♯ 音符）', () => {
+            // 確保黑鍵頻率存在且有效
+            const blackKeys = ['Do♯', 'Re♯', 'Fa♯', 'Sol♯', 'La♯'];
+            blackKeys.forEach(note => {
+                expect(noteFreqs[note]).toBeDefined();
+                expect(typeof noteFreqs[note]).toBe('number');
+                expect(noteFreqs[note]).toBeGreaterThan(0);
+            });
+        });
+
+        test('白鍵頻率正確', () => {
+            const whiteKeys = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
+            const expectedFreqs = {
+                Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23,
+                Sol: 392.00, La: 440.00, Si: 493.88
+            };
+            whiteKeys.forEach(note => {
+                expect(noteFreqs[note]).toBeCloseTo(expectedFreqs[note], 2);
+            });
+        });
+
+        test('黑鍵頻率符合十二平均律', () => {
+            // 黑鍵頻率應該是前一個白鍵頻率乘以 2^(1/12)
+            const ratio = Math.pow(2, 1/12);
+            expect(noteFreqs['Do♯']).toBeCloseTo(noteFreqs['Do'] * ratio, 1);
+            expect(noteFreqs['Re♯']).toBeCloseTo(noteFreqs['Re'] * ratio, 1);
+            expect(noteFreqs['Fa♯']).toBeCloseTo(noteFreqs['Fa'] * ratio, 1);
+            expect(noteFreqs['Sol♯']).toBeCloseTo(noteFreqs['Sol'] * ratio, 1);
+            expect(noteFreqs['La♯']).toBeCloseTo(noteFreqs['La'] * ratio, 1);
         });
     });
 
