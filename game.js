@@ -105,20 +105,49 @@ function getDomElement(id) {
 let audioCtx = null;
 let audioSupported = null; // 快取音頻支援狀態
 
-// XSS 防護：HTML 轉義函數（優化版本 - 使用字串替換避免重複創建 DOM 元素）
-const HTML_ESCAPE_MAP = {
-    '&': '&amp;',
-    '<': '&lt;',
-    '>': '&gt;',
-    '"': '&quot;',
-    "'": '&#39;'
-};
-const HTML_ESCAPE_REGEX = /[&<>"']/g;
+// ========== 單一資料來源 (SSOT) ==========
+// 音樂資料統一從 functions.js 的 MusicGame 取得，確保與測試共享同一份實作。
+// 若 MusicGame 尚未就緒（直接載入 game.js 而未先載入 functions.js），使用本地定義。
+const __MG = (typeof MusicGame !== 'undefined') ? MusicGame : null;
 
-function escapeHtml(text) {
-    if (text === null || text === undefined) return '';
-    return String(text).replace(HTML_ESCAPE_REGEX, char => HTML_ESCAPE_MAP[char]);
-}
+// 本地後備資料（MusicGame 未就緒時使用；內容已修正 G7/Dm 和弦 bug）
+const _notes_local    = ['Do','Re','Mi','Fa','Sol','La','Si'];
+const _noteNames_local= {Do:'C',Re:'D',Mi:'E',Fa:'F',Sol:'G',La:'A',Si:'B'};
+const _noteFreqs_local= {Do:261.63,Re:293.66,Mi:329.63,Fa:349.23,Sol:392.00,La:440.00,Si:493.88,'Do♯':277.18,'Re♯':311.13,'Fa♯':369.99,'Sol♯':415.30,'La♯':466.16};
+const _chords_local   = [
+    {name:'C大和弦',notes:['Do','Mi','Sol'],symbol:'C'},
+    {name:'G大和弦',notes:['Sol','Si','Re'],symbol:'G'},
+    {name:'F大和弦',notes:['Fa','La','Do'],symbol:'F'},
+    {name:'Dm和弦',notes:['Re','Fa♯','La'],symbol:'Dm'},
+    {name:'Am和弦',notes:['La','Do','Mi'],symbol:'Am'},
+    {name:'Em和弦',notes:['Mi','Sol','Si'],symbol:'Em'},
+    {name:'G7和弦',notes:['Sol','Si','Re','Fa♯'],symbol:'G7'}
+];
+const _rhythms_local  = [
+    {name:'四分音符',beats:1,symbol:'♩',duration:0.5},
+    {name:'二分音符',beats:2,symbol:'𝅗𝅥',duration:1.0},
+    {name:'全音符',beats:4,symbol:'𝅝',duration:2.0},
+    {name:'八分音符',beats:0.5,symbol:'♪',duration:0.25}
+];
+const _HTML_ESCAPE_MAP_local={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
+
+// 從 MusicGame 取用（SSOT），否則用本地後備
+const notes          = __MG ? __MG.notes      : _notes_local;
+const noteNames      = __MG ? __MG.noteNames  : _noteNames_local;
+const noteFreqs      = __MG ? __MG.noteFreqs  : _noteFreqs_local;
+const pianoNoteFreqs = noteFreqs; // pianoNoteFreqs === noteFreqs（已合併）
+const chords         = __MG ? __MG.chords     : _chords_local;
+const rhythms        = __MG ? __MG.rhythms    : _rhythms_local;
+const HTML_ESCAPE_MAP    = __MG ? __MG.HTML_ESCAPE_MAP    : _HTML_ESCAPE_MAP_local;
+const HTML_ESCAPE_REGEX  = __MG ? __MG.HTML_ESCAPE_REGEX  : /[&<>"']/g;
+const escapeHtml = __MG ? __MG.escapeHtml : function(t){if(t===null||t===undefined)return'';return String(t).replace(HTML_ESCAPE_REGEX,c=>HTML_ESCAPE_MAP[c]);};
+const isQuotaExceededError=__MG?__MG.isQuotaExceededError:function(e){return e instanceof DOMException&&(e.code===22||e.code===1014||e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED');};
+const formatPlayTime=__MG?__MG.formatPlayTime:function(s){if(!s||s<0)s=0;const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h>0?`${h}小時${m}分`:m>0?`${m}分${sec}秒`:`${sec}秒`;};
+const debounce=__MG?__MG.debounce:function(fn,wait,opts){let t;let la=null,lt=null;const lead=opts&&opts.leading,trail=opts&&opts.trailing;return function(...a){const first=t===undefined;t=a;lt=this;if(t)clearTimeout(t);if(lead&&first)fn.apply(this,a);if(trail)t=setTimeout(()=>{t=undefined;if(la)fn.apply(lt,la);},wait);};};
+const cleanupAudioNodes=__MG?__MG.cleanupAudioNodes:function(...ns){ns.forEach(n=>{if(n&&typeof n.disconnect==='function')try{n.disconnect();}catch(_){}});};
+const shuffleArray=__MG?__MG.shuffleArray:function(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
+
+// ==========原有程式碼==========
 
 function checkAudioSupport() {
     // 檢查音頻支援狀態（快取結果避免重複檢查）
@@ -178,20 +207,6 @@ function getAudioContext() {
     }
 }
 
-const notes = ['Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si'];
-const noteNames = { Do: 'C', Re: 'D', Mi: 'E', Fa: 'F', Sol: 'G', La: 'A', Si: 'B' };
-const noteFreqs = { Do: 261.63, Re: 293.66, Mi: 329.63, Fa: 349.23, Sol: 392.00, La: 440.00, Si: 493.88, 'Do♯': 277.18, 'Re♯': 311.13, 'Fa♯': 369.99, 'Sol♯': 415.30, 'La♯': 466.16 };
-
-// 鋼琴完整音符頻率（包含黑白鍵）- 模組層面定義避免重複創建
-const pianoNoteFreqs = {
-    'Do': 261.63, 'Do♯': 277.18,
-    'Re': 293.66, 'Re♯': 311.13,
-    'Mi': 329.63,
-    'Fa': 349.23, 'Fa♯': 369.99,
-    'Sol': 392.00, 'Sol♯': 415.30,
-    'La': 440.00, 'La♯': 466.16,
-    'Si': 493.88
-};
 
 // ========== 可測試函數命名空間 ==========
 // 將純函數與測試資料匯出至全域 MusicGame 命名空間
@@ -201,17 +216,6 @@ if (typeof window !== 'undefined') window.MusicGame = MusicGame;
 
 // 音頻節點清理輔助函數 - 統一處理記憶體洩漏防護
 // 改進：增加類型檢查，確保節點有 disconnect 方法後再調用
-function cleanupAudioNodes(...nodes) {
-    nodes.forEach(node => {
-        if (node && typeof node.disconnect === 'function') {
-            try {
-                node.disconnect();
-            } catch (e) {
-                // 靜默處理斷開連接時的錯誤（某些節點可能已經斷開）
-            }
-        }
-    });
-}
 
 // 從 localStorage 載入儲存的進度
 function loadProgress() {
@@ -270,20 +274,6 @@ function updatePlayTime() {
     }
 }
 
-// 檢查是否為 localStorage 配額超限錯誤
-function isQuotaExceededError(error) {
-    return (
-        error instanceof DOMException &&
-        // Firefox, Chrome, Safari
-        (error.code === 22 ||
-            // Firefox
-            error.code === 1014 ||
-            // Chrome, Opera
-            error.name === 'QuotaExceededError' ||
-            error.name === 'NS_ERROR_DOM_QUOTA_REACHED')
-    );
-}
-
 // 安全地儲存資料到 localStorage（處理配額超限）
 function safeLocalStorageSet(key, value) {
     try {
@@ -326,23 +316,6 @@ function savePlayTimeToStorage() {
         }
     } catch (e) {
         console.warn('儲存遊戲時長失敗:', e);
-    }
-}
-
-// 格式化遊戲時長為可讀格式
-function formatPlayTime(seconds) {
-    if (!seconds || seconds < 0) seconds = 0;
-    
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    const secs = seconds % 60;
-    
-    if (hours > 0) {
-        return `${hours}小時${minutes}分`;
-    } else if (minutes > 0) {
-        return `${minutes}分${secs}秒`;
-    } else {
-        return `${secs}秒`;
     }
 }
 
@@ -486,55 +459,6 @@ function checkDailyLogin() {
         // 記錄今天已領取
         safeLocalStorageSet('musicTheoryLastLogin', today);
     }
-}
-
-// Debounce 函數 - 避免頻繁寫入 localStorage
-// 支援 leading 和 trailing 選項，預設兩者都啟用以確保資料不丟失
-function debounce(func, wait, options = { leading: true, trailing: true }) {
-    let timeout;
-    let lastArgs = null;
-    let lastThis = null;
-    let result;
-    let lastInvokeTime = 0;
-    
-    const leading = options.leading;
-    const trailing = options.trailing;
-    
-    return function executedFunction(...args) {
-        const now = Date.now();
-        const isFirstCall = timeout === undefined;
-        
-        lastArgs = args;
-        lastThis = this;
-        
-        // 清除之前的計時器
-        if (timeout) clearTimeout(timeout);
-        
-        // Leading: 第一次呼叫時立即執行
-        if (leading && isFirstCall) {
-            lastInvokeTime = now;
-            result = func.apply(this, args);
-        }
-        
-        // Trailing: 設定計時器，在 wait 毫秒後執行
-        if (trailing) {
-            timeout = setTimeout(() => {
-                timeout = undefined;
-                // Trailing edge: 執行最近一次的呼叫
-                if (lastArgs) {
-                    lastInvokeTime = Date.now();
-                    result = func.apply(lastThis, lastArgs);
-                }
-            }, wait);
-        }
-        
-        // 更新最後呼叫時間（用於調試或進階用途）
-        if (!isFirstCall) {
-            lastInvokeTime = now;
-        }
-        
-        return result;
-    };
 }
 
 // 儲存進度到 localStorage（Debounced 版本，延遲 500ms）
@@ -1780,13 +1704,6 @@ function level2Question() {
 }
 
 // 🎼 Level 3: 節奏練習
-const rhythms = [
-    { name: '四分音符', beats: 1, symbol: '♩', duration: 0.5 },
-    { name: '二分音符', beats: 2, symbol: '𝅗𝅥', duration: 1.0 },
-    { name: '全音符', beats: 4, symbol: '𝅝', duration: 2.0 },
-    { name: '八分音符', beats: 0.5, symbol: '♪', duration: 0.25 }
-];
-
 // 播放節奏音效 - 使用點擊音效模擬節拍器，增強節奏學習體驗
 function playRhythm(rhythm) {
     if (!soundEnabled) return;
@@ -1863,25 +1780,6 @@ function playRhythmByName(name) {
 }
 
 // 🎹 Level 4: 和弦認識
-const chords = [
-    { name: 'C大和弦', notes: ['Do','Mi','Sol'], symbol: 'C' },
-    { name: 'G大和弦', notes: ['Sol','Si','Re'], symbol: 'G' },
-    { name: 'F大和弦', notes: ['Fa','La','Do'], symbol: 'F' },
-    { name: 'Dm和弦', notes: ['Re','Fa','La'], symbol: 'Dm' },
-    { name: 'Am和弦', notes: ['La','Do','Mi'], symbol: 'Am' },
-    { name: 'Em和弦', notes: ['Mi','Sol','Si'], symbol: 'Em' },
-    { name: 'G7和弦', notes: ['Sol','Si','Re','Fa'], symbol: 'G7' }
-];
-
-// Fisher-Yates 洗牌算法 (公平隨機)
-function shuffleArray(array) {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
-}
 
 // 根據目前關卡播放答題結果的音效反饋
 function playAnswerFeedback(isCorrect) {

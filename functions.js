@@ -26,10 +26,10 @@ const chords = [
     { name: 'C大和弦', notes: ['Do', 'Mi', 'Sol'], symbol: 'C' },
     { name: 'G大和弦', notes: ['Sol', 'Si', 'Re'], symbol: 'G' },
     { name: 'F大和弦', notes: ['Fa', 'La', 'Do'], symbol: 'F' },
-    { name: 'Dm和弦', notes: ['Re', 'Fa', 'La'], symbol: 'Dm' },
+    { name: 'Dm和弦', notes: ['Re', 'Fa♯', 'La'], symbol: 'Dm' },
     { name: 'Am和弦', notes: ['La', 'Do', 'Mi'], symbol: 'Am' },
     { name: 'Em和弦', notes: ['Mi', 'Sol', 'Si'], symbol: 'Em' },
-    { name: 'G7和弦', notes: ['Sol', 'Si', 'Re', 'Fa'], symbol: 'G7' },
+    { name: 'G7和弦', notes: ['Sol', 'Si', 'Re', 'Fa♯'], symbol: 'G7' },
 ];
 
 // ========== 節奏資料 ==========
@@ -178,7 +178,7 @@ function isValidRhythms() {
     });
 }
 
-// ========== CommonJS 匯出 ==========
+// ========== CommonJS 匯出（Node.js / Jest） ==========
 module.exports = {
     notes, noteNames, noteFreqs, chords, rhythms,
     shuffleArray, escapeHtml, formatPlayTime,
@@ -186,3 +186,16 @@ module.exports = {
     isValidNoteFrequencies, isValidChords, isValidRhythms,
     HTML_ESCAPE_MAP, HTML_ESCAPE_REGEX,
 };
+
+// ========== 瀏覽器匯出（window.MusicGame） ==========
+// 當以 <script> 載入時，將所有匯出附加至全域 MusicGame 物件
+// 讓 game.js 等瀏覽器腳本能直接取用，不必重複定義
+if (typeof window !== 'undefined') {
+    window.MusicGame = {
+        notes, noteNames, noteFreqs, chords, rhythms,
+        shuffleArray, escapeHtml, formatPlayTime,
+        isQuotaExceededError, debounce, cleanupAudioNodes,
+        isValidNoteFrequencies, isValidChords, isValidRhythms,
+        HTML_ESCAPE_MAP, HTML_ESCAPE_REGEX,
+    };
+}

@@ -350,3 +350,37 @@ describe('遊戲資料完整性', () => {
         expect(rhythms.length).toBeGreaterThan(0);
     });
 });
+
+describe('G7 和弦正確性（迴歸測試）', () => {
+    test('G7 和弦的第七音為 F♯（Fa♯），非 F natural（Fa）', () => {
+        const g7 = chords.find(c => c.symbol === 'G7');
+        expect(g7).toBeDefined();
+        // G7 = G, B, D, F♯ → 對應 solfège: Sol, Si, Re, Fa♯
+        expect(g7.notes).toContain('Fa♯');       // Fa♯ = F♯ = 369.99 Hz
+        expect(g7.notes).not.toContain('Fa');    // Fa = F natural = 349.23 Hz (錯誤)
+        expect(g7.notes).toEqual(['Sol', 'Si', 'Re', 'Fa♯']);
+    });
+
+    test('G7 和弦頻率為 G, B, D, F♯（非 G, B, D, F）', () => {
+        const g7 = chords.find(c => c.symbol === 'G7');
+        const freqs = g7.notes.map(n => noteFreqs[n]);
+        // G=392, B=493.88, D=293.66, F♯=369.99
+        expect(freqs).toEqual([392.00, 493.88, 293.66, 369.99]);
+    });
+
+    test('Dm 和弦包含 Re, Fa♯, La（Fa♯=F♯），非 Re, Fa, La（Fa=F natural）', () => {
+        const dm = chords.find(c => c.symbol === 'Dm');
+        expect(dm).toBeDefined();
+        // Dm = D, F♯, A → solfège: Re, Fa♯, La
+        expect(dm.notes).toContain('Fa♯');       // Fa♯ = F♯ = 369.99 Hz
+        expect(dm.notes).not.toContain('Fa');     // Fa = F natural = 349.23 Hz (錯誤)
+        expect(dm.notes).toEqual(['Re', 'Fa♯', 'La']);
+    });
+
+    test('Dm 和弦頻率為 D, F♯, A（非 D, F, A）', () => {
+        const dm = chords.find(c => c.symbol === 'Dm');
+        const freqs = dm.notes.map(n => noteFreqs[n]);
+        // D=293.66, F♯=369.99, A=440
+        expect(freqs).toEqual([293.66, 369.99, 440.00]);
+    });
+});
