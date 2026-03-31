@@ -1664,7 +1664,7 @@ function level1Question() {
             <button class="replay-btn" data-play="${correctNote}">🔄 再聽一次</button>
         </div>
         <div class="options">
-            ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctNote}')" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
+            ${shuffledNotes.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${escapeHtml(n)}','${escapeHtml(correctNote)}')" aria-label="選項 ${i+1}: ${escapeHtml(n)}"><span class="key-hint">${i+1}</span>${escapeHtml(n)}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1694,10 +1694,10 @@ function level2Question() {
     
     const html = `
         <p class="hint">🎧 ${question} (按 1-4 選答案 | 空白 播放聲音)</p>
-        <div class="note-display">${note}</div>
-        <button class="replay-btn" data-play="${note}">🔊 再聽一次</button>
+        <div class="note-display">${escapeHtml(note)}</div>
+        <button class="replay-btn" data-play="${escapeHtml(note)}">🔊 再聽一次</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${n}','${correctAnswer}')" aria-label="選項 ${i+1}: ${n}"><span class="key-hint">${i+1}</span>${n}</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${escapeHtml(n)}','${escapeHtml(correctAnswer)}')" aria-label="選項 ${i+1}: ${escapeHtml(n)}"><span class="key-hint">${i+1}</span>${escapeHtml(n)}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;
@@ -1762,10 +1762,10 @@ function level3Question() {
     // 音符名稱用於內部比對，但不在題目中顯示，避免用戶直接讀名稱猜答案
     const html = `
         <p class="hint">這個符號代表幾拍？（按 1-4 選答案 | 空白 播放節奏）</p>
-        <div class="note-display rhythm-symbol">${rhythm.symbol}</div>
-        <button class="play-btn" onclick="playRhythmByName('${rhythm.name}')" aria-label="播放節奏">🔊</button>
+        <div class="note-display rhythm-symbol">${escapeHtml(rhythm.symbol)}</div>
+        <button class="play-btn" onclick="playRhythmByName('${escapeHtml(rhythm.name)}')" aria-label="播放節奏">🔊</button>
         <div class="options">
-            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${beatsToName[n]}','${rhythm.name}')" aria-label="選項 ${i+1}: ${beatsToName[n]}"><span class="key-hint">${i+1}</span>${beatsToName[n]}</button>`).join('')}
+            ${options.map((n, i) => `<button class="option-btn" onclick="checkAnswer('${escapeHtml(beatsToName[n])}','${escapeHtml(rhythm.name)}')" aria-label="選項 ${i+1}: ${escapeHtml(beatsToName[n])}"><span class="key-hint">${i+1}</span>${escapeHtml(beatsToName[n])}</button>`).join('')}
         </div>
     `;
     getDomElement('questionArea').innerHTML = html;

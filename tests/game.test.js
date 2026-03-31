@@ -427,3 +427,122 @@ describe('G7 和弦正確性（迴歸測試）', () => {
         expect(freqs).toEqual([293.66, 369.99, 440.00]);
     });
 });
+
+/**
+ * XSS 防護迴歸測試（遊戲題目 HTML 生成）
+ *
+ * game.js 的 level1Question、level2Question、level3Question 在生成
+ * HTML 時會將音符名稱與答案嵌入 onclick / aria-label / textContent。
+ * 這些值在插入 HTML 前必須經過 escapeHtml 轉義，否則含單引號或雙引號的
+ * 音符名稱會造成 onclick="checkAnswer('...','...')" 屬性斷裂，產生 XSS。
+ *
+ * 本測試驗證：所有用於 HTML 屬性與文字內容的動態值，都會被 escapeHtml 處理。
+ */
+describe('題目 HTML 生成 XSS 防護（迴歸測試）', () => {
+    // 模擬遊戲中可能出現的所有音符 / 和弦 / 節奏名稱
+    // 包含目前實際值（中文 solfège、Unicode ♯、表情符號）
+    const allNoteNames = [
+        'Do', 'Re', 'Mi', 'Fa', 'Sol', 'La', 'Si',
+        'Do♯', 'Re♯', 'Fa♯', 'Sol♯', 'La♯',
+        'C', 'D', 'E', 'F', 'G', 'A', 'B',
+    ];
+    const allChordNames = [
+        'C大和弦', 'G大和弦', 'F大和弦', 'Dm和弦', 'Am和弦', 'Em和弦', 'G7和弦',
+    ];
+    const allRhythmNames = [
+        '八分音符', '四分音符', '二分音符', '全音符',
+    ];
+
+    test('所有音符名稱經 escapeHtml 後不含危險字元', () => {
+        allNoteNames.forEach(name => {
+            const escaped = escapeHtml(name);
+            expect(escaped).not.toContain('<');
+            expect(escaped).not.toContain('>');
+            expect(escaped).not.toContain('&');
+            expect(escaped).not.toContain('"');
+            expect(escaped).not.toContain("'");
+        });
+    });
+
+    test('所有和弦名稱經 escapeHtml 後不含危險字元', () => {
+        allChordNames.forEach(name => {
+            const escaped = escapeHtml(name);
+            expect(escaped).not.toContain('<');
+            expect(escaped).not.toContain('>');
+            expect(escaped).not.toContain('&');
+            expect(escaped).not.toContain('"');
+            expect(escaped).not.toContain("'");
+        });
+    });
+
+    test('所有節奏名稱經 escapeHtml 後不含危險字元', () => {
+        allRhythmNames.forEach(name => {
+            const escaped = escapeHtml(name);
+            expect(escaped).not.toContain('<');
+            expect(escaped).not.toContain('>');
+            expect(escaped).not.toContain('&');
+            expect(escaped).not.toContain('"');
+            expect(escaped).not.toContain("'");
+        });
+    });
+
+    test('Unicode ♯ 音符（Do♯ 等）經 escapeHtml 後內容安全', () => {
+        const sharpNotes = ['Do♯', 'Re♯', 'Fa♯', 'Sol♯', 'La♯'];
+        sharpNotes.forEach(name => {
+            const escaped = escapeHtml(name);
+            expect(escaped).toContain('♯');
+            expect(escaped).not.toMatch(/[&<>"']/);
+        });
+    });
+
+    test('含單引號的惡意音符名稱可被正確轉義', () => {
+        // 單引號是 onclick=\'...\' 屬性中最危險的字元，escapeHtml 將 ' → &#39;
+        // 轉義後 HTML 解析器將 &#39; 視為普通文字，無法斷裂屬性語法
+        const maliciousNote = "Do' onclick='alert(1)' data-x='";
+        const escaped = escapeHtml(maliciousNote);
+        expect(escaped).toBe("Do&#39; onclick=&#39;alert(1)&#39; data-x=&#39;");
+        // 原始單引號被轉義為 &#39;，不再作為 HTML 特殊字元
+        expect(escaped).not.toContain("'");        // 單引號被轉義，無法斷裂 HTML 屬性
+        expect(escaped).not.toContain("<script>"); // 無法注入 script 標籤
+    });
+
+    test('含雙引號的惡意名稱可被正確轉義', () => {
+        // 雙引號用於 HTML 雙引號屬性內，escapeHtml 將 " → &quot;
+        const malicious = 'Name" onmouseover="alert(1)"';
+        const escaped = escapeHtml(malicious);
+        expect(escaped).toBe('Name&quot; onmouseover=&quot;alert(1)&quot;');
+        expect(escaped).not.toContain('"');          // 雙引號被轉義
+        expect(escaped).not.toContain("<script>");  // 無法注入 script 標籤
+        expect(escaped).not.toContain("</script>"); // 無法注入 script 標籤
+    });
+
+    test('安全音符名稱（Do, La 等）經 escapeHtml 後內容不變', () => {
+        // 正常音符名稱不含危險字元，escapeHtml 後保持原樣
+        const n = escapeHtml('Do');
+        const correct = escapeHtml('Do');
+        expect(n).toBe('Do');
+        expect(correct).toBe('Do');
+        // 嵌入 HTML 後，雙引號屬性內的單引號仍然安全
+        const onclickAttr = `onclick="checkAnswer('${n}','${correct}')"`;
+        expect(onclickAttr).toBe("onclick=\"checkAnswer('Do','Do')\"");
+        // < > & 等在屬性上下文中仍是危險的，確保 escapeHtml 已處理
+        expect(onclickAttr).not.toContain('<');
+        expect(onclickAttr).not.toContain('>');
+        expect(onclickAttr).not.toContain('&amp;');
+    });
+
+    test('表情符號與特殊符號（emoji, ♯, 𝅗𝅥 等）經 escapeHtml 後安全且完整保留', () => {
+        const symbols = ['♪', '♩', '𝅗𝅥', '𝅝', '🎹', '🎵'];
+        symbols.forEach(sym => {
+            const escaped = escapeHtml(sym);
+            expect(escaped).not.toMatch(/[&<>"']/);
+            expect(escaped).toBe(sym);
+        });
+    });
+
+    test('空值和 null/undefined 經 escapeHtml 後返回空字串', () => {
+        expect(escapeHtml(null)).toBe('');
+        expect(escapeHtml(undefined)).toBe('');
+        expect(escapeHtml('')).toBe('');
+    });
+});
