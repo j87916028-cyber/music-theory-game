@@ -311,6 +311,49 @@ describe('節奏資料驗證', () => {
     });
 });
 
+describe('節奏資料順序（與 game.js _rhythms_local 一致性）', () => {
+    // game.js level3Question() 中 level3Question() 的 beatsToName 硬編碼：
+    //   { 0.5: '八分音符', 1: '四分音符', 2: '二分音符', 4: '全音符' }
+    // _rhythms_local 順序為：八分、四分、二分、全
+    // functions.js 的 rhythms 必須與 _rhythms_local 完全一致，確保 SSOT。
+    test('rhythms[0] 為八分音符（beats=0.5），對應 level3Question beatsToName[0.5]', () => {
+        expect(rhythms[0].name).toBe('八分音符');
+        expect(rhythms[0].beats).toBe(0.5);
+    });
+
+    test('rhythms[1] 為四分音符（beats=1），對應 level3Question beatsToName[1]', () => {
+        expect(rhythms[1].name).toBe('四分音符');
+        expect(rhythms[1].beats).toBe(1);
+    });
+
+    test('rhythms[2] 為二分音符（beats=2），對應 level3Question beatsToName[2]', () => {
+        expect(rhythms[2].name).toBe('二分音符');
+        expect(rhythms[2].beats).toBe(2);
+    });
+
+    test('rhythms[3] 為全音符（beats=4），對應 level3Question beatsToName[4]', () => {
+        expect(rhythms[3].name).toBe('全音符');
+        expect(rhythms[3].beats).toBe(4);
+    });
+
+    test('rhythms 完整順序為 [八分, 四分, 二分, 全音符]，共 4 項', () => {
+        expect(rhythms.map(r => r.name)).toEqual([
+            '八分音符', '四分音符', '二分音符', '全音符',
+        ]);
+        expect(rhythms.length).toBe(4);
+    });
+
+    test('level3Question 的 beatsToName 映射與 rhythms[beats] 一致（迴歸保護）', () => {
+        // game.js level3Question 中的 beatsToName = { 0.5: '八分音符', 1: '四分音符', 2: '二分音符', 4: '全音符' }
+        const beatsToName = { 0.5: '八分音符', 1: '四分音符', 2: '二分音符', 4: '全音符' };
+        const options = [0.5, 1, 2, 4]; // level3Question 固定順序
+        const currentOptions = options.map(n => beatsToName[n]);
+        // 驗證 currentOptions 與 rhythms 的 name 順序完全一致
+        const rhythmNames = rhythms.map(r => r.name);
+        expect(currentOptions).toEqual(rhythmNames);
+    });
+});
+
 describe('cleanupAudioNodes 函數', () => {
     test('能安全處理 null 和 undefined（不死機）', () => {
         expect(() => cleanupAudioNodes(null, undefined)).not.toThrow();

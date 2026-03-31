@@ -33,11 +33,15 @@ const chords = [
 ];
 
 // ========== 節奏資料 ==========
+// 注意：此順序必須與 game.js _rhythms_local 完全一致。
+// game.js level3Question() 的 beatsToName 硬編碼為：
+//   { 0.5: '八分音符', 1: '四分音符', 2: '二分音符', 4: '全音符' }
+// 與 level3Question() 中固定 options=[0.5, 1, 2, 4] 搭配使用。
 const rhythms = [
-    { name: '四分音符', beats: 1, symbol: '♩', duration: 0.5 },
-    { name: '二分音符', beats: 2, symbol: '𝅗𝅥', duration: 1.0 },
-    { name: '全音符', beats: 4, symbol: '𝅝', duration: 2.0 },
     { name: '八分音符', beats: 0.5, symbol: '♪', duration: 0.25 },
+    { name: '四分音符', beats: 1,   symbol: '♩', duration: 0.5  },
+    { name: '二分音符', beats: 2,   symbol: '𝅗𝅥', duration: 1.0  },
+    { name: '全音符',   beats: 4,   symbol: '𝅝', duration: 2.0  },
 ];
 
 // ========== 純函數 ==========
