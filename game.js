@@ -263,14 +263,14 @@ function initPlayTime() {
 }
 
 // 更新遊戲時長（由定時器呼叫）
+// 更新遊戲時長（由 stopPlayTimeTracker / saveProgress 呼叫）
+// 注意：不再內部呼叫 savePlayTimeToStorage，避免雙重累加
+// 計時器顯示每10秒更新一次（見 startPlayTimeTracker），不做累加計算
 function updatePlayTime() {
     if (sessionStartTime) {
         const sessionSeconds = Math.floor((Date.now() - sessionStartTime) / 1000);
         totalPlayTime += sessionSeconds;
         sessionStartTime = Date.now(); // 重置session計時
-        
-        // 儲存到 localStorage
-        savePlayTimeToStorage();
     }
 }
 
