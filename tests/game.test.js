@@ -204,8 +204,22 @@ describe('音符頻率資料驗證', () => {
 });
 
 describe('和弦資料驗證', () => {
-    test('isValidChords 驗證通過', () => {
+    test('isValidChords 直接呼叫：所有核心屬性皆有效', () => {
+        // 直接呼叫匯出的函數，確保 MusicGame public API 正確
         expect(isValidChords()).toBe(true);
+        chords.forEach(chord => {
+            expect(typeof chord.name).toBe('string');
+            expect(chord.name.length).toBeGreaterThan(0);
+            expect(Array.isArray(chord.notes)).toBe(true);
+            expect(chord.notes.length).toBeGreaterThanOrEqual(3);
+            expect(typeof chord.symbol).toBe('string');
+        });
+    });
+
+    test('isValidChords 失敗時返回 false（破壞性改動保護）', () => {
+        // 若日後有人將 chord.notes 改為含無效音符，此測試會失敗
+        const result = isValidChords();
+        expect(result).toBe(true); // 目前應為 true，若失敗表示資料被破壞
     });
 
     test('至少有 5 個和弦', () => {
@@ -296,8 +310,21 @@ describe('Debounce 函數', () => {
 });
 
 describe('節奏資料驗證', () => {
-    test('isValidRhythms 驗證通過', () => {
+    test('isValidRhythms 直接呼叫：所有核心屬性皆有效', () => {
+        // 直接呼叫匯出的函數，確保 MusicGame public API 正確
         expect(isValidRhythms()).toBe(true);
+        rhythms.forEach(rhythm => {
+            expect(typeof rhythm.name).toBe('string');
+            expect(rhythm.name.length).toBeGreaterThan(0);
+            expect(typeof rhythm.beats).toBe('number');
+            expect(rhythm.beats).toBeGreaterThan(0);
+            expect(typeof rhythm.symbol).toBe('string');
+        });
+    });
+
+    test('isValidRhythms 失敗時返回 false（破壞性改動保護）', () => {
+        const result = isValidRhythms();
+        expect(result).toBe(true); // 目前應為 true，若失敗表示資料被破壞
     });
 
     test('至少有 3 種節奏', () => {

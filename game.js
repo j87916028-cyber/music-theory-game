@@ -124,10 +124,10 @@ const _chords_local   = [
     {name:'G7和弦',notes:['Sol','Si','Re','Fa♯'],symbol:'G7'}
 ];
 const _rhythms_local  = [
+    {name:'八分音符',beats:0.5,symbol:'♪',duration:0.25},
     {name:'四分音符',beats:1,symbol:'♩',duration:0.5},
     {name:'二分音符',beats:2,symbol:'𝅗𝅥',duration:1.0},
-    {name:'全音符',beats:4,symbol:'𝅝',duration:2.0},
-    {name:'八分音符',beats:0.5,symbol:'♪',duration:0.25}
+    {name:'全音符',beats:4,symbol:'𝅝',duration:2.0}
 ];
 const _HTML_ESCAPE_MAP_local={'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'};
 
