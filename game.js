@@ -922,6 +922,7 @@ function toggleQuestionTimer() {
     }
     if (timerStatBox) {
         timerStatBox.style.opacity = questionTimerEnabled ? '1' : '0.5';
+        timerStatBox.classList.toggle('timer-active', questionTimerEnabled);
     }
     
     // 顯示提示

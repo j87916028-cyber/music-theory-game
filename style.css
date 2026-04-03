@@ -363,6 +363,22 @@ h1 {
     font-size: 0.95rem;
 }
 
+/* 計時器狀態指示器（#timerStatBox / #timerStatus）*/
+.score-display #timerStatBox {
+    transition: opacity 0.3s ease;
+    cursor: pointer;
+}
+
+.score-display #timerStatus {
+    transition: color 0.3s ease;
+    color: #aaa;
+}
+
+.score-display #timerStatBox.timer-active #timerStatus {
+    color: #00bfff;
+    text-shadow: 0 0 8px rgba(0, 191, 255, 0.6);
+}
+
 /* 進度條 */
 .progress-bar {
     width: 100%;

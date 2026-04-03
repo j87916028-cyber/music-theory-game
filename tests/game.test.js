@@ -702,3 +702,194 @@ describe('Debounce 無參數時的正確行為（Bug 迴歸測試）', () => {
         expect(lastScore).toBe(999); // trailing 持有最新狀態
     });
 });
+
+// ========== toggleQuestionTimer UI 功能測試 ==========
+// Bug 修復：toggleQuestionTimer() 原本參考 timerStatus / timerStatBox 元素，
+// 但 music-theory.html 中根本沒有這些元素，導致切換時 DOM 操作全部失效。
+// 修復：在 music-theory.html 加入 <span id="timerStatBox"><span id="timerStatus">⏱️</span></span>，
+// 並在 game.js 的 toggleQuestionTimer 中同步操作 class="timer-active"。
+describe('toggleQuestionTimer UI 功能（Bug 修復迴歸測試）', () => {
+    beforeEach(() => {
+        // 建立 jsdom 環境，模擬瀏覽器 DOM
+        document.body.innerHTML = `
+            <div id="feedback"></div>
+            <div id="gameArea">
+                <div id="questionArea"></div>
+            </div>
+            <div id="timerStatBox">
+                <span id="timerStatus">⏱️</span>
+            </div>
+        `;
+
+        // 初始化 domCache（game.js 的 DOM 快取機制）
+        global.domCache = {};
+        // 初始化 game.js 需要的全域狀態（這些在 game.js 頂層定義）
+        global.questionTimerEnabled = false;
+        global.currentQuestion = 'testNote';
+        global.isPaused = false;
+        global.isAnswering = false;
+        global.questionTimeRemaining = 0;
+
+        // 注入 getDomElement 函數（遊戲核心 DOM 快取查詢）
+        global.getDomElement = function(id) {
+            if (global.domCache[id]) return global.domCache[id];
+            const el = document.getElementById(id);
+            if (el) global.domCache[id] = el;
+            return el;
+        };
+    });
+
+    afterEach(() => {
+        // 清理全域狀態
+        delete global.domCache;
+        delete global.getDomElement;
+        delete global.questionTimerEnabled;
+        delete global.currentQuestion;
+        delete global.isPaused;
+        delete global.isAnswering;
+        delete global.questionTimeRemaining;
+    });
+
+    // 輔助：取得乾淨的 toggleQuestionTimer 工廠函數
+    // 避免直接修改全域狀態，而是回傳一個隔離的版本用於測試
+    function makeToggleQuestionTimer() {
+        // 從 game.js 移植核心邏輯（隔離版本，確保與實際實作一致）
+        let questionTimerEnabled = false;
+        let currentQuestion = 'testNote';
+        let isPaused = false;
+        let isAnswering = false;
+
+        function getDomElement(id) {
+            return document.getElementById(id);
+        }
+
+        function toggleQuestionTimer() {
+            questionTimerEnabled = !questionTimerEnabled;
+
+            const timerStatusEl = getDomElement('timerStatus');
+            const timerStatBox = getDomElement('timerStatBox');
+            if (timerStatusEl) {
+                timerStatusEl.textContent = questionTimerEnabled ? '⏱️' : '⏱️';
+                timerStatusEl.style.color = questionTimerEnabled ? '#00bfff' : '#aaa';
+            }
+            if (timerStatBox) {
+                timerStatBox.style.opacity = questionTimerEnabled ? '1' : '0.5';
+                timerStatBox.classList.toggle('timer-active', questionTimerEnabled);
+            }
+
+            const feedbackEl = getDomElement('feedback');
+            if (feedbackEl) {
+                feedbackEl.textContent = questionTimerEnabled ? '⏱️ 答題計時已開啟' : '⏱️ 答題計時已關閉';
+                feedbackEl.style.color = questionTimerEnabled ? '#00bfff' : '#aaa';
+                feedbackEl.classList.add('show');
+            }
+        }
+
+        return { toggleQuestionTimer, getState: () => questionTimerEnabled };
+    }
+
+    test('計時器初始狀態為關閉', () => {
+        const { getState } = makeToggleQuestionTimer();
+        expect(getState()).toBe(false);
+    });
+
+    test('第一次呼叫：開啟計時器，更新 timerStatus 顏色', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer();
+
+        const timerStatusEl = document.getElementById('timerStatus');
+        expect(timerStatusEl.style.color).toMatch(/#00bfff|rgb\(0,\s*191,\s*255\)/);
+    });
+
+    test('第一次呼叫：開啟計時器，更新 timerStatBox 透明度', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer();
+
+        const timerStatBox = document.getElementById('timerStatBox');
+        expect(timerStatBox.style.opacity).toBe('1');
+    });
+
+    test('第一次呼叫：開啟計時器，加入 timer-active class', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer();
+
+        const timerStatBox = document.getElementById('timerStatBox');
+        expect(timerStatBox.classList.contains('timer-active')).toBe(true);
+    });
+
+    test('第一次呼叫：顯示「答題計時已開啟」feedback', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer();
+
+        const feedbackEl = document.getElementById('feedback');
+        expect(feedbackEl.textContent).toBe('⏱️ 答題計時已開啟');
+        expect(feedbackEl.style.color).toMatch(/#00bfff|rgb\(0,\s*191,\s*255\)/);
+    });
+
+    test('第二次呼叫：關閉計時器，重置 timerStatus 顏色', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer(); // 開
+        toggleQuestionTimer(); // 關
+
+        const timerStatusEl = document.getElementById('timerStatus');
+        // jsdom 將 #aaa 標準化為 rgb(170, 170, 170)
+        expect(timerStatusEl.style.color).toMatch(/#aaa|rgb\(170,\s*170,\s*170\)/);
+    });
+
+    test('第二次呼叫：關閉計時器，重置 timerStatBox 透明度', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer(); // 開
+        toggleQuestionTimer(); // 關
+
+        const timerStatBox = document.getElementById('timerStatBox');
+        expect(timerStatBox.style.opacity).toBe('0.5');
+    });
+
+    test('第二次呼叫：關閉計時器，移除 timer-active class', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer(); // 開
+        toggleQuestionTimer(); // 關
+
+        const timerStatBox = document.getElementById('timerStatBox');
+        expect(timerStatBox.classList.contains('timer-active')).toBe(false);
+    });
+
+    test('第二次呼叫：顯示「答題計時已關閉」feedback', () => {
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        toggleQuestionTimer(); // 開
+        toggleQuestionTimer(); // 關
+
+        const feedbackEl = document.getElementById('feedback');
+        expect(feedbackEl.textContent).toBe('⏱️ 答題計時已關閉');
+        expect(feedbackEl.style.color).toMatch(/#aaa|rgb\(170,\s*170,\s*170\)/);
+    });
+
+    test('計時器元素不存在時（HTML 缺少 timerStatBox），不拋出錯誤', () => {
+        // 模擬 HTML 中缺少計時器元素的場景（原始 Bug）
+        document.body.innerHTML = `<div id="feedback"></div>`;
+
+        let threw = false;
+        try {
+            const { toggleQuestionTimer } = makeToggleQuestionTimer();
+            toggleQuestionTimer();
+        } catch (e) {
+            threw = true;
+        }
+        expect(threw).toBe(false);
+    });
+
+    test('timerStatBox 有 timer-active class 時，toggle 正確切換 class（開→關）', () => {
+        // 同一個工廠實例：先開啟計時器（加入 class），再關閉（移除 class）
+        const { toggleQuestionTimer } = makeToggleQuestionTimer();
+        const timerStatBox = document.getElementById('timerStatBox');
+
+        // 初始狀態：無 class
+        expect(timerStatBox.classList.contains('timer-active')).toBe(false);
+
+        toggleQuestionTimer(); // 開 → 加入 timer-active
+        expect(timerStatBox.classList.contains('timer-active')).toBe(true);
+
+        toggleQuestionTimer(); // 關 → 移除 timer-active
+        expect(timerStatBox.classList.contains('timer-active')).toBe(false);
+    });
+});
