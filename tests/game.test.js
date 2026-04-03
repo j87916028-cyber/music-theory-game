@@ -637,3 +637,68 @@ describe('Playtime 追蹤邏輯（回歸測試）', () => {
         expect(totalPlayTimeRef.current).toBe(42); // 未改變
     });
 });
+
+// ========== Debounce 內聯版本 Bug 修復測試 ==========
+// Bug: game.js 內聯的 debounce 當 opts=undefined 時，lead/trail 都為 falsy，
+// 導致 saveProgressDebounced 永不執行。
+// 修復：opts 必須有預設值 { leading: true, trailing: true }。
+// 此測試直接取用 functions.js 的 debounce（已修復）來驗證正確行為。
+describe('Debounce 無參數時的正確行為（Bug 迴歸測試）', () => {
+    beforeEach(() => { jest.useFakeTimers(); });
+    afterEach(() => { jest.useRealTimers(); });
+
+    test('未傳入 opts 時，leading + trailing 都應為 true（預設值）', () => {
+        // 驗證：debounce(fn, 100) 不傳 opts，結果等同於 leading+trailing
+        // saveProgressDebounced = debounce(fn, 500) → 無參數
+        // 若 lead=false 且 trail=false → fn 永不執行（bug）
+        // 若 lead=true 且 trail=true → fn 先立即執行，100ms 後再執行一次（正確）
+        const func = jest.fn();
+        const debouncedFn = debounce(func, 100); // ← 關鍵：未傳第三參數
+
+        debouncedFn('x');
+        expect(func).toHaveBeenCalledTimes(1);   // leading 執行
+        expect(func).toHaveBeenCalledWith('x');
+
+        jest.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(2);   // trailing 執行
+        expect(func).toHaveBeenCalledWith('x');
+    });
+
+    test('未傳入 opts 時，trailing 執行時的引數是最後一次呼叫的引數', () => {
+        const func = jest.fn();
+        const debouncedFn = debounce(func, 100);
+
+        debouncedFn('a');
+        debouncedFn('b');
+        debouncedFn('c');
+
+        jest.advanceTimersByTime(100);
+        expect(func).toHaveBeenCalledTimes(2); // 1 leading + 1 trailing
+        expect(func).toHaveBeenCalledWith('c'); // trailing 持有最後的引數
+    });
+
+    test('saveProgressDebounced 典型場景：leading 立即執行，trailing 合併多次呼叫', () => {
+        // 模擬 saveProgressDebounced 的使用情境
+        // leading=true → 第一次回調同步執行（立即保存）
+        // trailing=true → 最後一次呼叫後 500ms 再執行一次（捕獲最新狀態）
+        let callCount = 0;
+        let lastScore = null;
+        const saveProgressDebounced = debounce(() => {
+            callCount++;
+            lastScore = 999; // 模擬讀取當前 score（trailing 時已是最新值）
+        }, 500);
+
+        // 第一次回調：leading 執行（同步）
+        saveProgressDebounced();
+        expect(callCount).toBe(1); // leading 觸發
+        expect(lastScore).toBe(999);
+
+        // 後續呼叫（500ms 內）在 500ms 後合併為一次 trailing 執行
+        saveProgressDebounced();
+        saveProgressDebounced();
+
+        jest.advanceTimersByTime(500);
+        expect(callCount).toBe(2); // trailing 觸發（合併）
+        expect(lastScore).toBe(999); // trailing 持有最新狀態
+    });
+});

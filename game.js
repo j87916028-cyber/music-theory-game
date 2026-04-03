@@ -143,7 +143,7 @@ const HTML_ESCAPE_REGEX  = __MG ? __MG.HTML_ESCAPE_REGEX  : /[&<>"']/g;
 const escapeHtml = __MG ? __MG.escapeHtml : function(t){if(t===null||t===undefined)return'';return String(t).replace(HTML_ESCAPE_REGEX,c=>HTML_ESCAPE_MAP[c]);};
 const isQuotaExceededError=__MG?__MG.isQuotaExceededError:function(e){return e instanceof DOMException&&(e.code===22||e.code===1014||e.name==='QuotaExceededError'||e.name==='NS_ERROR_DOM_QUOTA_REACHED');};
 const formatPlayTime=__MG?__MG.formatPlayTime:function(s){if(!s||s<0)s=0;const h=Math.floor(s/3600),m=Math.floor((s%3600)/60),sec=s%60;return h>0?`${h}小時${m}分`:m>0?`${m}分${sec}秒`:`${sec}秒`;};
-const debounce=__MG?__MG.debounce:function(fn,wait,opts){let t;let la=null,lt=null;const lead=opts&&opts.leading,trail=opts&&opts.trailing;return function(...a){const first=t===undefined;t=a;lt=this;if(t)clearTimeout(t);if(lead&&first)fn.apply(this,a);if(trail)t=setTimeout(()=>{t=undefined;if(la)fn.apply(lt,la);},wait);};};
+const debounce=__MG?__MG.debounce:function(fn,wait,opts){let t;let la=null,lt=null;const o=opts||{leading:true,trailing:true};const lead=o.leading,trail=o.trailing;return function(...a){const first=t===undefined;t=a;lt=this;if(t)clearTimeout(t);if(lead&&first)fn.apply(this,a);if(trail)t=setTimeout(()=>{t=undefined;if(la)fn.apply(lt,la);},wait);};};
 const cleanupAudioNodes=__MG?__MG.cleanupAudioNodes:function(...ns){ns.forEach(n=>{if(n&&typeof n.disconnect==='function')try{n.disconnect();}catch(_){}});};
 const shuffleArray=__MG?__MG.shuffleArray:function(a){const r=[...a];for(let i=r.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[r[i],r[j]]=[r[j],r[i]];}return r;};
 
