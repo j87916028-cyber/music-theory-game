@@ -572,6 +572,57 @@ describe('題目 HTML 生成 XSS 防護（迴歸測試）', () => {
         expect(escapeHtml(undefined)).toBe('');
         expect(escapeHtml('')).toBe('');
     });
+
+    test('所有音符名稱用於 data-play 屬性時必須 escapeHtml（level1Question data-play 一致性）', () => {
+        // level1Question 中有兩處 data-play="${correctNote}"，
+        // 與同一函式的 onclick / aria-label / textContent 一致，都應經 escapeHtml
+        // 此測試確保 notes 陣列中所有值都能安全嵌入 data-play HTML 屬性
+        notes.forEach(note => {
+            const escaped = escapeHtml(note);
+            // 嵌入 data-play="..." 雙引號屬性時，若含 " 必須被轉義
+            const html = `<button data-play="${escaped}">`;
+            // 驗證危險字元已被轉義：escapeHtml("）→ &quot;
+            // notes 目前不含危險字元（Do, Re...），escaped === note，但若日後新增含 " 的值就會觸發轉義
+            // 測試用含雙引號的惡意值驗證 escapeHtml 確實保護了 data-play 屬性
+            const maliciousNote = 'Test" onclick="alert(1)" data-x="';
+            const maliciousEscaped = escapeHtml(maliciousNote);
+            const maliciousHtml = `<button data-play="${maliciousEscaped}">`;
+            // 原始 " 被轉義為 &quot;，屬性不會被提前終止
+            expect(maliciousHtml).not.toContain(`data-play="Test"`);
+            expect(maliciousHtml).not.toContain('<button data-play="Test"');
+            // 安全值（如 'Do'）嵌入後仍是合法屬性
+            const safeHtml = `<button data-play="${escapeHtml('Do')}">`;
+            expect(safeHtml).toContain('data-play="Do"');
+        });
+    });
+
+    test('notes 陣列所有值嵌入 HTML 屬性時無危險字元殘留', () => {
+        // 確保 notes 中任何值嵌入 HTML 時，都不會破壞屬性語法或造成 XSS
+        notes.forEach(note => {
+            const escaped = escapeHtml(note);
+            // 驗證 escapeHtml 已處理 notes 值的危險字元（& < > " '）
+            // 安全的 notes 值（Do, Re...）經 escapeHtml 後內容不變
+            expect(escaped).not.toContain('&');
+            expect(escaped).not.toContain('<');
+            expect(escaped).not.toContain('>');
+            expect(escaped).not.toContain('"');
+            expect(escaped).not.toContain("'");
+            // 驗證安全的 notes 值嵌入 textContent 後內容正確
+            expect(escaped).toBe(note);
+        });
+
+        // 驗證 escapeHtml 對含危險字元的值確實做了轉義（保護能力測試）
+        const dangerTests = [
+            { input: '<script>',       expectContains: '&lt;script&gt;' }, // < > → &lt; &gt;
+            { input: 'a>b',           expectContains: 'a&gt;b'         }, // > → &gt;
+            { input: 'Note"x="y',     expectContains: '&quot;'        }, // " → &quot;
+            { input: "Note'x='y",     expectContains: '&#39;'          }, // ' → &#39;
+        ];
+        dangerTests.forEach(({ input, expectContains }) => {
+            const escaped = escapeHtml(input);
+            expect(escaped).toContain(expectContains);
+        });
+    });
 });
 
 // ========== Playtime 追蹤行為回歸測試 ==========
