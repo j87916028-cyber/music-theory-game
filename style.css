@@ -358,6 +358,11 @@ h1 {
     font-size: 1.2rem;
 }
 
+.score-display #bestStreakDisplay {
+    color: var(--accent-gold);
+    font-size: 0.95rem;
+}
+
 .score-display #playTimeDisplay {
     color: var(--accent-blue);
     font-size: 0.95rem;

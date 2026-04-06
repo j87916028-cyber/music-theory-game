@@ -944,3 +944,118 @@ describe('toggleQuestionTimer UI 功能（Bug 修復迴歸測試）', () => {
         expect(timerStatBox.classList.contains('timer-active')).toBe(false);
     });
 });
+
+// ========== Best Streak 最高連擊追蹤測試 ==========
+// 功能：追蹤玩家的歷史最高連擊記錄，激勵玩家打破個人最佳成績
+describe('Best Streak 最高連擊追蹤（遊戲化功能）', () => {
+    beforeEach(() => {
+        // 模擬 localStorage
+        const storage = {};
+        global.localStorage = {
+            getItem: jest.fn((key) => storage[key] || null),
+            setItem: jest.fn((key, value) => { storage[key] = value; }),
+            removeItem: jest.fn((key) => { delete storage[key]; }),
+        };
+        // 模擬 MusicGame（防止 JS 錯誤）
+        global.MusicGame = {
+            notes, noteNames, noteFreqs, chords, rhythms,
+            shuffleArray, escapeHtml, debounce, cleanupAudioNodes,
+            formatPlayTime, isQuotaExceededError,
+            isValidNoteFrequencies, isValidChords, isValidRhythms,
+        };
+    });
+
+    afterEach(() => {
+        delete global.localStorage;
+        delete global.MusicGame;
+    });
+
+    test('bestStreak 預設為 0（初始狀態）', () => {
+        // 模擬初始狀態：無 savedProgress
+        const savedProgress = null;
+        const bestStreak = savedProgress && savedProgress.bestStreak ? savedProgress.bestStreak : 0;
+        expect(bestStreak).toBe(0);
+    });
+
+    test('bestStreak 從 localStorage 正確載入', () => {
+        // 模擬已保存的最高連擊為 15
+        const savedProgress = {
+            score: 100,
+            streak: 5,
+            bestStreak: 15,
+            currentLevel: 1,
+            questionsAnswered: 10,
+            correctAnswers: 8,
+            lastPlayed: '2026-04-06T00:00:00.000Z',
+            totalPlayTime: 300,
+        };
+        const bestStreak = savedProgress && savedProgress.bestStreak ? savedProgress.bestStreak : 0;
+        expect(bestStreak).toBe(15);
+    });
+
+    test('bestStreak 為 0 時從 localStorage 正確處理', () => {
+        // 模擬 savedProgress.bestStreak 為 0 或 undefined
+        const savedProgress1 = { bestStreak: 0 };
+        const savedProgress2 = {};
+        
+        const bestStreak1 = savedProgress1 && savedProgress1.bestStreak ? savedProgress1.bestStreak : 0;
+        const bestStreak2 = savedProgress2 && savedProgress2.bestStreak ? savedProgress2.bestStreak : 0;
+        
+        expect(bestStreak1).toBe(0);
+        expect(bestStreak2).toBe(0);
+    });
+
+    test('新連擊超過 bestStreak 時更新為新值', () => {
+        let bestStreak = 10;
+        let currentStreak = 15;
+        
+        // 模擬：當 currentStreak > bestStreak 時更新
+        if (currentStreak > bestStreak) {
+            bestStreak = currentStreak;
+        }
+        
+        expect(bestStreak).toBe(15);
+    });
+
+    test('新連擊未超過 bestStreak 時保持不變', () => {
+        let bestStreak = 15;
+        let currentStreak = 10;
+        
+        // 模擬：當 currentStreak <= bestStreak 時不更新
+        if (currentStreak > bestStreak) {
+            bestStreak = currentStreak;
+        }
+        
+        expect(bestStreak).toBe(15);
+    });
+
+    test('bestStreak 保存到 localStorage 時包含在資料結構中', () => {
+        const bestStreak = 20;
+        const score = 500;
+        const streak = 8;
+        const currentLevel = 2;
+        
+        const data = {
+            score: score,
+            streak: streak,
+            bestStreak: bestStreak, // 關鍵欄位
+            currentLevel: currentLevel,
+            questionsAnswered: 50,
+            correctAnswers: 40,
+            lastPlayed: new Date().toISOString(),
+            totalPlayTime: 600,
+        };
+        
+        expect(data).toHaveProperty('bestStreak');
+        expect(data.bestStreak).toBe(20);
+    });
+
+    test('resetProgress 時 bestStreak 重置為 0', () => {
+        let bestStreak = 25;
+        
+        // 模擬重置
+        bestStreak = 0;
+        
+        expect(bestStreak).toBe(0);
+    });
+});

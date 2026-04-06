@@ -226,6 +226,7 @@ function loadProgress() {
             return {
                 score: Math.min(Math.max(parseInt(data.score) || 0, 0), 999999),
                 streak: Math.min(Math.max(parseInt(data.streak) || 0, 0), 999),
+                bestStreak: Math.max(parseInt(data.bestStreak) || 0, 0), // 最高連擊
                 currentLevel: Math.min(Math.max(parseInt(data.currentLevel) || 1, 1), 4),
                 questionsAnswered: Math.max(parseInt(data.questionsAnswered) || 0, 0),
                 correctAnswers: Math.max(parseInt(data.correctAnswers) || 0, 0),
@@ -464,9 +465,14 @@ function checkDailyLogin() {
 // 儲存進度到 localStorage（Debounced 版本，延遲 500ms）
 // 使用 leading + trailing 確保：1) 快速答題時立即儲存第一筆 2) 短暫停頓後儲存最後一筆
 const saveProgressDebounced = debounce(() => {
+    // 更新最高連擊
+    if (streak > bestStreak) {
+        bestStreak = streak;
+    }
     const data = {
         score: Math.min(score, 999999), // 分數上限保護
         streak: Math.min(streak, 999),
+        bestStreak: bestStreak, // 最高連擊
         currentLevel: currentLevel,
         questionsAnswered: questionsAnswered,
         correctAnswers: correctAnswers,
@@ -483,9 +489,15 @@ function saveProgress() {
     // 只儲存遊戲時長，不重新計算（避免重複計時）
     savePlayTimeToStorage();
     
+    // 更新最高連擊
+    if (streak > bestStreak) {
+        bestStreak = streak;
+    }
+    
     const data = {
         score: Math.min(score, 999999), // 分數上限保護
         streak: Math.min(streak, 999),
+        bestStreak: bestStreak, // 最高連擊
         currentLevel: currentLevel,
         questionsAnswered: questionsAnswered,
         correctAnswers: correctAnswers,
@@ -537,6 +549,7 @@ function resetProgress() {
     
     score = 0;
     streak = 0;
+    bestStreak = 0; // 重置最高連擊
     currentLevel = 1;
     questionsAnswered = 0;
     correctAnswers = 0;
@@ -550,8 +563,10 @@ function resetProgress() {
 function updateUI() {
     const scoreEl = getDomElement('score');
     const streakEl = getDomElement('streakCount');
+    const bestStreakEl = getDomElement('bestStreakDisplay');
     if (scoreEl) scoreEl.textContent = score;
     if (streakEl) streakEl.textContent = streak;
+    if (bestStreakEl) bestStreakEl.textContent = bestStreak;
     updateAccuracy();
     updateProgress();
 }
@@ -596,6 +611,7 @@ if (document.readyState === 'loading') {
     initAccessibility();
 }
 let streak = savedProgress ? savedProgress.streak : 0;
+let bestStreak = savedProgress && savedProgress.bestStreak ? savedProgress.bestStreak : 0; // 最高連擊紀錄
 let currentLevel = savedProgress ? savedProgress.currentLevel : 1;
 let questionsAnswered = savedProgress ? savedProgress.questionsAnswered : 0;
 let correctAnswers = savedProgress ? savedProgress.correctAnswers : 0;
@@ -2192,6 +2208,18 @@ function checkAnswer(answer, correct) {
         streak++;
         correctAnswers++;
         
+        // 檢查是否打破最高連擊紀錄
+        if (streak > bestStreak) {
+            bestStreak = streak;
+            // 顯示新紀錄提示
+            const popup = getDomElement('streakPopup');
+            popup.textContent = `🏆 新紀錄！最高 ${bestStreak} 連擊！`;
+            popup.classList.add('show');
+            popup.style.background = 'rgba(255, 215, 0, 0.5)';
+            triggerHapticFeedback('success');
+            setTimeout(() => popup.classList.remove('show'), 2000);
+        }
+        
         // 顯示浮動分數提示
         showFloatingScore(pointsEarned);
         
@@ -2249,8 +2277,10 @@ function checkAnswer(answer, correct) {
 // 初始化 - 恢復儲存的進度（不重置統計資料）
 const initScoreEl = getDomElement('score');
 const initStreakEl = getDomElement('streakCount');
+const initBestStreakEl = getDomElement('bestStreakDisplay');
 if (initScoreEl) initScoreEl.textContent = score;
 if (initStreakEl) initStreakEl.textContent = streak;
+if (initBestStreakEl) initBestStreakEl.textContent = bestStreak;
 updateAccuracy();
 updateProgress();
 setLevel(currentLevel, false);
